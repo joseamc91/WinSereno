@@ -1,0 +1,10 @@
+﻿<Window Style="{StaticResource {x:Type Window}}" x:Class="WinSereno.Views.TaskOutputWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Salida completa · Tarea" Width="820" Height="640" MinWidth="560" MinHeight="480" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <Grid Margin="24"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <TextBlock Text="{Binding TaskName}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,16"/>
+    <TextBlock Grid.Row="1" Text="STDOUT · salida completa" Margin="0,0,0,6"/>
+    <TextBox Grid.Row="2" Text="{Binding Progress.StdOut, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True"/>
+    <TextBlock Grid.Row="3" Text="STDERR · salida completa" Margin="0,16,0,6"/>
+    <TextBox Grid.Row="4" Text="{Binding Progress.StdErr, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True"/>
+    <Button Grid.Row="5" Content="Cerrar" IsCancel="True" HorizontalAlignment="Right" Margin="0,16,0,0"/>
+  </Grid>
+</Window>

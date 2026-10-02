@@ -1,0 +1,193 @@
+﻿<Window Style="{StaticResource {x:Type Window}}" x:Class="WinSereno.Views.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="WinSereno" Width="1180" Height="820" MinWidth="900" MinHeight="640" WindowStartupLocation="CenterScreen">
+  <Window.Resources>
+    <Style x:Key="RepairSessionResultText" TargetType="TextBlock" BasedOn="{StaticResource Muted}"><Setter Property="FontSize" Value="12"/><Setter Property="Margin" Value="0,4,0,0"/><Style.Triggers><DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="Sin resultados durante esta sesión."><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style>
+    <Style x:Key="NetworkToolResultText" TargetType="TextBlock" BasedOn="{StaticResource Muted}"><Setter Property="FontSize" Value="12"/><Setter Property="Margin" Value="0,4,0,0"/><Style.Triggers><DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="Sin resultados durante esta sesión."><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style>
+    <DataTemplate x:Key="ToolTemplate"><Border Style="{StaticResource Card}"><StackPanel><DockPanel><TextBlock Text="PRÓXIMAMENTE" DockPanel.Dock="Right" Foreground="{DynamicResource MutedBrush}" FontSize="11" Margin="16,0,0,0"/><TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold"/></DockPanel><TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" Margin="0,8,0,0"/></StackPanel></Border></DataTemplate>
+  </Window.Resources>
+  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+    <Border Background="{DynamicResource SidebarBrush}" Padding="20,28,20,20"><DockPanel>
+      <StackPanel DockPanel.Dock="Top" Margin="0,0,0,28"><TextBlock Text="WinSereno" FontSize="24" FontWeight="SemiBold"/></StackPanel>
+      <StackPanel DockPanel.Dock="Bottom"><TextBlock Text="{Binding ProductVersion}" Style="{StaticResource Muted}"/><TextBlock Text="Portable · Acciones explícitas" Style="{StaticResource Muted}" FontSize="11" Margin="0,5,0,0"/></StackPanel>
+      <ListBox ItemsSource="{Binding Navigation}" SelectedItem="{Binding SelectedNavigation}" Background="Transparent" BorderThickness="0" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Disabled"><ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Label}"/></DataTemplate></ListBox.ItemTemplate></ListBox>
+    </DockPanel></Border>
+    <Grid Grid.Column="1" Margin="28,28,28,20"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <StackPanel Margin="0,0,0,18"><TextBlock Text="{Binding PageTitle}" FontSize="30" FontWeight="SemiBold"/><TextBlock Text="{Binding PageDescription}" Style="{StaticResource Muted}" Margin="0,8,0,0"/></StackPanel>
+      <Border Grid.Row="1" Background="{DynamicResource BannerBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,18"><TextBlock Text="{Binding PageNotice}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}"/></Border>
+      <ScrollViewer x:Name="PageScroll" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,12,0">
+        <Grid>
+          <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Home"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+            <DockPanel Margin="0,0,0,10"><Button Content="Actualizar" DockPanel.Dock="Right" Command="{Binding Home.RefreshCommand}" Margin="12,0,0,0"/><TextBlock Text="{Binding Home.RefreshedText}" Style="{StaticResource Muted}" VerticalAlignment="Center"/></DockPanel>
+            <ItemsControl ItemsSource="{Binding Home.Cards}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><Border Style="{StaticResource Card}" Width="252" Padding="12" Margin="0,0,10,10"><StackPanel><TextBlock Text="{Binding Title}" Style="{StaticResource Muted}"/><TextBlock Text="{Binding Value}" FontSize="17" FontWeight="SemiBold" Margin="0,5,0,5"/><TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="12"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            <Border Style="{StaticResource Card}" Padding="12"><StackPanel>
+              <TextBlock Text="Discos locales" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
+              <TextBlock Text="{Binding Home.DisksMessage}" Style="{StaticResource Muted}" Visibility="{Binding Home.HasDisksMessage, Converter={StaticResource BoolVisibility}}"/>
+              <ItemsControl ItemsSource="{Binding Home.Disks}"><ItemsControl.ItemTemplate><DataTemplate>
+                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                  <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="1" Text="{Binding CapacityText}" Style="{StaticResource Muted}" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="2" Text="{Binding FreeText}" Style="{StaticResource Muted}" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="3" Text="{Binding StatusText}" VerticalAlignment="Center"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource GoodBrush}"/><Style.Triggers><DataTrigger Binding="{Binding NeedsAttention}" Value="True"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                </Grid></Border>
+              </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            </StackPanel></Border>
+
+          </StackPanel>
+          <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Diagnosis"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+            <Border Style="{StaticResource Card}"><StackPanel>
+              <WrapPanel Margin="0,0,0,14"><Button Content="{Binding Diagnosis.AnalyzeLabel}" Command="{Binding Diagnosis.AnalyzeCommand}" Style="{StaticResource PrimaryButton}"/><Button Content="Cancelar diagnóstico" Command="{Binding Diagnosis.CancelCommand}" Visibility="{Binding Diagnosis.IsRunning, Converter={StaticResource BoolVisibility}}"/></WrapPanel>
+              <TextBlock Text="{Binding Diagnosis.Summary}" FontWeight="SemiBold"/>
+              <WrapPanel Margin="0,12,0,0"><TextBlock Text="{Binding Diagnosis.HealthyCount, StringFormat={}{0} Correctos}" Foreground="{DynamicResource GoodBrush}" Margin="0,0,20,6"/><TextBlock Text="{Binding Diagnosis.AttentionCount, StringFormat={}{0} Atención}" Foreground="{DynamicResource WarningBrush}" Margin="0,0,20,6"/><TextBlock Text="{Binding Diagnosis.ErrorCount, StringFormat={}{0} Errores}" Foreground="{DynamicResource ErrorBrush}" Margin="0,0,20,6"/><TextBlock Text="{Binding Diagnosis.NotCheckedCount, StringFormat={}{0} No comprobado}" Style="{StaticResource Muted}"/></WrapPanel>
+            </StackPanel></Border>
+            <ItemsControl ItemsSource="{Binding Diagnosis.Results}"><ItemsControl.ItemTemplate><DataTemplate><ContentControl Loaded="OnDiagnosticHostLoaded"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+          </StackPanel>
+          <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Repair"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+            <ItemsControl ItemsSource="{Binding RealRepairTasks}"><ItemsControl.ItemTemplate><DataTemplate>
+              <Border><Border.Style><Style TargetType="Border" BasedOn="{StaticResource Card}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Task.Id}" Value="repair.complete"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="230"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                  <StackPanel Margin="0,0,16,0">
+                    <TextBlock Text="{Binding Task.Name}" FontSize="22" FontWeight="SemiBold"/>
+                    <TextBlock Text="Comprueba la integridad de Windows y repara los problemas detectados cuando es necesario." Margin="0,6,0,0"/>
+                    <TextBlock Text="ScanHealth → RestoreHealth si es necesario → SFC" Style="{StaticResource Muted}" FontSize="12" Margin="0,6,0,0"/>
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="{Binding ButtonLabel}" Command="{Binding DataContext.RunRepairCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding Task.Id}" Style="{StaticResource PrimaryButton}" Margin="0" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding ResultText}" Style="{StaticResource RepairSessionResultText}" Margin="0,8,0,0"/>
+                </Grid>
+              </Border>
+            </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            <TextBlock Text="Herramientas individuales" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,4"/>
+            <TextBlock Text="Control específico sobre las comprobaciones, reparaciones y mantenimiento." Style="{StaticResource Muted}" FontSize="12" Margin="0,0,0,10"/>
+            <Border Style="{StaticResource Card}" Padding="12,0">
+              <ItemsControl ItemsSource="{Binding RealRepairTasks}"><ItemsControl.ItemTemplate><DataTemplate>
+                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,10"><Border.Style><Style TargetType="Border"><Style.Triggers><DataTrigger Binding="{Binding Task.Id}" Value="repair.complete"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,14,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Task.Name}" FontWeight="SemiBold"/>
+                      <TextBlock Text="{Binding Task.ShortDescription}" Style="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0"/>
+                      <TextBlock Text="{Binding TechnicalName}" Style="{StaticResource Muted}" FontSize="11" Margin="0,3,0,0"/>
+                      <TextBlock Text="{Binding ResultText}" Style="{StaticResource RepairSessionResultText}"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="{Binding ButtonLabel}" Command="{Binding DataContext.RunRepairCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding Task.Id}" FontSize="13" Padding="10,6" Margin="0" VerticalAlignment="Center"/>
+                  </Grid>
+                </Border>
+              </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            </Border>
+            <ItemsControl ItemsSource="{Binding RepairTools}" ItemTemplate="{StaticResource ToolTemplate}"/>
+          </StackPanel>
+          <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Network"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+            <Border Style="{StaticResource Card}" Padding="12"><StackPanel>
+              <DockPanel><Button Content="Actualizar" DockPanel.Dock="Right" Command="{Binding Network.RefreshCommand}" Margin="12,0,0,0"/><TextBlock Text="Estado de red" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/></DockPanel>
+              <TextBlock Text="{Binding Network.Summary}" TextWrapping="Wrap" Margin="0,8,0,8"/>
+              <ItemsControl ItemsSource="{Binding Network.Adapters}"><ItemsControl.ItemTemplate><DataTemplate>
+                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="0,8"><StackPanel>
+                  <TextBlock Text="{Binding Heading}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                  <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}"/>
+                  <TextBlock Text="{Binding SpeedDetails}" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                  <TextBlock Text="{Binding AddressDetails}" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                  <TextBlock Text="{Binding WifiDetails}" Style="{StaticResource Muted}" Visibility="{Binding HasWifiDetails, Converter={StaticResource BoolVisibility}}"/>
+                </StackPanel></Border>
+              </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+              <Expander Header="Detalles de conectividad" Margin="0,8,0,0"><TextBlock Text="{Binding Network.Connectivity}" Style="{StaticResource Muted}" Margin="0,8,0,0"/></Expander>
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="12,0"><StackPanel>
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,10"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="220"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,14,0" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Network.FlushDnsTask.Name}" FontWeight="SemiBold"/>
+                  <TextBlock Text="{Binding Network.FlushDnsTask.ShortDescription}" Style="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0"/>
+                  <TextBlock Text="{Binding Network.FlushDnsResultText}" Style="{StaticResource NetworkToolResultText}"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Vaciar caché DNS" Command="{Binding FlushDnsCommand}" FontSize="13" Padding="10,6" Margin="0" VerticalAlignment="Center"/>
+              </Grid></Border>
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,10"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="220"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,14,0" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Network.RenewDhcpTask.Name}" FontWeight="SemiBold"/>
+                  <TextBlock Text="{Binding Network.RenewDhcpTask.ShortDescription}" Style="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0"/>
+                  <TextBlock Text="{Binding Network.DhcpResultText}" Style="{StaticResource NetworkToolResultText}"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Renovar dirección DHCP" Command="{Binding RenewDhcpCommand}" FontSize="13" Padding="10,6" Margin="0" VerticalAlignment="Center"/>
+              </Grid></Border>
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,10"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="220"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,14,0" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Network.RestartAdapterTask.Name}" FontWeight="SemiBold"/>
+                  <TextBlock Text="{Binding Network.RestartAdapterTask.ShortDescription}" Style="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0"/>
+                  <TextBlock Text="{Binding Network.RestartResultText}" Style="{StaticResource NetworkToolResultText}"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Reiniciar adaptador de red" Command="{Binding RestartAdapterCommand}" FontSize="13" Padding="10,6" Margin="0" VerticalAlignment="Center"/>
+              </Grid></Border>
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,10"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="220"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,14,0" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Network.ResetWinsockTask.Name}" FontWeight="SemiBold"/>
+                  <TextBlock Text="{Binding Network.ResetWinsockTask.ShortDescription}" Style="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0"/>
+                  <TextBlock Text="Puede requerir reiniciar Windows; nunca se reinicia automáticamente." Style="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0"/>
+                  <TextBlock Text="{Binding Network.WinsockResultText}" Style="{StaticResource NetworkToolResultText}"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Restablecer Winsock" Command="{Binding ResetWinsockCommand}" FontSize="13" Padding="10,6" Margin="0" VerticalAlignment="Center"/>
+              </Grid></Border>
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,10"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="220"/></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,14,0" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Network.ResetTcpIpTask.Name}" FontWeight="SemiBold"/>
+                  <TextBlock Text="{Binding Network.ResetTcpIpTask.ShortDescription}" Style="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0"/>
+                  <TextBlock Text="Puede interrumpir la conexión. Normalmente será necesario reiniciar Windows; nunca se reinicia automáticamente." Style="{StaticResource Muted}" FontSize="12" Margin="0,3,0,0"/>
+                  <TextBlock Text="{Binding Network.TcpIpResultText}" Style="{StaticResource NetworkToolResultText}"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Restablecer TCP/IP" Command="{Binding ResetTcpIpCommand}" FontSize="13" Padding="10,6" Margin="0" VerticalAlignment="Center"/>
+              </Grid></Border>
+            </StackPanel></Border>
+            <ItemsControl ItemsSource="{Binding NetworkTools}" ItemTemplate="{StaticResource ToolTemplate}"/>
+          </StackPanel>
+          <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Cleanup"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <TextBlock Text="{Binding Cleanup.SelectionSummary}" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <StackPanel Grid.Column="1" Orientation="Horizontal"><Button Content="{Binding Cleanup.AnalyzeLabel}" Command="{Binding Cleanup.AnalyzeCommand}"/><Button Content="Limpiar seleccionados" Command="{Binding CleanSelectedCommand}" Margin="0"/></StackPanel>
+            </Grid>
+            <TextBlock Text="{Binding Cleanup.Summary}" Style="{StaticResource Muted}" Margin="0,0,0,10"/>
+            <Border Style="{StaticResource Card}" Padding="12,0">
+              <ItemsControl ItemsSource="{Binding Cleanup.Categories}"><ItemsControl.ItemTemplate><DataTemplate>
+                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,12">
+                  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="110"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,12,0" VerticalAlignment="Center">
+                      <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" IsEnabled="{Binding DataContext.Cleanup.CanChangeSelection, RelativeSource={RelativeSource AncestorType=Window}}" FontWeight="SemiBold"><TextBlock Text="{Binding Name}" TextWrapping="Wrap"/></CheckBox>
+                      <TextBlock Text="{Binding RecoverableEstimate}" Style="{StaticResource Muted}" FontSize="12" Margin="20,4,0,0"/>
+                      <TextBlock Text="{Binding ElevatedAnalysisText}" Style="{StaticResource Muted}" FontSize="12" Margin="20,4,0,0" Visibility="{Binding HasElevatedAnalysisTime, Converter={StaticResource BoolVisibility}}"/>
+                      <Expander Header="Detalles" Margin="20,4,0,0" FontSize="12" Foreground="{DynamicResource MutedBrush}">
+                        <Expander.Style><Style TargetType="Expander"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Result.WasAnalyzed}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Expander.Style>
+                        <StackPanel Margin="0,5,0,0"><TextBlock Text="{Binding Summary}"/><TextBlock Text="{Binding Details}" Style="{StaticResource Muted}" Margin="0,4,0,0"/><TextBlock Text="{Binding Path}" Style="{StaticResource Muted}" FontSize="11" Margin="0,4,0,0"/></StackPanel>
+                      </Expander>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Margin="0,0,10,0" VerticalAlignment="Center" FontSize="12">
+                      <TextBlock.Style><Style TargetType="TextBlock" BasedOn="{StaticResource Muted}"><Setter Property="Text" Value="Aún no analizado"/><Style.Triggers>
+                        <DataTrigger Binding="{Binding Result.WasAnalyzed}" Value="True"><Setter Property="Text" Value="Analizado"/></DataTrigger>
+                        <DataTrigger Binding="{Binding Result.IsPartial}" Value="True"><Setter Property="Text" Value="Resultado parcial"/></DataTrigger>
+                        <DataTrigger Binding="{Binding Result.IsAvailable}" Value="False"><Setter Property="Text" Value="No disponible"/></DataTrigger>
+                        <MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding Result.IsAvailable}" Value="False"/><Condition Binding="{Binding Result.IsPartial}" Value="True"/></MultiDataTrigger.Conditions><Setter Property="Text" Value="No disponible · Resultado parcial"/></MultiDataTrigger>
+                        <DataTrigger Binding="{Binding Result.WasAnalyzed}" Value="False"><Setter Property="Text" Value="Aún no analizado"/></DataTrigger>
+                      </Style.Triggers></Style></TextBlock.Style>
+                    </TextBlock>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                      <Button Content="Vaciar Papelera" Command="{Binding DataContext.EmptyRecycleBinCommand, RelativeSource={RelativeSource AncestorType=Window}}" Padding="10,6" Margin="0"><Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsRecycleBin}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Button.Style></Button>
+                      <Button Content="Limpiar" Command="{Binding DataContext.CleanThumbnailsCommand, RelativeSource={RelativeSource AncestorType=Window}}" Padding="10,6" Margin="0"><Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsThumbnailCache}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Button.Style></Button>
+                      <Button Content="Limpiar" Command="{Binding DataContext.CleanWindowsTempCommand, RelativeSource={RelativeSource AncestorType=Window}}" Padding="10,6" Margin="0"><Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsWindowsTemporary}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Button.Style></Button>
+                      <Button Command="{Binding DataContext.AnalyzeWindowsTempCommand, RelativeSource={RelativeSource AncestorType=Window}}" Padding="10,6" Margin="0,4,0,0"><TextBlock Text="Analizar con permisos de administrador" TextWrapping="Wrap" TextAlignment="Center" FontSize="12"/><Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CanAnalyzeElevated}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Button.Style></Button>
+                      <Button Content="Limpiar" Command="{Binding DataContext.CleanUserTempCommand, RelativeSource={RelativeSource AncestorType=Window}}" Padding="10,6" Margin="0"><Button.Style><Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsUserTemporary}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Button.Style></Button>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            </Border>
+            <TextBlock Text="Potencialmente limpiable es una estimación, no una garantía de borrado. Se omiten enlaces y elementos inaccesibles; no se comprueban permisos de eliminación." Style="{StaticResource Muted}" Margin="0,0,0,10"/>
+          </StackPanel>
+          <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Settings"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Apariencia" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="Tema guardado en config.json junto al ejecutable." Style="{StaticResource Muted}" Margin="0,8,0,12"/><ComboBox ItemsSource="{Binding ThemeChoices}" SelectedItem="{Binding SelectedTheme}" Width="180" HorizontalAlignment="Left"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Logs de sesión" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="Un archivo por sesión en .\Logs\. No se guardan datos propios en AppData ni en el registro." Style="{StaticResource Muted}" Margin="0,8,0,12"/><Button Content="Abrir carpeta de logs" Command="{Binding OpenLogsCommand}" HorizontalAlignment="Left"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Actualizaciones" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="La comprobación de actualizaciones estará disponible próximamente." Style="{StaticResource Muted}" Margin="0,8,0,12"/><Button Content="Buscar actualizaciones" Command="{Binding CheckUpdatesCommand}" HorizontalAlignment="Left"/></StackPanel></Border>
+          </StackPanel>
+        </Grid>
+      </ScrollViewer>
+      <StackPanel Grid.Row="3"><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Margin" Value="0"/><Style.Triggers><DataTrigger Binding="{Binding HasTask}" Value="True"><Setter Property="Margin" Value="0,12,0,0"/></DataTrigger><DataTrigger Binding="{Binding Diagnosis.IsRunning}" Value="True"><Setter Property="Margin" Value="0,12,0,0"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+        <ContentControl x:Name="TaskExecutionHost" Visibility="{Binding HasTask, Converter={StaticResource BoolVisibility}}"/>
+        <Border Style="{StaticResource Card}" Margin="0" Visibility="{Binding Diagnosis.IsRunning, Converter={StaticResource BoolVisibility}}">
+          <DockPanel><Button Content="Cancelar diagnóstico" DockPanel.Dock="Right" Command="{Binding Diagnosis.CancelCommand}" Margin="12,0,0,0"/><StackPanel><TextBlock Text="Diagnóstico · operación de solo lectura" FontWeight="SemiBold"/><TextBlock Text="{Binding Diagnosis.Summary}" Margin="0,5,0,0"/></StackPanel></DockPanel>
+        </Border>
+      </StackPanel>
+    </Grid>
+  </Grid>
+</Window>

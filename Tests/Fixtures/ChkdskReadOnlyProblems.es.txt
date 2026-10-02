@@ -1,0 +1,13 @@
+El tipo del sistema de archivos es NTFS.
+ADVERTENCIA: parámetro /F no especificado.
+Ejecutando CHKDSK en modo de solo lectura.
+
+Etapa 2: Examen de la vinculación de nombres de archivos...
+Progreso: 1924504 de 1924504 finalizado; Etapa: 100%; Total: 79%; Tiempo estimado de llegada:   0:00:30
+Comprobación de índices completada.
+ Duración de la fase (Recuperación de registro de archivo huérfano): 17.23 milisegundos.
+Se ha completado la comprobación del diario USN.
+El mapa de bits del volumen es incorrecto.
+
+Windows comprobó el sistema de archivos y detectó problemas.
+Ejecute chkdsk /scan para encontrar los problemas y ponerlos en cola para su reparación.

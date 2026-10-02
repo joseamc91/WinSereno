@@ -1,0 +1,24 @@
+﻿<Window Style="{StaticResource {x:Type Window}}" x:Class="WinSereno.Views.TaskConfirmationWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Confirmar tarea" Width="660" Height="660" MinWidth="540" MinHeight="550" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <Grid Margin="24"><Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="0,0,12,18">
+      <TextBlock Text="{Binding Task.Name}" FontSize="24" FontWeight="SemiBold"/>
+      <Border Background="{DynamicResource BannerBrush}" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="2" CornerRadius="6" Padding="12" Margin="0,14,0,0" Visibility="{Binding HasConfirmationWarning, Converter={StaticResource BoolVisibility}}">
+        <TextBlock Text="{Binding ConfirmationWarning}" Foreground="{DynamicResource WarningBrush}" FontWeight="Bold" TextWrapping="Wrap"/>
+      </Border>
+      <TextBlock Text="{Binding Task.ShortDescription}" Margin="0,12,0,12"/>
+      <TextBlock Text="{Binding Task.DetailedDescription}" Style="{StaticResource Muted}"/>
+      <Border Style="{StaticResource Card}" Margin="0,20,0,14"><StackPanel>
+        <TextBlock Text="{Binding ImpactLabel, StringFormat=Nivel de impacto: {0}}"/>
+        <TextBlock Text="{Binding ElevationLabel, StringFormat=Requiere administrador: {0}}" Margin="0,7,0,0"/>
+        <TextBlock Text="{Binding RestartLabel, StringFormat=Puede requerir reinicio: {0}}" Margin="0,7,0,0"/>
+        <TextBlock Text="{Binding CancellationLabel, StringFormat=Se puede cancelar: {0}}" Margin="0,7,0,0"/>
+      </StackPanel></Border>
+      <TextBlock Text="Comando exacto" FontWeight="SemiBold" Margin="0,0,0,6"/>
+      <TextBox Text="{Binding ExactCommand, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas" TextWrapping="Wrap"/>
+      <TextBlock Text="Argumentos" FontWeight="SemiBold" Margin="0,14,0,6"/>
+      <TextBox Text="{Binding Task.Arguments, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas" TextWrapping="Wrap"/>
+      <TextBlock Text="{Binding ExecutionNotice}" Foreground="{DynamicResource AccentBrush}" Margin="0,16,0,0"/>
+    </StackPanel></ScrollViewer>
+    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Cancelar" IsCancel="True"/><Button Content="Ejecutar" Click="OnExecute" Style="{StaticResource PrimaryButton}" Margin="0"/></StackPanel>
+  </Grid>
+</Window>

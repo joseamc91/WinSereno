@@ -1,0 +1,15 @@
+# Artefactos locales de Visual Studio y compilación
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Datos de ejecución de WinSereno (junto al ejecutable)
+Logs/
+config.json
+
+# Documentación histórica local del desarrollo
+RENAME_REPORT.md
