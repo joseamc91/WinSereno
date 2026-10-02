@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Registro de acciones de la sesión y cierre de resultados terminados del panel global sin perder sus detalles.
 - Aplicación portable para Windows con los módulos Inicio, Diagnóstico, Reparación, Red, Limpieza y Ajustes.
 - Información real del equipo y diagnóstico general de solo lectura, sin elevación automática.
 - Herramientas DISM CheckHealth, ScanHealth y RestoreHealth; SFC; CHKDSK de solo lectura y Component Cleanup como mantenimiento.

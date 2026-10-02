@@ -175,6 +175,21 @@
             </Border>
             <TextBlock Text="Potencialmente limpiable es una estimación, no una garantía de borrado. Se omiten enlaces y elementos inaccesibles; no se comprueban permisos de eliminación." Style="{StaticResource Muted}" Margin="0,0,0,10"/>
           </StackPanel>
+          <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Activity"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+            <TextBlock Text="Todavía no se han realizado acciones en esta sesión." Margin="0,8,0,0"><TextBlock.Style><Style TargetType="TextBlock" BasedOn="{StaticResource Muted}"><Style.Triggers><DataTrigger Binding="{Binding HasHistory}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+            <ItemsControl ItemsSource="{Binding ActionHistory}"><ItemsControl.ItemTemplate><DataTemplate>
+              <Border Style="{StaticResource Card}" Padding="12">
+                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                  <StackPanel Margin="0,0,12,0">
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                    <WrapPanel Margin="0,4,0,0"><TextBlock Text="{Binding TimeText}" Style="{StaticResource Muted}" FontSize="12" Margin="0,0,14,0"/><TextBlock Text="{Binding StateText}" FontSize="12" Margin="0,0,14,0"/><TextBlock Text="{Binding DurationText}" Style="{StaticResource Muted}" FontSize="12"/></WrapPanel>
+                    <TextBlock Text="{Binding Summary}" Style="{StaticResource Muted}" FontSize="12" Margin="0,5,0,0"/>
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="Ver detalles" Command="{Binding DataContext.HistoryDetailsCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" VerticalAlignment="Center" Padding="10,6" Margin="0"/>
+                </Grid>
+              </Border>
+            </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+          </StackPanel>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Settings"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
             <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Apariencia" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="Tema guardado en config.json junto al ejecutable." Style="{StaticResource Muted}" Margin="0,8,0,12"/><ComboBox ItemsSource="{Binding ThemeChoices}" SelectedItem="{Binding SelectedTheme}" Width="180" HorizontalAlignment="Left"/></StackPanel></Border>
             <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Logs de sesión" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="Un archivo por sesión en .\Logs\. No se guardan datos propios en AppData ni en el registro." Style="{StaticResource Muted}" Margin="0,8,0,12"/><Button Content="Abrir carpeta de logs" Command="{Binding OpenLogsCommand}" HorizontalAlignment="Left"/></StackPanel></Border>
@@ -182,8 +197,8 @@
           </StackPanel>
         </Grid>
       </ScrollViewer>
-      <StackPanel Grid.Row="3"><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Margin" Value="0"/><Style.Triggers><DataTrigger Binding="{Binding HasTask}" Value="True"><Setter Property="Margin" Value="0,12,0,0"/></DataTrigger><DataTrigger Binding="{Binding Diagnosis.IsRunning}" Value="True"><Setter Property="Margin" Value="0,12,0,0"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
-        <ContentControl x:Name="TaskExecutionHost" Visibility="{Binding HasTask, Converter={StaticResource BoolVisibility}}"/>
+      <StackPanel Grid.Row="3"><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Margin" Value="0"/><Style.Triggers><DataTrigger Binding="{Binding ShowTaskPanel}" Value="True"><Setter Property="Margin" Value="0,12,0,0"/></DataTrigger><DataTrigger Binding="{Binding Diagnosis.IsRunning}" Value="True"><Setter Property="Margin" Value="0,12,0,0"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
+        <ContentControl x:Name="TaskExecutionHost" Visibility="{Binding ShowTaskPanel, Converter={StaticResource BoolVisibility}}"/>
         <Border Style="{StaticResource Card}" Margin="0" Visibility="{Binding Diagnosis.IsRunning, Converter={StaticResource BoolVisibility}}">
           <DockPanel><Button Content="Cancelar diagnóstico" DockPanel.Dock="Right" Command="{Binding Diagnosis.CancelCommand}" Margin="12,0,0,0"/><StackPanel><TextBlock Text="Diagnóstico · operación de solo lectura" FontWeight="SemiBold"/><TextBlock Text="{Binding Diagnosis.Summary}" Margin="0,5,0,0"/></StackPanel></DockPanel>
         </Border>

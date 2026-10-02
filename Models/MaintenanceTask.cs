@@ -6,7 +6,7 @@
     public enum ExecutionStatus { Success, Failed, Cancelled, Unknown }
     public enum FindingStatus { Healthy, Attention, Repaired, RepairRequired, RepairFailed, Unrepairable, RestartRequired, Unknown, SourceFilesNotFound, ScanFailed, Completed, PartiallyCompleted, Failed }
     public enum RunnerState { Idle, Running, Cancelling, Completed }
-    public enum NavigationSection { Home, Diagnosis, Repair, Network, Cleanup, Settings }
+    public enum NavigationSection { Home, Diagnosis, Repair, Network, Cleanup, Settings, Activity }
     public enum DiagnosticStatus { Healthy, Attention, Error, NotChecked }
 
     public sealed class MaintenanceTask

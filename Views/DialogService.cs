@@ -26,8 +26,11 @@ namespace WinSereno.Views
         public void ShowDiagnosticDetails(DiagnosticResult result) => new DiagnosticDetailsWindow(result) { Owner = Application.Current.MainWindow }.ShowDialog();
         public void ShowOutput(TaskProgress progress)
         {
-            // Bind to the main view model to keep stdout/stderr updated while the modal is open.
-            new TaskOutputWindow(Application.Current.MainWindow.DataContext) { Owner = Application.Current.MainWindow }.ShowDialog();
+            // Current output stays live; historical details bind to their independent snapshot.
+            var main = Application.Current.MainWindow.DataContext as ViewModels.MainViewModel;
+            object context = main != null && ReferenceEquals(main.Progress, progress) ? (object)main :
+                new { TaskName = progress.CurrentTask?.Name, Progress = progress };
+            new TaskOutputWindow(context) { Owner = Application.Current.MainWindow }.ShowDialog();
         }
         public void ShowMessage(string message) => MessageBox.Show(Application.Current.MainWindow, message, "WinSereno", MessageBoxButton.OK, MessageBoxImage.Information);
         public bool ConfirmCancelAndClose() => MessageBox.Show(Application.Current.MainWindow,

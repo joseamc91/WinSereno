@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Session action history and dismissal of completed results from the global panel without losing their details.
 - Portable Windows application with Home, Diagnostics, Repair, Network, Cleanup, and Settings modules.
 - Real system information and read-only general diagnostics, without automatic elevation.
 - DISM CheckHealth, ScanHealth, and RestoreHealth tools; SFC; read-only CHKDSK; and Component Cleanup for maintenance.

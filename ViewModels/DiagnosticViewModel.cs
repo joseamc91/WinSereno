@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using WinSereno.Infrastructure;
@@ -22,6 +23,7 @@ namespace WinSereno.ViewModels
         public RelayCommand AnalyzeCommand { get; }
         public RelayCommand CancelCommand { get; }
         public RelayCommand DetailsCommand { get; }
+        public event EventHandler<TaskProgress> Completed;
         private bool isRunning;
         public bool IsRunning { get => isRunning; private set => Set(ref isRunning, value); }
         private bool hasRun;
@@ -49,6 +51,7 @@ namespace WinSereno.ViewModels
             if (operations.IsActive || IsRunning) return;
             using (var operation = operations.Begin("Diagnóstico", true))
             {
+                var outcome = new MaintenanceTaskResult { StartedAt = DateTimeOffset.Now, ExecutionStatus = ExecutionStatus.Success };
                 IsRunning = true; CancelCommand.Refresh();
                 Results.Clear(); foreach (var item in DiagnosticService.CreatePendingResults()) Results.Add(item);
                 CountsChanged(); watch.Restart(); Summary = "Analizando... · 00:00"; timer.Start();
@@ -58,13 +61,30 @@ namespace WinSereno.ViewModels
                     operation.Token.ThrowIfCancellationRequested();
                     Summary = "Diagnóstico finalizado en " + watch.Elapsed.TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture) + " s";
                 }
-                catch (OperationCanceledException) { Summary = "Diagnóstico cancelado"; }
-                catch (Exception ex) { Summary = "No se pudo completar el diagnóstico. Los resultados obtenidos se conservan."; SystemQuery.Log(logger, "Error orquestación diagnóstico: " + ex); }
+                catch (OperationCanceledException) { outcome.ExecutionStatus = ExecutionStatus.Cancelled; Summary = "Diagnóstico cancelado"; }
+                catch (Exception ex) { outcome.ExecutionStatus = ExecutionStatus.Failed; Summary = "No se pudo completar el diagnóstico. Los resultados obtenidos se conservan."; SystemQuery.Log(logger, "Error orquestación diagnóstico: " + ex); }
                 finally
                 {
                     watch.Stop(); timer.Stop(); IsRunning = false; hasRun = true; Raise(nameof(AnalyzeLabel)); CancelCommand.Refresh();
                     CountsChanged();
                     SystemQuery.Log(logger, "Resumen diagnóstico | Correctos=" + HealthyCount + " | Atención=" + AttentionCount + " | Errores=" + ErrorCount + " | No comprobado=" + NotCheckedCount + " | " + Summary);
+                    outcome.FinishedAt = DateTimeOffset.Now; outcome.Duration = watch.Elapsed;
+                    outcome.UserSummary = Summary + " · " + HealthyCount + " Correctos · " + AttentionCount + " Atención · " + ErrorCount + " Errores · " + NotCheckedCount + " No comprobado";
+                    outcome.FindingStatus = outcome.ExecutionStatus != ExecutionStatus.Success ? FindingStatus.Unknown :
+                        ErrorCount > 0 ? FindingStatus.Failed : AttentionCount > 0 ? FindingStatus.Attention : NotCheckedCount > 0 ? FindingStatus.PartiallyCompleted : FindingStatus.Healthy;
+                    var text = new StringBuilder();
+                    foreach (var result in Results)
+                    {
+                        text.AppendLine(result.Name + " · " + result.StatusLabel);
+                        text.AppendLine(result.Summary); text.AppendLine(result.DetailedDescription);
+                        text.AppendLine(result.Recommendation); text.AppendLine(result.TechnicalDetails);
+                        foreach (var item in result.Events) text.AppendLine(item.Time + " · " + item.Provider + " · " + item.EventId + " · " + item.Level + "\n" + item.Interpretation + "\n" + item.WindowsDescription);
+                        text.AppendLine();
+                    }
+                    outcome.StdOut = text.ToString();
+                    Completed?.Invoke(this, new TaskProgress { State = RunnerState.Completed,
+                        CurrentTask = new MaintenanceTask { Id = "diagnosis.general", Name = "Diagnóstico" }, Result = outcome,
+                        StartedAt = outcome.StartedAt, Elapsed = outcome.Duration, StdOut = outcome.StdOut, LastRelevantLine = outcome.UserSummary });
                 }
             }
         }

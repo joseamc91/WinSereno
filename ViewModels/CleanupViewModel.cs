@@ -2,6 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
@@ -50,6 +52,7 @@ namespace WinSereno.ViewModels
         private readonly ISessionLogger logger;
         public ObservableCollection<CleanupCategoryViewModel> Categories { get; } = new ObservableCollection<CleanupCategoryViewModel>();
         public RelayCommand AnalyzeCommand { get; }
+        public event EventHandler<TaskProgress> Completed;
         public bool CanChangeSelection => !operations.IsActive;
         public CleanupSelection SelectedCategories
         { get { CleanupSelection value = CleanupSelection.None; foreach (var row in Categories) if (row.IsSelected) value |= (CleanupSelection)(1 << (int)row.Result.Category); return value; } }
@@ -99,11 +102,12 @@ namespace WinSereno.ViewModels
             AnalyzeCommand = new RelayCommand(async p => await AnalyzeAsync(), p => !operations.IsActive && !IsRunning);
             operations.Changed += (s, e) => { AnalyzeCommand.Refresh(); Raise(nameof(CanChangeSelection)); };
         }
-        public async Task AnalyzeAsync()
+        public async Task AnalyzeAsync(bool recordHistory = true)
         {
             if (operations.IsActive || IsRunning) return;
             using (var operation = operations.Begin("Análisis de Limpieza (solo lectura)", true))
             {
+                var outcome = new MaintenanceTaskResult { StartedAt = DateTimeOffset.Now, ExecutionStatus = ExecutionStatus.Success };
                 var watch = Stopwatch.StartNew();
                 var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
                 timer.Tick += (s, e) => Summary = "Analizando... · " + watch.Elapsed.ToString(@"mm\:ss") + " · Solo lectura";
@@ -116,9 +120,24 @@ namespace WinSereno.ViewModels
                     foreach (var result in LastResult.Categories) Apply(result);
                     if (elevatedWindowsTemp != null) Apply(elevatedWindowsTemp);
                     Summary = (LastResult.WasCancelled ? "Análisis cancelado" : "Análisis finalizado") + " en " + LastResult.Duration.TotalSeconds.ToString("0.00") + " s · No se borró ningún archivo";
+                    outcome.ExecutionStatus = LastResult.WasCancelled ? ExecutionStatus.Cancelled : ExecutionStatus.Success;
+                    outcome.FindingStatus = Categories.Any(c => c.Result.IsPartial || !c.Result.IsAvailable) ? FindingStatus.PartiallyCompleted : FindingStatus.Completed;
                 }
-                catch (Exception ex) { Summary = "No se pudo completar el análisis. No se borró ningún archivo."; SystemQuery.Log(logger, "Error análisis Limpieza: " + ex); }
-                finally { timer.Stop(); watch.Stop(); IsRunning = false; hasRun = true; Raise(nameof(AnalyzeLabel)); Raise(nameof(LastResult)); AnalyzeCommand.Refresh(); }
+                catch (Exception ex) { outcome.ExecutionStatus = ExecutionStatus.Failed; Summary = "No se pudo completar el análisis. No se borró ningún archivo."; SystemQuery.Log(logger, "Error análisis Limpieza: " + ex); }
+                finally
+                {
+                    timer.Stop(); watch.Stop(); IsRunning = false; hasRun = true; Raise(nameof(AnalyzeLabel)); Raise(nameof(LastResult)); AnalyzeCommand.Refresh();
+                    if (recordHistory)
+                    {
+                        outcome.FinishedAt = DateTimeOffset.Now; outcome.Duration = watch.Elapsed; outcome.UserSummary = Summary;
+                        var text = new StringBuilder();
+                        foreach (var row in Categories) text.AppendLine(row.Name + "\n" + row.Summary + "\n" + row.Details + "\n" + row.ElevatedAnalysisText + "\n");
+                        outcome.StdOut = text.ToString();
+                        Completed?.Invoke(this, new TaskProgress { State = RunnerState.Completed,
+                            CurrentTask = new MaintenanceTask { Id = "cleanup.analyze", Name = "Análisis de Limpieza" }, Result = outcome,
+                            StartedAt = outcome.StartedAt, Elapsed = outcome.Duration, StdOut = outcome.StdOut, LastRelevantLine = outcome.UserSummary });
+                    }
+                }
             }
         }
         private void Apply(CleanupCategoryResult result)
