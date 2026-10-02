@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace WinSereno.Models
 {
-    public enum InformationBlock { Windows, Cpu, Memory, Disks, Network, Uptime, Restart }
+    public enum InformationBlock { Windows, Cpu, Memory, Disks, Network, Uptime, Gpu }
     public enum InformationStatus { Available, Unavailable, Failed }
-    public enum RestartPendingStatus { Pending, Possible, NotPending, Unknown }
     public sealed class InformationUpdate
     {
         public InformationBlock Block { get; set; }
@@ -26,8 +25,26 @@ namespace WinSereno.Models
         public string Model { get; set; }
         public int? PhysicalCores { get; set; }
         public int? LogicalProcessors { get; set; }
+        public int? MaxClockSpeedMHz { get; set; }
     }
-    public sealed class MemoryInformation { public ulong InstalledBytes { get; set; } }
+    public sealed class GpuInformation
+    {
+        public string Name { get; set; }
+        public string DriverVersion { get; set; }
+        public string IntegratedName { get; set; }
+        public bool IsDedicated { get; set; }
+    }
+    public sealed class MemoryInformation
+    {
+        public ulong InstalledBytes { get; set; }
+        public IList<MemoryModuleInformation> Modules { get; set; } = new List<MemoryModuleInformation>();
+    }
+    public sealed class MemoryModuleInformation
+    {
+        public ulong CapacityBytes { get; set; }
+        public uint SmbiosMemoryType { get; set; }
+        public uint ConfiguredSpeed { get; set; }
+    }
     public sealed class DiskInformation
     {
         public string Unit { get; set; }
@@ -37,7 +54,11 @@ namespace WinSereno.Models
         public double FreePercentage => TotalBytes > 0 ? 100.0 * FreeBytes / TotalBytes : 0;
         public bool NeedsAttention => FreePercentage < SystemInformationPolicy.LowDiskSpacePercentage;
     }
-    public static class SystemInformationPolicy { public const double LowDiskSpacePercentage = 10.0; }
+    public static class SystemInformationPolicy
+    {
+        public const double LowDiskSpacePercentage = 10.0;
+        public static bool IsReasonableCpuClockSpeed(int mhz) => mhz >= 100 && mhz <= 20000;
+    }
     public sealed class DiskCollection { public IList<DiskInformation> Volumes { get; } = new List<DiskInformation>(); public bool HasErrors { get; set; } }
     public sealed class NetworkInformation
     {
@@ -52,9 +73,4 @@ namespace WinSereno.Models
         public string NeutralMessage { get; set; }
     }
     public sealed class UptimeInformation { public TimeSpan Uptime { get; set; } }
-    public sealed class RestartPendingInformation
-    {
-        public RestartPendingStatus Status { get; set; }
-        public IList<string> PendingIndicators { get; } = new List<string>();
-    }
 }

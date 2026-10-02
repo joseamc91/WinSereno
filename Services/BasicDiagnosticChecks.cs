@@ -49,15 +49,6 @@ namespace WinSereno.Services
                 DetailedDescription = string.Join("\n", details) + "\nEs información del proveedor de almacenamiento, no un análisis SMART completo. No se han asociado letras de volumen a discos físicos.",
                 Recommendation = unhealthy || warning ? "Conservar una copia de los datos y revisar el dispositivo indicado." : "Esta comprobación no descarta problemas no expuestos por el controlador." };
         }
-        public DiagnosticResult Restart()
-        {
-            var value = new RestartPendingService(logger).Read();
-            return new DiagnosticResult { Id = "restart", Name = "Reinicio pendiente",
-                Status = value.Status == RestartPendingStatus.NotPending ? DiagnosticStatus.Healthy : value.Status == RestartPendingStatus.Unknown ? DiagnosticStatus.NotChecked : DiagnosticStatus.Attention,
-                Summary = value.Status == RestartPendingStatus.Pending ? "Windows tiene un reinicio pendiente." : value.Status == RestartPendingStatus.Possible ? "Posible reinicio: hay operaciones de archivos pendientes." : value.Status == RestartPendingStatus.NotPending ? "No se encontraron indicadores conocidos de reinicio." : "No se pudo completar la comprobación.",
-                DetailedDescription = "Resultado: " + value.Status + "\nIndicadores presentes: " + (value.PendingIndicators.Count == 0 ? "ninguno" : string.Join(", ", value.PendingIndicators)) + "\nLas operaciones pendientes de archivos son una señal secundaria; no garantizan que sea necesario reiniciar.",
-                Recommendation = "Guardar el trabajo antes de cualquier reinicio decidido por el usuario. No se reinicia automáticamente." };
-        }
         public DiagnosticResult Services()
         {
             var lines = new List<string>(); bool stopped = false, unknown = false, transition = false;

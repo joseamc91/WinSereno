@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Inicio muestra información más completa y compacta de CPU, GPU, RAM, red y discos.
+- Se elimina el indicador global de reinicio pendiente de Inicio y Diagnóstico; se mantienen los avisos de reinicio de operaciones concretas.
 - Registro de acciones de la sesión y cierre de resultados terminados del panel global sin perder sus detalles.
 - Aplicación portable para Windows con los módulos Inicio, Diagnóstico, Reparación, Red, Limpieza y Ajustes.
 - Información real del equipo y diagnóstico general de solo lectura, sin elevación automática.

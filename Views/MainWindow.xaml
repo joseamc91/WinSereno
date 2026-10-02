@@ -12,24 +12,23 @@
     </DockPanel></Border>
     <Grid Grid.Column="1" Margin="28,28,28,20"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
       <StackPanel Margin="0,0,0,18"><TextBlock Text="{Binding PageTitle}" FontSize="30" FontWeight="SemiBold"/><TextBlock Text="{Binding PageDescription}" Style="{StaticResource Muted}" Margin="0,8,0,0"/></StackPanel>
-      <Border Grid.Row="1" Background="{DynamicResource BannerBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,18"><TextBlock Text="{Binding PageNotice}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}"/></Border>
+      <Border Grid.Row="1" Visibility="{Binding HasPageNotice, Converter={StaticResource BoolVisibility}}" Background="{DynamicResource BannerBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,18"><TextBlock Text="{Binding PageNotice}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}"/></Border>
       <ScrollViewer x:Name="PageScroll" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,12,0">
         <Grid>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Home"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
             <DockPanel Margin="0,0,0,10"><Button Content="Actualizar" DockPanel.Dock="Right" Command="{Binding Home.RefreshCommand}" Margin="12,0,0,0"/><TextBlock Text="{Binding Home.RefreshedText}" Style="{StaticResource Muted}" VerticalAlignment="Center"/></DockPanel>
             <ItemsControl ItemsSource="{Binding Home.Cards}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><Border Style="{StaticResource Card}" Width="252" Padding="12" Margin="0,0,10,10"><StackPanel><TextBlock Text="{Binding Title}" Style="{StaticResource Muted}"/><TextBlock Text="{Binding Value}" FontSize="17" FontWeight="SemiBold" Margin="0,5,0,5"/><TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="12"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-            <Border Style="{StaticResource Card}" Padding="12"><StackPanel>
-              <TextBlock Text="Discos locales" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4"/>
-              <TextBlock Text="{Binding Home.DisksMessage}" Style="{StaticResource Muted}" Visibility="{Binding Home.HasDisksMessage, Converter={StaticResource BoolVisibility}}"/>
-              <ItemsControl ItemsSource="{Binding Home.Disks}"><ItemsControl.ItemTemplate><DataTemplate>
-                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                  <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                  <TextBlock Grid.Column="1" Text="{Binding CapacityText}" Style="{StaticResource Muted}" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                  <TextBlock Grid.Column="2" Text="{Binding FreeText}" Style="{StaticResource Muted}" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                  <TextBlock Grid.Column="3" Text="{Binding StatusText}" VerticalAlignment="Center"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource GoodBrush}"/><Style.Triggers><DataTrigger Binding="{Binding NeedsAttention}" Value="True"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
-                </Grid></Border>
-              </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-            </StackPanel></Border>
+            <TextBlock Text="Discos locales" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,10"/>
+            <TextBlock Text="{Binding Home.DisksMessage}" Style="{StaticResource Muted}" Visibility="{Binding Home.HasDisksMessage, Converter={StaticResource BoolVisibility}}"/>
+            <ItemsControl ItemsSource="{Binding Home.Disks}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate>
+              <Border Style="{StaticResource Card}" Width="252" Padding="12" Margin="0,0,10,10"><StackPanel>
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding CapacityText}" Style="{StaticResource Muted}" FontSize="12" Margin="0,5,0,5"/>
+                <WrapPanel><TextBlock Text="{Binding FreeText}" Style="{StaticResource Muted}" FontSize="12"/><TextBlock Text=" · " Style="{StaticResource Muted}" FontSize="12"/>
+                  <TextBlock Text="{Binding StatusText}" FontSize="12"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource GoodBrush}"/><Style.Triggers><DataTrigger Binding="{Binding NeedsAttention}" Value="True"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                </WrapPanel>
+              </StackPanel></Border>
+            </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
 
           </StackPanel>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Diagnosis"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>

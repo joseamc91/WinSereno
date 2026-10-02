@@ -60,7 +60,7 @@ public static class DiagnosticPresentationChecks {
    var colors=new ResourceDictionary {Source=new Uri("/WinSereno;component/Themes/"+theme+".xaml",UriKind.Relative)};
    app.Resources.MergedDictionaries.Add(colors);
    var card=new DiagnosticCard();double total=0;
-   var initial=DiagnosticService.CreatePendingResults();Check(initial.Count==8,"Ocho comprobaciones iniciales");
+   var initial=DiagnosticService.CreatePendingResults();Check(initial.Count==7,"Siete comprobaciones iniciales");
    foreach(var result in initial) {
     var border=Present(card,result);total+=card.DesiredSize.Height;
     Check((string)border.Tag=="True","Solo presentación inicial marcada");
@@ -74,7 +74,7 @@ public static class DiagnosticPresentationChecks {
     Check(Shown(actions)==result.HasNavigation,"Sin hueco de acciones; integridad conserva navegación");
     if(result.Id=="integrity") Check(Children<Button>(card).Any(b=>(string)b.Content=="Ir a Reparación"&&Shown(b)),"Integridad sigue accesible: "+string.Join(";",Children<Button>(card).Select(b=>Convert.ToString(b.Content)+":"+b.Visibility+":"+Shown(b))));
    }
-   Check(total<520,"Las ocho tarjetas iniciales ocupan menos de 520 px: "+total);
+   Check(total<520,"Las siete tarjetas iniciales ocupan menos de 520 px: "+total);
    foreach(var status in new[]{DiagnosticStatus.Healthy,DiagnosticStatus.Attention,DiagnosticStatus.Error,DiagnosticStatus.NotChecked}) {
     RealResult(card,new DiagnosticResult {Id="events",Name="Eventos de Windows",Status=status,Summary="Resultado real "+status,
      Recommendation="Recomendación real",DetailedDescription="Descripción original",TechnicalDetails="Información técnica",

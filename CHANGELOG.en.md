@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Home displays more complete and compact CPU, GPU, RAM, network, and disk information.
+- Removed the global pending restart indicator from Home and Diagnostics; restart notices for specific operations are retained.
 - Session action history and dismissal of completed results from the global panel without losing their details.
 - Portable Windows application with Home, Diagnostics, Repair, Network, Cleanup, and Settings modules.
 - Real system information and read-only general diagnostics, without automatic elevation.

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -18,12 +19,10 @@ namespace WinSereno.Services
     public sealed class SystemInformationService : ISystemInformationService
     {
         private readonly ISessionLogger logger;
-        private readonly RestartPendingService restart;
         private readonly NetworkInformationService network;
         public SystemInformationService(ISessionLogger logger)
         {
             this.logger = logger;
-            restart = new RestartPendingService(logger);
             network = new NetworkInformationService(logger);
         }
         public async Task CollectAsync(IProgress<InformationUpdate> progress, CancellationToken cancellationToken)
@@ -39,7 +38,7 @@ namespace WinSereno.Services
                     ReadAsync(InformationBlock.Disks, ReadDisks, progress, cancellationToken),
                     ReadAsync(InformationBlock.Network, () => network.Read(), progress, cancellationToken),
                     ReadAsync(InformationBlock.Uptime, ReadUptime, progress, cancellationToken),
-                    ReadAsync(InformationBlock.Restart, () => restart.Read(), progress, cancellationToken));
+                    ReadAsync(InformationBlock.Gpu, ReadGpu, progress, cancellationToken));
             }
             finally { SystemQuery.Log(logger, "Finalización de recopilación de datos del sistema | Tiempo=" + watch.Elapsed); }
         }
@@ -103,11 +102,64 @@ namespace WinSereno.Services
         }
         private object ReadCpu()
         {
-            var rows = SystemQuery.Read("SELECT Name, NumberOfCores, NumberOfLogicalProcessors FROM Win32_Processor", "Name", "NumberOfCores", "NumberOfLogicalProcessors");
+            var rows = SystemQuery.Read("SELECT Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed FROM Win32_Processor", "Name", "NumberOfCores", "NumberOfLogicalProcessors", "MaxClockSpeed");
             if (rows.Count == 0) return null;
             return new CpuInformation { Model = string.Join(" / ", rows.Select(r => r["Name"] as string).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).Distinct()),
-                PhysicalCores = SumReliable(rows, "NumberOfCores"), LogicalProcessors = SumReliable(rows, "NumberOfLogicalProcessors") };
+                PhysicalCores = SumReliable(rows, "NumberOfCores"), LogicalProcessors = SumReliable(rows, "NumberOfLogicalProcessors"), MaxClockSpeedMHz = ReliableCpuClockSpeed(rows) };
         }
+        private static int? ReliableCpuClockSpeed(System.Collections.Generic.IList<System.Collections.Generic.Dictionary<string, object>> rows)
+        {
+            int? common = null;
+            foreach (var row in rows)
+            {
+                if (!row.TryGetValue("MaxClockSpeed", out object value) || value == null
+                    || !int.TryParse(value.ToString(), out int mhz) || !SystemInformationPolicy.IsReasonableCpuClockSpeed(mhz)
+                    || (common.HasValue && common.Value != mhz)) return null;
+                common = mhz;
+            }
+            return common;
+        }
+        private object ReadGpu()
+        {
+            var adapters = SystemQuery.Read("SELECT Name, DriverVersion FROM Win32_VideoController", "Name", "DriverVersion")
+                .Select(row => new GpuInformation { Name = row["Name"] as string, DriverVersion = row["DriverVersion"] as string }).ToList();
+            return SummarizeGpu(adapters);
+        }
+        private static GpuInformation SummarizeGpu(System.Collections.Generic.IList<GpuInformation> adapters)
+        {
+            var named = adapters.Where(a => a != null && !string.IsNullOrWhiteSpace(a.Name)).ToList();
+            if (named.Count == 0) return null;
+            // Exclude only explicitly identified Windows software/remote adapters when other devices exist.
+            // Basic Display Adapter may drive physical hardware and must remain eligible.
+            var relevant = named.Where(a => !string.Equals(a.Name.Trim(), "Microsoft Remote Display Adapter", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(a.Name.Trim(), "Microsoft Basic Render Driver", StringComparison.OrdinalIgnoreCase)).ToList();
+            if (relevant.Count == 0) relevant = named;
+            var integrated = relevant.Where(a => IsIntelIntegratedGpu(a.Name)).ToList();
+            var dedicated = relevant.Where(a => IsDedicatedGpu(a.Name)).ToList();
+            // Split only a fully recognized combination; ambiguous devices stay together under GPU.
+            bool canSplit = integrated.Count > 0 && dedicated.Count > 0 && integrated.Count + dedicated.Count == relevant.Count;
+            string integratedName = canSplit ? string.Join(" / ", integrated.Select(a => a.Name.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(n => n, StringComparer.OrdinalIgnoreCase)) : null;
+            bool isDedicated = dedicated.Count > 0 && (canSplit || dedicated.Count == relevant.Count);
+            if (canSplit) relevant = dedicated;
+            var names = relevant.Select(a => a.Name.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
+            var versions = relevant.Select(a => a.DriverVersion?.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            return new GpuInformation
+            {
+                Name = string.Join(" / ", names),
+                IntegratedName = integratedName,
+                IsDedicated = isDedicated,
+                // A single version is displayed only when it reliably applies to every listed adapter.
+                DriverVersion = versions.Count == 1 && !string.IsNullOrWhiteSpace(versions[0]) ? versions[0] : null
+            };
+        }
+        private static bool IsIntelIntegratedGpu(string name)
+            => Regex.IsMatch(name.Trim(), @"^Intel(?:\(R\))?\s+(?:(?:UHD|HD)\s+Graphics\b|Iris(?:\(R\))?\s+(?:Xe\s+)?Graphics\b)",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+                && !Regex.IsMatch(name, @"\bMAX\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static bool IsDedicatedGpu(string name)
+            => Regex.IsMatch(name.Trim(), @"^(?:NVIDIA\s+(?:GeForce|Quadro|RTX)\b|AMD\s+Radeon(?:\(TM\))?\s+(?:RX\s+\d{3,4}\b|Pro\s+(?:WX\s+\d+|W\d{4})\b))",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static int? SumReliable(System.Collections.Generic.IList<System.Collections.Generic.Dictionary<string, object>> rows, string field)
         {
             int total = 0;
@@ -125,7 +177,7 @@ namespace WinSereno.Services
         {
             if (!GetPhysicallyInstalledSystemMemory(out ulong kilobytes) || kilobytes == 0)
                 throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
-            return new MemoryInformation { InstalledBytes = checked(kilobytes * 1024) };
+            return MemoryModuleReader.Enrich(checked(kilobytes * 1024), MemoryModuleReader.Read, logger);
         }
         public DiskCollection ReadDisks()
         {

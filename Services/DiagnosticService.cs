@@ -16,7 +16,7 @@ namespace WinSereno.Services
         public static IList<DiagnosticResult> CreatePendingResults()
         {
             var items = new List<DiagnosticResult>();
-            foreach (var pair in new[] { Tuple.Create("space", "Espacio de almacenamiento"), Tuple.Create("storage-health", "Salud básica de almacenamiento"), Tuple.Create("restart", "Reinicio pendiente"),
+            foreach (var pair in new[] { Tuple.Create("space", "Espacio de almacenamiento"), Tuple.Create("storage-health", "Salud básica de almacenamiento"),
                 Tuple.Create("network", "Red local e Internet"), Tuple.Create("services", "Servicios críticos"), Tuple.Create("power", "Plan de energía"), Tuple.Create("events", "Eventos de Windows"), Tuple.Create("integrity", "Integridad de Windows") })
                 items.Add(new DiagnosticResult { Id = pair.Item1, Name = pair.Item2, Status = DiagnosticStatus.NotChecked, Summary = pair.Item1 == "integrity" ? "La comprobación de integridad requiere una acción administrativa explícita." : "Aún no se ha realizado esta comprobación.",
                     Recommendation = pair.Item1 == "integrity" ? "Revisar las opciones de Reparación; no se ejecutará DISM en este análisis." : "Pulsar Analizar este PC.",
@@ -52,7 +52,6 @@ namespace WinSereno.Services
                     {
                         case "space": return basic.Space();
                         case "storage-health": return basic.StorageHealth();
-                        case "restart": return basic.Restart();
                         case "network": return await new NetworkDiagnosticCheck(logger).RunAsync(token).ConfigureAwait(false);
                         case "services": return basic.Services();
                         case "power": return basic.Power();

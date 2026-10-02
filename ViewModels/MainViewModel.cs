@@ -71,7 +71,7 @@ namespace WinSereno.ViewModels
             set
             {
                 if (value == null || !Set(ref selectedNavigation, value)) return;
-                Raise(nameof(CurrentSection)); Raise(nameof(CurrentSectionCode)); Raise(nameof(PageTitle)); Raise(nameof(PageDescription)); Raise(nameof(PageNotice));
+                Raise(nameof(CurrentSection)); Raise(nameof(CurrentSectionCode)); Raise(nameof(PageTitle)); Raise(nameof(PageDescription)); Raise(nameof(PageNotice)); Raise(nameof(HasPageNotice));
                 if (value.Section == NavigationSection.Network) _ = Network.RefreshAsync();
             }
         }
@@ -81,8 +81,9 @@ namespace WinSereno.ViewModels
         public NavigationSection RepairNavigationTarget => NavigationSection.Repair;
         public string PageTitle => CurrentSection == NavigationSection.Activity ? "Registro de acciones" : SelectedNavigation.Label;
         public string ProductVersion => "v" + FileVersionInfo.GetVersionInfo(typeof(MainViewModel).Assembly.Location).FileVersion;
-        public string PageNotice => CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
-            : CurrentSection == NavigationSection.Home || CurrentSection == NavigationSection.Diagnosis
+        public bool HasPageNotice => !string.IsNullOrWhiteSpace(PageNotice);
+        public string PageNotice => CurrentSection == NavigationSection.Home ? "" : CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
+            : CurrentSection == NavigationSection.Diagnosis
             ? "Información y diagnóstico de solo lectura. Sin elevación ni reparación automática."
             : CurrentSection == NavigationSection.Cleanup ? "El análisis es de solo lectura. Los archivos en uso o protegidos se omitirán. Temporales de Windows requiere administrador." : CurrentSection == NavigationSection.Network ? "Información real de red. Vaciar caché DNS, renovar DHCP y reiniciar adaptador requieren confirmación; restablecer Winsock y TCP/IP requieren confirmación y UAC. No se combinan automáticamente." : CurrentSection == NavigationSection.Repair ? "DISM y SFC requieren confirmación y UAC. RestoreHealth y SFC realizan reparaciones." : "El tema y los logs se guardan junto a la aplicación.";
         public string PageDescription
@@ -97,7 +98,7 @@ namespace WinSereno.ViewModels
                     case NavigationSection.Network: return "Adaptadores y conectividad de solo lectura. Actualiza al entrar o mediante Actualizar.";
                     case NavigationSection.Cleanup: return "Análisis de cuatro categorías, limpieza de temporales y miniaturas, y vaciado de Papelera.";
                     case NavigationSection.Settings: return "Personalización y almacenamiento de esta aplicación portable.";
-                    default: return "Información del equipo consultada mediante APIs de Windows, sin modificar su configuración.";
+                    default: return "Información del equipo obtenida directamente desde Windows.";
                 }
             }
         }
