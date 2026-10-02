@@ -4,7 +4,7 @@ Aplicación portable para Windows centrada en diagnóstico, mantenimiento y repa
 
 ## Estado
 
-WinSereno está en desarrollo, en estado **pre-release**. Todavía no se presenta como una versión estable y no hay una release publicada.
+WinSereno está en fase **Beta / pre-release**. **v0.1.0-beta.1** es la primera beta pública; no es una versión estable.
 
 Las funciones implementadas y su validación son aspectos distintos: algunas cuentan con pruebas manuales y otras requieren más validación en equipos reales.
 
@@ -12,16 +12,17 @@ Las funciones implementadas y su validación son aspectos distintos: algunas cue
 
 | Módulo | Funcionalidad actual |
 |---|---|
-| Inicio | Información real de Windows, CPU, RAM instalada, discos locales, adaptador principal, uptime y reinicio pendiente. Actualización manual. |
-| Diagnóstico | Comprobaciones de almacenamiento, reinicio, red, servicios esenciales, plan de energía y eventos conocidos. Solo lectura, sin UAC. Reutiliza la integridad administrativa obtenida explícitamente durante la sesión. |
-| Reparación | Herramientas individuales DISM, SFC, CHKDSK de solo lectura, mantenimiento del almacén de componentes y Reparación completa condicional. |
+| Inicio | Información real de Windows, CPU, GPU integrada/dedicada cuando se identifican, RAM y detalles de módulos cuando Windows los expone, red principal, uptime y discos locales. Actualización manual. |
+| Diagnóstico | Seis comprobaciones: espacio de almacenamiento, salud básica de almacenamiento, red local e Internet, servicios críticos, eventos de Windows e integridad de Windows. Las cinco primeras utilizan permisos normales; Integridad ejecuta DISM CheckHealth y SFC VerifyOnly con un único UAC. Ninguna realiza reparaciones. |
+| Reparación | DISM CheckHealth, ScanHealth y RestoreHealth; SFC /scannow; CHKDSK de solo lectura; StartComponentCleanup y Reparación completa condicional. |
 | Red | Información de adaptadores y conectividad, caché DNS, DHCP, reinicio de adaptador y restablecimientos Winsock/TCP/IP. |
 | Limpieza | Análisis y limpieza individual o por selección de temporales, miniaturas y Papelera, con estimaciones y resultados por categoría. |
 | Ajustes | Tema claro/oscuro persistente y apertura de la carpeta de logs. La búsqueda de actualizaciones permanece deshabilitada. |
+| Actividad | Historial de acciones de la sesión con resumen, duración y detalles. No se conserva al cerrar; los TXT de Logs siguen siendo el registro persistente. |
 
-El diagnóstico general se inicia al pulsar **Analizar este PC**. No ejecuta herramientas administrativas ni repara automáticamente. Un dato no disponible se presenta como **No comprobado**, no como un problema detectado.
+Al pulsar **Analizar este PC**, se realizan las comprobaciones generales y se solicita un único UAC para Integridad. El mismo worker elevado ejecuta DISM CheckHealth y SFC VerifyOnly, sin reparar. Si se cancelan los permisos, las demás comprobaciones continúan e Integridad queda **No comprobado**. Un dato no disponible no se interpreta como un problema detectado.
 
-Las operaciones que modifican el sistema requieren confirmación. La aplicación principal arranca con permisos normales; UAC se solicita únicamente cuando corresponde a la acción confirmada. Solo puede existir una operación activa.
+Las operaciones que modifican el sistema requieren confirmación. La aplicación principal arranca con permisos normales; UAC se solicita únicamente cuando corresponde a la acción iniciada por el usuario. Solo puede existir una operación activa.
 
 WinSereno nunca reinicia ni apaga Windows automáticamente. No incluye limpiador de registro, optimizador de RAM ni tweaks agresivos.
 
@@ -30,12 +31,12 @@ WinSereno nunca reinicia ni apaga Windows automáticamente. No incluye limpiador
 - **DISM CheckHealth:** comprobación rápida del estado registrado del almacén de componentes.
 - **DISM ScanHealth:** análisis profundo sin reparación.
 - **DISM RestoreHealth:** análisis y reparación del almacén de componentes.
-- **SFC:** comprobación y reparación de archivos protegidos del sistema.
+- **SFC /scannow:** comprobación y reparación de archivos protegidos del sistema.
 - **CHKDSK:** comprobación de solo lectura del volumen de la instalación actual de Windows, resuelto internamente. No repara ni programa reparaciones.
-- **Component Cleanup:** mantenimiento que elimina versiones reemplazadas de componentes. No es una reparación de corrupción.
+- **Component Cleanup / StartComponentCleanup:** mantenimiento que elimina versiones reemplazadas de componentes. No es una reparación de corrupción.
 - **Reparación completa:** ejecuta ScanHealth; omite RestoreHealth si el almacén está sano, o lo ejecuta si la corrupción es reparable; continúa con SFC solo si los pasos anteriores lo permiten. Utiliza una confirmación y un único UAC. Los pasos omitidos y sus motivos quedan visibles.
 
-El panel de ejecución permite consultar stdout/stderr, duración y resultado. Los porcentajes se usan cuando proceden de la herramienta, sin estimaciones globales ficticias. CHKDSK conserva su progreso nativo en la salida.
+Un toast flotante global muestra la operación activa, el tiempo, el progreso real cuando existe y el resumen final. **Ver detalles** permite consultar la salida completa y el resultado. Al finalizar puede cerrarse sin eliminar el resultado de la sesión, Actividad ni Logs. No se inventan porcentajes globales; CHKDSK conserva su progreso nativo en la salida.
 
 ### Red
 
@@ -49,7 +50,7 @@ Herramientas disponibles:
 - Restablecer Winsock.
 - Restablecer TCP/IP.
 
-Las acciones son independientes y requieren confirmación. Las operaciones potencialmente disruptivas incorporan advertencias especiales cuando se detecta una sesión RDP. Si es necesario reiniciar Windows, se informa sin hacerlo automáticamente.
+Las acciones son independientes y requieren confirmación. Las operaciones potencialmente disruptivas incorporan advertencias especiales cuando se detecta una sesión RDP y todavía requieren más validación manual controlada. Si es necesario reiniciar Windows, se informa sin hacerlo automáticamente.
 
 ### Limpieza
 
@@ -107,6 +108,11 @@ Las suites automatizadas disponibles están en [Tests/](Tests/):
 
 | Suite | Alcance |
 |---|---|
+| [HomeInformationChecks.ps1](Tests/HomeInformationChecks.ps1) | Datos y presentación de Inicio: CPU, GPU, RAM, red y discos. |
+| [DiagnosticIntegrityChecks.ps1](Tests/DiagnosticIntegrityChecks.ps1) | Integridad de solo lectura, VerifyOnly, combinación de resultados y UAC simulado. |
+| [ActivityHistoryChecks.ps1](Tests/ActivityHistoryChecks.ps1) | Historial de sesión, snapshots y cierre de resultados. |
+| [ToastRepairPresentationChecks.ps1](Tests/ToastRepairPresentationChecks.ps1) | Toast y herramientas de Reparación en ambos temas, con operaciones simuladas. |
+| [ToastRepairStaticChecks.ps1](Tests/ToastRepairStaticChecks.ps1) | Estructura XAML, recursos, foco y bindings del toast y Reparación, sin cargar el EXE. |
 | [IntegritySessionChecks.ps1](Tests/IntegritySessionChecks.ps1) | Selección temporal de integridad DISM, cancelaciones y separación de SFC. |
 | [SfcStreamingChecks.ps1](Tests/SfcStreamingChecks.ps1) | Reconstrucción de líneas, salida íntegra y progreso SFC español/inglés. |
 | [WindowsTempSnapshotChecks.ps1](Tests/WindowsTempSnapshotChecks.ps1) | Snapshot elevado, timestamp y reanálisis con proveedores controlados. |
@@ -122,20 +128,22 @@ Tras compilar Debug, pueden ejecutarse individualmente con Windows PowerShell 5.
 powershell.exe -NoProfile -STA -File .\Tests\ThemePersistenceChecks.ps1
 ```
 
-La suite de regresión CHKDSK ha compilado, pero su ejecución y la repetición de las suites de integridad y SFC sobre el último binario quedaron bloqueadas por App Control. No se consideran superadas esas ejecuciones bloqueadas.
+Las suites disponibles no equivalen a una validación completa de la beta. En la preparación del candidato visual pasaron las comprobaciones estáticas de toast/Reparación, pero Smart App Control bloqueó la ejecución local de las suites de presentación toast/Reparación, Diagnóstico y tema. Esas ejecuciones bloqueadas no se consideran superadas. La regresión histórica de CHKDSK en español («Acceso denegado») permanece pendiente; este proceso de publicación no cambia su parser.
 
 Existen validaciones manuales previas de Inicio, Diagnóstico y DISM CheckHealth/ScanHealth/RestoreHealth. SFC y CHKDSK también han aportado salidas reales para identificar correcciones. Esto no valida todas las acciones ni sustituye las pruebas pendientes de los cambios más recientes. Las operaciones disruptivas de red y varias limpiezas necesitan validación manual controlada adicional.
 
 ## Limitaciones conocidas
 
-- Smart App Control puede bloquear builds locales sin firma o desconocidas. WinSereno no cambia las políticas de seguridad.
-- Algunas operaciones requieren elevación explícita.
+- Smart App Control puede bloquear builds locales no firmadas o desconocidas. El EXE de esta beta no está firmado con Authenticode. WinSereno no modifica ni desactiva Smart App Control, Defender ni otras políticas de seguridad.
+- Se requiere .NET Framework 4.8 y una carpeta portable local escribible.
+- Algunas operaciones requieren permisos de administrador mediante UAC.
+- Algunas operaciones disruptivas de Red todavía requieren más validación manual controlada.
 - Determinadas tareas no son cancelables una vez iniciado el comando nativo; la ventana impide cerrar mientras están activas.
 - Una herramienta nativa que no termine puede mantener ocupado el coordinador de operaciones.
 - La disponibilidad de datos depende de Windows, hardware, controladores y permisos; un resultado desconocido no se interpreta como saludable.
 - No existe aún un sistema integrado de actualización.
 
-La arquitectura y sus límites se describen en [AUDIT_PRIVILEGED_EXECUTION.md](AUDIT_PRIVILEGED_EXECUTION.md). Los cambios pendientes de publicación están en [CHANGELOG.md](CHANGELOG.md).
+La arquitectura y sus límites se describen en [AUDIT_PRIVILEGED_EXECUTION.md](AUDIT_PRIVILEGED_EXECUTION.md). El historial de cambios está en [CHANGELOG.md](CHANGELOG.md) y [CHANGELOG.en.md](CHANGELOG.en.md).
 
 ## Licencia
 

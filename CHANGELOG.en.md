@@ -2,15 +2,17 @@
 
 ## Unreleased
 
+## 0.1.0-beta.1 — 2026-10-02
+
 - Diagnostics now includes Windows integrity checks with a single UAC prompt, using DISM CheckHealth and SFC VerifyOnly without performing repairs.
 - Diagnostics has been simplified and made more compact, with explanations before analysis, clearer results, and aligned statuses.
 - The global operation panel has been replaced by a floating toast that retains progress, details, and history without taking up space on the pages.
 - Repair now features a simplified header and more compact individual tools, with descriptive names and their technical terms.
 - Home displays more complete and compact CPU, GPU, RAM, network, and disk information.
 - Removed the global pending restart indicator from Home and Diagnostics; restart notices for specific operations are retained.
-- Session action history and dismissal of completed results from the global panel without losing their details.
-- Portable Windows application with Home, Diagnostics, Repair, Network, Cleanup, and Settings modules.
-- Real system information and read-only general diagnostics, without automatic elevation.
+- Session action history and dismissal of completed results from the global toast without losing their details.
+- Portable Windows application with Home, Diagnostics, Repair, Network, Cleanup, Settings, and Activity modules.
+- Real system information and read-only general diagnostics; Integrity requests a single UAC prompt without elevating the main application.
 - DISM CheckHealth, ScanHealth, and RestoreHealth tools; SFC; read-only CHKDSK; and Component Cleanup for maintenance.
 - Complete Repair with ScanHealth, conditional RestoreHealth, and SFC, with one confirmation and a single UAC prompt.
 - Adapter and connectivity information, DNS cache flushing, DHCP renewal, adapter restart, and Winsock/TCP/IP resets, with warnings for RDP sessions.
