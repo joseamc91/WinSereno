@@ -49,4 +49,34 @@ foreach($theme in @('Light','Dark')) {
 }
 foreach($file in @('Views\MainWindow.xaml','Views\TaskExecutionPanel.xaml')) { $text=Source $file; [xml]$valid=$text; Check (-not $text.Contains('xmlns:local') -and -not $text.Contains('x:Static m:')) "No compiled local type dependency $file" }
 Check ((Source 'app.manifest').Contains('level="asInvoker"')) 'Manifest retained'
+$pageScroll=$xml.SelectSingleNode('//p:ScrollViewer[@x:Name="PageScroll"]',$ns)
+$focusSetter=$pageScroll.SelectSingleNode('p:ScrollViewer.Style/p:Style/p:Style.Triggers/p:DataTrigger[@Value="Repair"]/p:Setter[@Property="FocusVisualStyle"]',$ns)
+Check ($null -ne $focusSetter -and $focusSetter.GetAttribute('Value') -eq '{x:Null}') 'Only Repair viewport suppresses native giant focus visual'
+Check (-not $pageScroll.HasAttribute('Focusable')) 'Viewport remains keyboard-focusable for scrolling'
+$repairLists=@($xml.SelectNodes('//p:ItemsControl[@ItemsSource="{Binding RealRepairTasks}" or @ItemsSource="{Binding RepairTools}"]',$ns))
+Check ($repairLists.Count -eq 3) 'Three Repair presentation-only list containers'
+foreach($list in $repairLists) { Check ($list.GetAttribute('Focusable') -eq 'False') 'Non-interactive Repair list not focusable' }
+Check (-not (Source 'Themes\Styles.xaml').Contains('Property="FocusVisualStyle"')) 'No global suppression of keyboard focus'
+Check ((Source 'Themes\Styles.xaml').Contains('IsKeyboardFocused') -and (Source 'Themes\Styles.xaml').Contains('IsKeyboardFocusWithin')) 'Buttons and sidebar focus indicators retained'
+Check ($toast.Contains('Effect="{DynamicResource ToastShadowEffect}"')) 'Toast shadow resolves from current theme'
+function ThemeColor([string]$theme,[string]$key) {
+ [xml]$doc=Source "Themes\$theme.xaml"
+ $node=$doc.DocumentElement.ChildNodes | Where-Object { $_ -is [Xml.XmlElement] } | Where-Object { $_.GetAttribute('Key','http://schemas.microsoft.com/winfx/2006/xaml') -eq $key }
+ return $node.GetAttribute('Color')
+}
+Check ((ThemeColor 'Light' 'ToastBackgroundBrush') -eq '#141E2D' -and (ThemeColor 'Light' 'ToastBorderBrush') -eq '#344359') 'Light toast appearance retained'
+Check ((ThemeColor 'Dark' 'ToastBackgroundBrush') -eq '#090F1B') 'Dark deeper blue-black surface'
+Check ((ThemeColor 'Dark' 'ToastBorderBrush') -eq '#4B6280') 'Dark stronger edge'
+foreach($theme in @('Light','Dark')) {
+ Check ((ThemeColor $theme 'ToastCloseBrush') -eq '#B02D42' -and (ThemeColor $theme 'ToastTextBrush') -eq '#FFFFFF') "$theme red X / white text retained"
+ Check ((Source "Themes\$theme.xaml").Contains('x:Key="ToastShadowEffect"')) "$theme shadow resource exists"
+}
+foreach($theme in @('Light','Dark')) {
+ [xml]$colors=Source "Themes\$theme.xaml"
+ $shadow=$colors.DocumentElement.ChildNodes | Where-Object { $_ -is [Xml.XmlElement] -and $_.LocalName -eq 'DropShadowEffect' }
+ Check ($shadow.GetAttribute('Key','http://schemas.microsoft.com/winfx/2006/xaml') -eq 'ToastShadowEffect') "$theme framework-only shadow resource"
+ if($theme -eq 'Light') { Check ($shadow.GetAttribute('BlurRadius') -eq '12' -and $shadow.GetAttribute('ShadowDepth') -eq '2' -and $shadow.GetAttribute('Opacity') -eq '0.25') 'Light shadow parameters unchanged' }
+ else { Check ($shadow.GetAttribute('BlurRadius') -eq '20' -and $shadow.GetAttribute('ShadowDepth') -eq '3' -and $shadow.GetAttribute('Opacity') -eq '0.45') 'Dark shadow strengthened' }
+}
+Check (-not $toast.Contains('x:Static') -and -not $xaml.Contains('xmlns:local')) 'No local WPF type references introduced'
 Write-Output "$count comprobaciones estáticas correctas; no EXE, herramientas reales ni UAC."

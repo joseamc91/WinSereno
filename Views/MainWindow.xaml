@@ -14,6 +14,7 @@
       <StackPanel Margin="0,0,0,18"><TextBlock Text="{Binding PageTitle}" FontSize="30" FontWeight="SemiBold"/><TextBlock Text="{Binding PageDescription}" Style="{StaticResource Muted}" Margin="0,8,0,0"/></StackPanel>
       <Border Grid.Row="1" Visibility="{Binding HasPageNotice, Converter={StaticResource BoolVisibility}}" Background="{DynamicResource BannerBrush}" CornerRadius="6" Padding="12" Margin="0,0,0,18"><TextBlock Text="{Binding PageNotice}" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}"/></Border>
       <ScrollViewer x:Name="PageScroll" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,12,0">
+        <ScrollViewer.Style><Style TargetType="ScrollViewer"><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Repair"><Setter Property="FocusVisualStyle" Value="{x:Null}"/></DataTrigger></Style.Triggers></Style></ScrollViewer.Style>
         <Grid>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Home"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
             <DockPanel Margin="0,0,0,10"><Button Content="Actualizar" DockPanel.Dock="Right" Command="{Binding Home.RefreshCommand}" Margin="12,0,0,0"/><TextBlock Text="{Binding Home.RefreshedText}" Style="{StaticResource Muted}" VerticalAlignment="Center"/></DockPanel>
@@ -55,7 +56,7 @@
             <ItemsControl ItemsSource="{Binding Diagnosis.Results}"><ItemsControl.ItemTemplate><DataTemplate><ContentControl Loaded="OnDiagnosticHostLoaded"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
           </StackPanel>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Repair"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
-            <ItemsControl ItemsSource="{Binding RealRepairTasks}"><ItemsControl.ItemTemplate><DataTemplate>
+            <ItemsControl Focusable="False" ItemsSource="{Binding RealRepairTasks}"><ItemsControl.ItemTemplate><DataTemplate>
               <Border><Border.Style><Style TargetType="Border" BasedOn="{StaticResource Card}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Task.Id}" Value="repair.complete"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
                 <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="230"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                   <StackPanel Margin="0,0,16,0">
@@ -70,7 +71,7 @@
             </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
             <TextBlock Text="Herramientas individuales" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,10"/>
             <Border Style="{StaticResource Card}" Padding="12,0">
-              <ItemsControl ItemsSource="{Binding RealRepairTasks}"><ItemsControl.ItemTemplate><DataTemplate>
+              <ItemsControl Focusable="False" ItemsSource="{Binding RealRepairTasks}"><ItemsControl.ItemTemplate><DataTemplate>
                 <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,10"><Border.Style><Style TargetType="Border"><Style.Triggers><DataTrigger Binding="{Binding Task.Id}" Value="repair.complete"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Border.Style>
                   <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
                     <StackPanel Margin="0,0,14,0" VerticalAlignment="Center">
@@ -83,7 +84,7 @@
                 </Border>
               </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
             </Border>
-            <ItemsControl ItemsSource="{Binding RepairTools}" ItemTemplate="{StaticResource ToolTemplate}"/>
+            <ItemsControl Focusable="False" ItemsSource="{Binding RepairTools}" ItemTemplate="{StaticResource ToolTemplate}"/>
           </StackPanel>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Network"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
             <Border Style="{StaticResource Card}" Padding="12"><StackPanel>

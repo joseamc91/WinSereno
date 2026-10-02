@@ -75,6 +75,10 @@ public static class ToastRepairPresentationChecks {
    var vm=new MainViewModel(new PortableStorage(project),new AppSettings(),new ThemeService(),dialogs,runner,new HomeViewModel(null,logger),diagnosis,ops,integrity,logger);
    var window=new MainWindow(vm,dialogs);var root=(FrameworkElement)window.Content;Layout(root);
    var layer=(Canvas)window.FindName("ToastLayer");var host=(ContentControl)window.FindName("TaskExecutionHost");var main=(Grid)window.FindName("MainArea");var scroll=(ScrollViewer)window.FindName("PageScroll");
+   var defaultScroll=new ScrollViewer();Check(defaultScroll.Focusable&&defaultScroll.FocusVisualStyle!=null,"WPF ScrollViewer defaults to focusable with focus visual");
+   string focusTemplate=System.Windows.Markup.XamlWriter.Save(app.FindResource(SystemParameters.FocusVisualStyleKey));
+   Check(focusTemplate.Contains("StrokeDashArray=\"1 2\""),"Native focus visual is the dotted rectangle, not a page Border");
+   Check(scroll.Focusable&&scroll.FocusVisualStyle!=null,"Other pages retain ScrollViewer keyboard focus visual");
    Check(host.Parent==layer&&layer.Parent==main&&Grid.GetColumn(main)==1,"Overlay only in main area");
    Check(main.RowDefinitions.Count==3&&Grid.GetRowSpan(layer)==3&&layer.DesiredSize.Height==16,"Canvas does not reserve page height (margin only)");
    Check(Canvas.GetRight(host)==0&&Canvas.GetBottom(host)==0&&Panel.GetZIndex(layer)>0,"Bottom right above page");
@@ -98,6 +102,19 @@ public static class ToastRepairPresentationChecks {
    Check(Visual<TextBlock>(close).Any()&&Visual<TextBlock>(close).All(t=>Equals(t.Foreground,app.Resources["ToastTextBrush"])),"Rendered X stays white in both themes");
    Check(Visual<TextBlock>(details).Any()&&Visual<TextBlock>(details).All(t=>Equals(t.Foreground,app.Resources["ToastTextBrush"])),"Rendered button text contrasts with dark toast");
    Check(((SolidColorBrush)close.Background).Color.R>((SolidColorBrush)close.Background).Color.G*2,"Close is clearly red");
+   var shell=(Border)panel.FindName("ToastShell");var toastColor=((SolidColorBrush)shell.Background).Color;var cardColor=((SolidColorBrush)app.Resources["SurfaceBrush"]).Color;
+   Check(Equals(shell.Background,app.Resources["ToastBackgroundBrush"])&&Equals(shell.BorderBrush,app.Resources["ToastBorderBrush"]),"Toast uses theme resources");
+   var shadow=shell.Effect as System.Windows.Media.Effects.DropShadowEffect;Check(shadow!=null&&Equals(shadow,app.Resources["ToastShadowEffect"]),"Theme-specific floating shadow");
+   if(theme=="Light") {
+    Check(toastColor==Color.FromRgb(20,30,45)&&((SolidColorBrush)shell.BorderBrush).Color==Color.FromRgb(52,67,89),"Light dark surface and border unchanged");
+    Check(shadow.BlurRadius==12&&shadow.ShadowDepth==2&&shadow.Opacity==0.25,"Light shadow unchanged");
+   } else {
+    Check(toastColor.R>0&&toastColor.R<cardColor.R&&toastColor.G<cardColor.G&&toastColor.B<cardColor.B,"Dark toast is deeper navy than cards, not pure black");
+    var edge=((SolidColorBrush)shell.BorderBrush).Color;var cardEdge=((SolidColorBrush)app.Resources["BorderBrush"]).Color;
+    Check(edge.R>cardEdge.R&&edge.G>cardEdge.G&&edge.B>cardEdge.B,"Dark toast border more visible than card border");
+    Check(shadow.BlurRadius==20&&shadow.ShadowDepth==3&&shadow.Opacity==0.45,"Dark shadow strengthened");
+   }
+   Check(((SolidColorBrush)app.Resources["ToastTextBrush"]).Color==Colors.White,"High-contrast toast text");
    int history=vm.ActionHistory.Count;vm.DismissTaskPanelCommand.Execute(null);Layout(root);Check(!vm.ShowTaskPanel&&vm.ActionHistory.Count==history,"Dismiss retains history");
    vm.HistoryDetailsCommand.Execute(vm.ActionHistory[0]);Check(dialogs.Output.StdOut.Contains("Full stdout"),"Historical details retained");
    using(var lease=ops.Begin("Simulated cancelable",true)) {
@@ -128,6 +145,12 @@ public static class ToastRepairPresentationChecks {
     typeof(DiagnosticViewModel).GetProperty("IsRunning").SetValue(diagnosis,false,null);
    }
    vm.Navigate(NavigationSection.Repair);Layout(root);
+   Check(scroll.Focusable&&scroll.FocusVisualStyle==null,"Repair viewport retains keyboard scrolling but no giant focus rectangle");
+   foreach(var list in Visual<ItemsControl>(root).Where(c=>BindingPath(c,ItemsControl.ItemsSourceProperty)=="RealRepairTasks"||BindingPath(c,ItemsControl.ItemsSourceProperty)=="RepairTools"))
+    Check(!list.Focusable,"Non-interactive Repair list does not receive keyboard focus");
+   Check(Visual<ListBox>(root).Single().Focusable&&Visual<ListBox>(root).Single().FocusVisualStyle!=null,"Sidebar keyboard accessibility retained");
+   vm.Navigate(NavigationSection.Home);Layout(root);Check(scroll.FocusVisualStyle!=null,"Repair-only focus correction restores other page visuals");
+   vm.Navigate(NavigationSection.Repair);Layout(root);
    Check(vm.PageDescription=="Comprueba y repara componentes de Windows mediante acciones explícitas; las herramientas administrativas solicitan confirmación y permisos de administrador antes de ejecutarse.","Single Repair description");
    var notice=(Border)Visual<TextBlock>(root).Single(t=>BindingPath(t,TextBlock.TextProperty)=="PageNotice").Parent;
    Check(!vm.HasPageNotice&&notice.Visibility==Visibility.Collapsed&&main.RowDefinitions[1].ActualHeight==0,"Repair notice fully collapsed");
@@ -142,6 +165,7 @@ public static class ToastRepairPresentationChecks {
     var row=(StackPanel)title.Parent;Check(Visual<TextBlock>(row).Any(t=>t.Text==expectedDescriptions[i]&&Shown(t)),"Description below");
     Check(Visual<TextBlock>(row).Where(t=>BindingPath(t,TextBlock.TextProperty)=="ResultText").All(t=>!Shown(t)),"No empty session result text");
     var grid=(Grid)row.Parent;var button=Visual<Button>(grid).Single();Check(Grid.GetColumn(button)==1&&ReferenceEquals(button.Command,vm.RunRepairCommand)&&Equals(button.CommandParameter,tools[i].Task.Id),"Right button and unchanged action");
+    Check(button.Focusable&&button.IsTabStop&&button.FocusVisualStyle!=null,"Repair button keeps keyboard tab and visible focus");
     // Normal width: enough vertical room for a single title/annotation line.
     Check(title.ActualHeight<28,"Annotation stays on same line at normal width "+expectedTech[i]);
    }
