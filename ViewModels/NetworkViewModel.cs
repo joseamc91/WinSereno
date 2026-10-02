@@ -38,7 +38,25 @@ namespace WinSereno.ViewModels
         private string summary = "Pendiente de consultar.";
         public string Summary { get => summary; private set => Set(ref summary, value); }
         private string connectivity;
-        public string Connectivity { get => connectivity; private set => Set(ref connectivity, value); }
+        public string Connectivity { get => connectivity; private set { if (Set(ref connectivity, value)) Raise(nameof(HasConnectivityDetails)); } }
+        public bool HasConnectivityDetails => !string.IsNullOrWhiteSpace(Connectivity);
+        private string connectivityStatusCode = "NotChecked";
+        public string ConnectivityStatusCode { get => connectivityStatusCode; private set { if (Set(ref connectivityStatusCode, value)) Raise(nameof(ConnectivityStatusText)); } }
+        public string ConnectivityStatusText
+        {
+            get
+            {
+                switch (ConnectivityStatusCode)
+                {
+                    case "Healthy": return "Internet disponible";
+                    case "Attention": return "Conexión con incidencias";
+                    case "Error": case "Failed": return "Sin conexión a Internet";
+                    default: return "Conexión no comprobada";
+                }
+            }
+        }
+        private DateTimeOffset? refreshedAt;
+        public string RefreshedText => refreshedAt.HasValue ? "Última actualización: " + refreshedAt.Value.ToLocalTime().ToString("HH:mm:ss") : "Aún no se ha actualizado.";
         public NetworkViewModel(ISessionLogger logger, OperationCoordinator operations)
         {
             this.logger = logger; this.operations = operations;
@@ -51,7 +69,7 @@ namespace WinSereno.ViewModels
             using (var operation = operations.Begin("Información de red", true))
             {
                 var watch = Stopwatch.StartNew();
-                Summary = "Consultando adaptadores y conectividad..."; Connectivity = null;
+                Summary = "Consultando adaptadores y conectividad..."; Connectivity = null; ConnectivityStatusCode = "NotChecked";
                 SystemQuery.Log(logger, "Inicio de actualización informativa de Red");
                 try
                 {
@@ -63,10 +81,13 @@ namespace WinSereno.ViewModels
                     }
                     catch (Exception ex) { Adapters.Clear(); SystemQuery.Log(logger, "Listado de adaptadores no disponible: " + ex); Summary = "No se pudo consultar la lista de adaptadores físicos."; }
                     operation.Token.ThrowIfCancellationRequested();
-                    var result = await Task.Run(() => new NetworkDiagnosticCheck(logger).RunAsync(operation.Token));
+                    var check = new NetworkDiagnosticCheck(logger);
+                    var result = await Task.Run(() => check.RunAsync(operation.Token));
                     operation.Token.ThrowIfCancellationRequested();
-                    Connectivity = result.DetailedDescription;
-                    Summary = result.StatusLabel + " · " + result.Summary + " · Actualizado " + DateTime.Now.ToString("HH:mm:ss");
+                    Connectivity = check.ProbeDetails;
+                    ConnectivityStatusCode = result.Status.ToString();
+                    refreshedAt = DateTimeOffset.Now; Raise(nameof(RefreshedText));
+                    Summary = result.StatusLabel + " · " + result.Summary;
                     if (Adapters.Count == 0) Summary += " · Sin adaptadores físicos disponibles para mostrar.";
                 }
                 catch (OperationCanceledException) { Summary = "Consulta de red cancelada."; }

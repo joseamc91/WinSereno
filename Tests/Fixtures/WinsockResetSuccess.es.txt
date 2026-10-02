@@ -1,0 +1,2 @@
+El catálogo Winsock se restableció correctamente.
+Debe reiniciar el equipo para completar el restablecimiento.

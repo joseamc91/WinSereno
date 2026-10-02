@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.0-beta.2 — 2026-10-02
+
+- Corregida la decodificación de la salida de netsh para interpretar correctamente resultados localizados de Winsock, TCP/IP y reinicio de adaptador, preservando los avisos de reinicio.
+- Red rediseñada con tarjetas compactas de adaptadores, grid de tres columnas, una cabecera única con estado de conectividad simplificado y detalles sin información duplicada.
+- Inicio y Red comparten ahora una disposición de tres columnas que aprovecha mejor el ancho disponible.
+
 ## 0.1.0-beta.1 — 2026-10-02
 
 - Diagnóstico ahora incluye la comprobación de integridad de Windows con un único UAC, utilizando DISM CheckHealth y SFC VerifyOnly sin realizar reparaciones.

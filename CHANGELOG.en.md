@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.0-beta.2 — 2026-10-02
+
+- Fixed netsh output decoding to correctly interpret localized Winsock, TCP/IP, and adapter restart results, preserving restart notices.
+- Redesigned Network with compact adapter cards, a three-column grid, a single header with simplified connectivity status, and details without duplicated information.
+- Home and Network now share a three-column layout that makes better use of the available width.
+
 ## 0.1.0-beta.1 — 2026-10-02
 
 - Diagnostics now includes Windows integrity checks with a single UAC prompt, using DISM CheckHealth and SFC VerifyOnly without performing repairs.

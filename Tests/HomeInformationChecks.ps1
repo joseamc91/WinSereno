@@ -12,8 +12,10 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using WinSereno.Models;
 using WinSereno.Services;
 using WinSereno.ViewModels;
@@ -89,6 +91,28 @@ public static class HomeInformationChecks {
  }
  static void Layout(FrameworkElement content,double width=1150,double height=760) {
   content.Measure(new Size(width,height));content.Arrange(new Rect(0,0,width,height));content.UpdateLayout();
+ }
+ static void Save(FrameworkElement root,string file) {
+  var bitmap=new RenderTargetBitmap((int)root.ActualWidth,(int)root.ActualHeight,96,96,PixelFormats.Pbgra32);
+  var backdrop=new DrawingVisual();using(var drawing=backdrop.RenderOpen())drawing.DrawRectangle((Brush)Application.Current.Resources["BackgroundBrush"],null,new Rect(0,0,root.ActualWidth,root.ActualHeight));bitmap.Render(backdrop);bitmap.Render(root);
+  var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));using(var stream=File.Create(file))encoder.Save(stream);
+ }
+ static void CheckGrid(MainWindow window,FrameworkElement root,ItemsControl cards,HomeViewModel home,string label) {
+  var panel=Visual<UniformGrid>(cards).Single();var style=window.FindResource("ThreeColumnCard");
+  var borders=Visual<Border>(cards).Where(b=>ReferenceEquals(b.Style,style)).ToList();
+  Check(panel.Columns==3&&borders.Count==6,"Exactly three columns and six Home cards: "+label);
+  Check(borders.Select(b=>b.DataContext).SequenceEqual(home.Cards.Cast<object>()),"Windows/CPU/GPU then RAM/Network/Uptime unchanged: "+label);
+  Check(borders.All(b=>double.IsNaN(b.Width)&&b.HorizontalAlignment==HorizontalAlignment.Stretch),"No fixed width; all Home cards stretch: "+label);
+  Check(borders.All(b=>Math.Abs(b.ActualWidth-borders[0].ActualWidth)<0.5),"Equal Home card widths: "+label);
+  var points=borders.Select(b=>b.TransformToAncestor(root).Transform(new Point())).ToList();
+  Check(points.Take(3).All(p=>Math.Abs(p.Y-points[0].Y)<0.5)&&points.Skip(3).All(p=>Math.Abs(p.Y-points[3].Y)<0.5)&&points[3].Y>points[0].Y,"Two rows of three: "+label);
+  Check(Enumerable.Range(0,3).All(i=>Math.Abs(points[i].X-points[i+3].X)<0.5),"Aligned column positions: "+label);
+  var refresh=Logical<Button>(root).Single(b=>ReferenceEquals(b.Command,home.RefreshCommand));var buttonPoint=refresh.TransformToAncestor(root).Transform(new Point());
+  Check(Math.Abs(points[2].X+borders[2].ActualWidth-buttonPoint.X-refresh.ActualWidth)<0.5,"Third column aligns with Refresh right edge: "+label);
+  var parent=(FrameworkElement)cards.Parent;var parentPoint=parent.TransformToAncestor(root).Transform(new Point());
+  Check(Math.Abs(points[0].X-parentPoint.X)<0.5&&Math.Abs(cards.ActualWidth+cards.Margin.Left+cards.Margin.Right-parent.ActualWidth)<0.5,"Home fills useful width without exterior gaps: "+label);
+  Check(Math.Abs(points[1].X-points[0].X-borders[0].ActualWidth-10)<0.5&&Math.Abs(points[2].X-points[1].X-borders[1].ActualWidth-10)<0.5,"Consistent horizontal card gaps: "+label);
+  foreach(var border in borders)foreach(var text in Visual<TextBlock>(border))Check(text.ActualWidth<=border.ActualWidth-border.Padding.Left-border.Padding.Right,"Home text contained at "+label);
  }
  static string BindingPath(DependencyObject obj,DependencyProperty property) {
   var b=BindingOperations.GetBinding(obj,property);return b==null?null:b.Path.Path;
@@ -334,10 +358,13 @@ public static class HomeInformationChecks {
    var cards=Logical<ItemsControl>(content).Single(c=>ReferenceEquals(c.ItemsSource,home.Cards));
    var volumes=Logical<ItemsControl>(content).Single(c=>ReferenceEquals(c.ItemsSource,home.Disks));
    Check(cards.Items.Count==6&&volumes.Items.Count==3,"All six cards and volumes present: "+theme);
-   Check(cards.ItemsPanel.LoadContent() is WrapPanel&&volumes.ItemsPanel.LoadContent() is WrapPanel,"Matching wrapping layout: "+theme);
-   var cardBorders=Visual<Border>(cards).Where(b=>b.Width==252).ToList();
+   Check(cards.ItemsPanel.LoadContent() is UniformGrid&&((UniformGrid)cards.ItemsPanel.LoadContent()).Columns==3&&volumes.ItemsPanel.LoadContent() is WrapPanel,"Three-column Home grid, independent disk wrapping retained: "+theme);
+   var cardBorders=Visual<Border>(cards).Where(b=>ReferenceEquals(b.Style,window.FindResource("ThreeColumnCard"))).ToList();
    var diskBorders=Visual<Border>(volumes).Where(b=>b.Width==252).ToList();
-   Check(cardBorders.Count==6&&diskBorders.Count==3,"Matching 252 px card widths: "+theme);
+   Check(cardBorders.Count==6&&diskBorders.Count==3,"Six stretched information cards and three unchanged disk cards: "+theme);
+   var networkCards=(ItemsControl)window.FindName("NetworkAdapterCards");
+   Check(ReferenceEquals(cards.Style,networkCards.Style)&&ReferenceEquals(cards.ItemsPanel,networkCards.ItemsPanel),"Home and Network reuse the same layout resources: "+theme);
+   CheckGrid(window,content,cards,home,theme+" 1150");
    var gpuBorder=cardBorders.Single(b=>ReferenceEquals(b.DataContext,home.Cards[2]));
    Check(gpuBorder.Padding==new Thickness(12)&&ReferenceEquals(gpuBorder.Style,cardBorders[0].Style),"GPU uses identical card padding/style: "+theme);
    Check(Equals(gpuBorder.Background,cardBorders[0].Background),"GPU themed background matches: "+theme);
@@ -355,11 +382,17 @@ public static class HomeInformationChecks {
    Check(Visual<TextBlock>(volumes).Where(t=>t.Text=="Correcto").All(t=>Equals(t.Foreground,app.Resources["GoodBrush"])),"Healthy themed colors: "+theme);
    var scroll=(ScrollViewer)window.FindName("PageScroll");
    Check(scroll.ScrollableHeight==0,"Normal-size Home fits without scrolling: "+theme);
+   var imageDir=Path.Combine(project,"bin","Debug","VisualChecks");Directory.CreateDirectory(imageDir);Save(content,Path.Combine(imageDir,"HomeThreeColumns-"+theme+".png"));
+   double normalWidth=cardBorders[0].ActualWidth;
+   Layout(content,1280);CheckGrid(window,content,cards,home,theme+" 1280");
+   Check(cardBorders[0].ActualWidth>normalWidth,"Cards expand with available width: "+theme);
    Layout(content,900,550);
+   CheckGrid(window,content,cards,home,theme+" 900");
+   Check(cardBorders[0].ActualWidth<normalWidth,"Cards shrink while maintaining three columns: "+theme);
    Check(scroll.VerticalScrollBarVisibility==ScrollBarVisibility.Auto,"Small-window scrolling retained: "+theme);
    Check(Logical<Button>(content).Any(b=>Convert.ToString(b.Content)=="Actualizar"&&ReferenceEquals(b.Command,home.RefreshCommand)),"Refresh command retained");
    window.Close();
-   foreach(var item in vm.Navigation.Where(n=>n.Section!=NavigationSection.Home&&n.Section!=NavigationSection.Diagnosis&&n.Section!=NavigationSection.Repair)) {
+   foreach(var item in vm.Navigation.Where(n=>n.Section!=NavigationSection.Home&&n.Section!=NavigationSection.Diagnosis&&n.Section!=NavigationSection.Repair&&n.Section!=NavigationSection.Network)) {
     // Change only the test backing field: normal Network navigation would perform real connectivity queries.
     typeof(MainViewModel).GetField("selectedNavigation",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(vm,item);
     Check(vm.HasPageNotice&&!string.IsNullOrWhiteSpace(vm.PageNotice),"Other notice content retained: "+item.Label);

@@ -1,5 +1,17 @@
 <Window Style="{StaticResource {x:Type Window}}" x:Class="WinSereno.Views.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="WinSereno" Width="1180" Height="820" MinWidth="900" MinHeight="640" WindowStartupLocation="CenterScreen">
   <Window.Resources>
+    <ItemsPanelTemplate x:Key="ThreeColumnCardPanel"><UniformGrid Columns="3"/></ItemsPanelTemplate>
+    <Style x:Key="ThreeColumnCards" TargetType="ItemsControl">
+      <Setter Property="ItemsPanel" Value="{StaticResource ThreeColumnCardPanel}"/>
+      <!-- Half-gaps are cancelled at the outside edges; the cards align with the page header. -->
+      <Setter Property="Margin" Value="-5,0,-5,0"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="Focusable" Value="False"/>
+    </Style>
+    <Style x:Key="ThreeColumnCard" TargetType="Border" BasedOn="{StaticResource Card}">
+      <Setter Property="Padding" Value="12"/><Setter Property="Margin" Value="5,0,5,10"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
     <Style x:Key="RepairSessionResultText" TargetType="TextBlock" BasedOn="{StaticResource Muted}"><Setter Property="FontSize" Value="12"/><Setter Property="Margin" Value="0,4,0,0"/><Style.Triggers><DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="Sin resultados durante esta sesión."><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style>
     <Style x:Key="NetworkToolResultText" TargetType="TextBlock" BasedOn="{StaticResource Muted}"><Setter Property="FontSize" Value="12"/><Setter Property="Margin" Value="0,4,0,0"/><Style.Triggers><DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="Sin resultados durante esta sesión."><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style>
     <DataTemplate x:Key="ToolTemplate"><Border Style="{StaticResource Card}"><StackPanel><DockPanel><TextBlock Text="PRÓXIMAMENTE" DockPanel.Dock="Right" Foreground="{DynamicResource MutedBrush}" FontSize="11" Margin="16,0,0,0"/><TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold"/></DockPanel><TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" Margin="0,8,0,0"/></StackPanel></Border></DataTemplate>
@@ -18,7 +30,7 @@
         <Grid>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Home"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
             <DockPanel Margin="0,0,0,10"><Button Content="Actualizar" DockPanel.Dock="Right" Command="{Binding Home.RefreshCommand}" Margin="12,0,0,0"/><TextBlock Text="{Binding Home.RefreshedText}" Style="{StaticResource Muted}" VerticalAlignment="Center"/></DockPanel>
-            <ItemsControl ItemsSource="{Binding Home.Cards}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate><Border Style="{StaticResource Card}" Width="252" Padding="12" Margin="0,0,10,10"><StackPanel><TextBlock Text="{Binding Title}" Style="{StaticResource Muted}"/><TextBlock Text="{Binding Value}" FontSize="17" FontWeight="SemiBold" Margin="0,5,0,5"/><TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="12"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            <ItemsControl x:Name="HomeInformationCards" Style="{StaticResource ThreeColumnCards}" ItemsSource="{Binding Home.Cards}"><ItemsControl.ItemTemplate><DataTemplate><Border Style="{StaticResource ThreeColumnCard}"><StackPanel><TextBlock Text="{Binding Title}" Style="{StaticResource Muted}"/><TextBlock Text="{Binding Value}" FontSize="17" FontWeight="SemiBold" Margin="0,5,0,5"/><TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="12"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
             <TextBlock Text="Discos locales" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,10"/>
             <TextBlock Text="{Binding Home.DisksMessage}" Style="{StaticResource Muted}" Visibility="{Binding Home.HasDisksMessage, Converter={StaticResource BoolVisibility}}"/>
             <ItemsControl ItemsSource="{Binding Home.Disks}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate>
@@ -87,20 +99,47 @@
             <ItemsControl Focusable="False" ItemsSource="{Binding RepairTools}" ItemTemplate="{StaticResource ToolTemplate}"/>
           </StackPanel>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Network"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
-            <Border Style="{StaticResource Card}" Padding="12"><StackPanel>
-              <DockPanel><Button Content="Actualizar" DockPanel.Dock="Right" Command="{Binding Network.RefreshCommand}" Margin="12,0,0,0"/><TextBlock Text="Estado de red" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/></DockPanel>
-              <TextBlock Text="{Binding Network.Summary}" TextWrapping="Wrap" Margin="0,8,0,8"/>
-              <ItemsControl ItemsSource="{Binding Network.Adapters}"><ItemsControl.ItemTemplate><DataTemplate>
-                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="0,8"><StackPanel>
-                  <TextBlock Text="{Binding Heading}" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                  <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}"/>
-                  <TextBlock Text="{Binding SpeedDetails}" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
-                  <TextBlock Text="{Binding AddressDetails}" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
-                  <TextBlock Text="{Binding WifiDetails}" Style="{StaticResource Muted}" Visibility="{Binding HasWifiDetails, Converter={StaticResource BoolVisibility}}"/>
+            <Grid x:Name="NetworkStatusHeader" Margin="0,0,0,6"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <Button Grid.Column="1" Content="Actualizar" Command="{Binding Network.RefreshCommand}" Margin="12,0,0,0" Padding="10,6"/>
+              <TextBlock x:Name="NetworkConnectivityHeading" VerticalAlignment="Center"><Run Text="Estado de red" FontSize="18" FontWeight="SemiBold"/><Run Text=" · " Foreground="{DynamicResource MutedBrush}"/>
+                <Run Text="{Binding Network.ConnectivityStatusText, Mode=OneWay}"><Run.Style><Style TargetType="Run"><Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/><Style.Triggers>
+                  <DataTrigger Binding="{Binding Network.ConnectivityStatusCode}" Value="Healthy"><Setter Property="Foreground" Value="{DynamicResource GoodBrush}"/></DataTrigger>
+                  <DataTrigger Binding="{Binding Network.ConnectivityStatusCode}" Value="Attention"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/></DataTrigger>
+                  <DataTrigger Binding="{Binding Network.ConnectivityStatusCode}" Value="Error"><Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/></DataTrigger>
+                  <DataTrigger Binding="{Binding Network.ConnectivityStatusCode}" Value="Failed"><Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/></DataTrigger>
+                </Style.Triggers></Style></Run.Style></Run>
+              </TextBlock>
+            </Grid>
+            <TextBlock Text="{Binding Network.RefreshedText}" Style="{StaticResource Muted}" FontSize="11" Margin="0,3,0,10"/>
+            <ItemsControl x:Name="NetworkAdapterCards" Style="{StaticResource ThreeColumnCards}" ItemsSource="{Binding Network.Adapters}">
+              <ItemsControl.ItemTemplate><DataTemplate>
+                <Border Style="{StaticResource ThreeColumnCard}"><StackPanel>
+                  <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding Kind}" FontWeight="SemiBold"/>
+                    <Grid Grid.Column="1" HorizontalAlignment="Right" Margin="12,0,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Ellipse x:Name="NetworkStateDot" Width="7" Height="7" Margin="0,0,5,0"><Ellipse.Style><Style TargetType="Ellipse"><Setter Property="Fill" Value="{DynamicResource MutedBrush}"/><Style.Triggers>
+                      <DataTrigger Binding="{Binding IsConnected}" Value="True"><Setter Property="Fill" Value="{DynamicResource GoodBrush}"/></DataTrigger>
+                      <DataTrigger Binding="{Binding Status}" Value="Desconectado"><Setter Property="Fill" Value="{DynamicResource ErrorBrush}"/></DataTrigger>
+                    </Style.Triggers></Style></Ellipse.Style></Ellipse>
+                    <TextBlock Grid.Column="1" Text="{Binding Status}" Style="{StaticResource Muted}" FontSize="12"/>
+                  </Grid></Grid>
+                  <TextBlock Text="{Binding CardName}" FontSize="16" FontWeight="SemiBold" Margin="0,6,0,0" Visibility="{Binding HasCardName, Converter={StaticResource BoolVisibility}}"/>
+                  <TextBlock Text="{Binding Name}" Style="{StaticResource Muted}" FontSize="11" Margin="0,3,0,0" Visibility="{Binding HasInterfaceName, Converter={StaticResource BoolVisibility}}"/>
+                  <WrapPanel Margin="0,6,0,0">
+                    <TextBlock Text="{Binding LinkSpeed}" Style="{StaticResource Muted}" FontSize="12" Margin="0,0,10,0" Visibility="{Binding HasLinkSpeed, Converter={StaticResource BoolVisibility}}"/>
+                    <TextBlock Text="{Binding IPv4, StringFormat=IPv4: {0}}" Style="{StaticResource Muted}" FontSize="12" Visibility="{Binding HasIPv4, Converter={StaticResource BoolVisibility}}"/>
+                  </WrapPanel>
+                  <Expander Header="Detalles del adaptador" FontSize="12" Foreground="{DynamicResource MutedBrush}" Margin="0,6,0,0" Visibility="{Binding HasAdditionalDetails, Converter={StaticResource BoolVisibility}}">
+                    <StackPanel Margin="0,4,0,0">
+                      <TextBlock Text="{Binding Gateway, StringFormat=Gateway: {0}}" Style="{StaticResource Muted}" FontSize="12" Visibility="{Binding HasGateway, Converter={StaticResource BoolVisibility}}"/>
+                      <TextBlock Text="{Binding Dns, StringFormat=DNS: {0}}" Style="{StaticResource Muted}" FontSize="12" Visibility="{Binding HasDns, Converter={StaticResource BoolVisibility}}"/>
+                      <TextBlock Text="{Binding WifiDetails}" Style="{StaticResource Muted}" FontSize="12" Visibility="{Binding HasWifiDetails, Converter={StaticResource BoolVisibility}}"/>
+                    </StackPanel>
+                  </Expander>
                 </StackPanel></Border>
-              </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-              <Expander Header="Detalles de conectividad" Margin="0,8,0,0"><TextBlock Text="{Binding Network.Connectivity}" Style="{StaticResource Muted}" Margin="0,8,0,0"/></Expander>
-            </StackPanel></Border>
+              </DataTemplate></ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Expander Header="Detalles de conectividad" Margin="0,0,0,12" Foreground="{DynamicResource MutedBrush}" Visibility="{Binding Network.HasConnectivityDetails, Converter={StaticResource BoolVisibility}}"><TextBlock Text="{Binding Network.Connectivity}" Style="{StaticResource Muted}" FontSize="12" Margin="0,6,0,0"/></Expander>
             <Border Style="{StaticResource Card}" Padding="12,0"><StackPanel>
               <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,10"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="220"/></Grid.ColumnDefinitions>
                 <StackPanel Margin="0,0,14,0" VerticalAlignment="Center">

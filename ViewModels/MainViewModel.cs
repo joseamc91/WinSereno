@@ -85,8 +85,8 @@ namespace WinSereno.ViewModels
         public string PageTitle => CurrentSection == NavigationSection.Activity ? "Registro de acciones" : SelectedNavigation.Label;
         public string ProductVersion => "v" + FileVersionInfo.GetVersionInfo(typeof(MainViewModel).Assembly.Location).FileVersion;
         public bool HasPageNotice => !string.IsNullOrWhiteSpace(PageNotice);
-        public string PageNotice => CurrentSection == NavigationSection.Home || CurrentSection == NavigationSection.Diagnosis || CurrentSection == NavigationSection.Repair ? "" : CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
-            : CurrentSection == NavigationSection.Cleanup ? "El análisis es de solo lectura. Los archivos en uso o protegidos se omitirán. Temporales de Windows requiere administrador." : CurrentSection == NavigationSection.Network ? "Información real de red. Vaciar caché DNS, renovar DHCP y reiniciar adaptador requieren confirmación; restablecer Winsock y TCP/IP requieren confirmación y UAC. No se combinan automáticamente." : "El tema y los logs se guardan junto a la aplicación.";
+        public string PageNotice => CurrentSection == NavigationSection.Home || CurrentSection == NavigationSection.Diagnosis || CurrentSection == NavigationSection.Repair || CurrentSection == NavigationSection.Network ? "" : CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
+            : CurrentSection == NavigationSection.Cleanup ? "El análisis es de solo lectura. Los archivos en uso o protegidos se omitirán. Temporales de Windows requiere administrador." : "El tema y los logs se guardan junto a la aplicación.";
         public string PageDescription
         {
             get
@@ -96,7 +96,7 @@ namespace WinSereno.ViewModels
                     case NavigationSection.Activity: return "Acciones realizadas durante esta sesión, de más reciente a más antigua.";
                     case NavigationSection.Diagnosis: return "Analiza el estado general del PC sin realizar reparaciones. La integridad de Windows requiere permisos de administrador.";
                     case NavigationSection.Repair: return "Comprueba y repara componentes de Windows mediante acciones explícitas; las herramientas administrativas solicitan confirmación y permisos de administrador antes de ejecutarse.";
-                    case NavigationSection.Network: return "Adaptadores y conectividad de solo lectura. Actualiza al entrar o mediante Actualizar.";
+                    case NavigationSection.Network: return "Consulta y actualiza el estado de la red; las herramientas solicitan confirmación y permisos de administrador cuando corresponde.";
                     case NavigationSection.Cleanup: return "Análisis de cuatro categorías, limpieza de temporales y miniaturas, y vaciado de Papelera.";
                     case NavigationSection.Settings: return "Personalización y almacenamiento de esta aplicación portable.";
                     default: return "Información del equipo obtenida directamente desde Windows.";

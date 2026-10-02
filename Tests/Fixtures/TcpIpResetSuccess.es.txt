@@ -1,0 +1,4 @@
+Restablecimiento de Compartimiento correcto.
+Restablecimiento de Interfaz correcto.
+Restableciendo Reenvío, correcto.
+Reinicie el equipo para completar esta acción.

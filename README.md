@@ -4,7 +4,7 @@ Aplicación portable para Windows centrada en diagnóstico, mantenimiento y repa
 
 ## Estado
 
-WinSereno está en fase **Beta / pre-release**. **v0.1.0-beta.1** es la primera beta pública; no es una versión estable.
+WinSereno está en fase **Beta / pre-release**. **v0.1.0-beta.2** es la segunda beta pública; no es una versión estable.
 
 Las funciones implementadas y su validación son aspectos distintos: algunas cuentan con pruebas manuales y otras requieren más validación en equipos reales.
 
@@ -12,10 +12,10 @@ Las funciones implementadas y su validación son aspectos distintos: algunas cue
 
 | Módulo | Funcionalidad actual |
 |---|---|
-| Inicio | Información real de Windows, CPU, GPU integrada/dedicada cuando se identifican, RAM y detalles de módulos cuando Windows los expone, red principal, uptime y discos locales. Actualización manual. |
+| Inicio | Información real de Windows, CPU, GPU integrada/dedicada cuando se identifican, RAM y detalles de módulos cuando Windows los expone, red principal, uptime y discos locales. Tarjetas principales en tres columnas y actualización manual. |
 | Diagnóstico | Seis comprobaciones: espacio de almacenamiento, salud básica de almacenamiento, red local e Internet, servicios críticos, eventos de Windows e integridad de Windows. Las cinco primeras utilizan permisos normales; Integridad ejecuta DISM CheckHealth y SFC VerifyOnly con un único UAC. Ninguna realiza reparaciones. |
 | Reparación | DISM CheckHealth, ScanHealth y RestoreHealth; SFC /scannow; CHKDSK de solo lectura; StartComponentCleanup y Reparación completa condicional. |
-| Red | Información de adaptadores y conectividad, caché DNS, DHCP, reinicio de adaptador y restablecimientos Winsock/TCP/IP. |
+| Red | Tarjetas compactas de adaptadores físicos en tres columnas, estado de conectividad simplificado y detalles separados por adaptador y pruebas globales. Caché DNS, DHCP, reinicio de adaptador y restablecimientos Winsock/TCP/IP. |
 | Limpieza | Análisis y limpieza individual o por selección de temporales, miniaturas y Papelera, con estimaciones y resultados por categoría. |
 | Ajustes | Tema claro/oscuro persistente y apertura de la carpeta de logs. La búsqueda de actualizaciones permanece deshabilitada. |
 | Actividad | Historial de acciones de la sesión con resumen, duración y detalles. No se conserva al cerrar; los TXT de Logs siguen siendo el registro persistente. |
@@ -40,7 +40,9 @@ Un toast flotante global muestra la operación activa, el tiempo, el progreso re
 
 ### Red
 
-Muestra adaptadores físicos relevantes, Ethernet/Wi-Fi, estado, velocidad, IPv4, gateway, DNS y resumen de conectividad. Los datos adicionales de Wi-Fi y la capacidad máxima de Ethernet se muestran solo cuando pueden obtenerse de forma fiable.
+Muestra adaptadores físicos relevantes en tarjetas compactas de tres columnas, con tipo Ethernet/Wi-Fi, nombre, estado, velocidad e IPv4. Gateway, DNS y datos adicionales de Wi-Fi quedan en **Detalles del adaptador**, cuando están disponibles. Inicio y Red comparten la misma disposición de tarjetas para aprovechar el ancho útil.
+
+La cabecera reúne **Estado de red**, un estado breve como **Internet disponible** o **Conexión con incidencias**, y **Actualizar**; la hora de la última consulta aparece debajo. **Detalles de conectividad** conserva las pruebas globales de gateway, ICMP público, DNS y HTTPS, sin repetir la configuración de cada adaptador. La falta de respuesta ICMP por sí sola no demuestra que Internet no funcione.
 
 Herramientas disponibles:
 
@@ -50,7 +52,9 @@ Herramientas disponibles:
 - Restablecer Winsock.
 - Restablecer TCP/IP.
 
-Las acciones son independientes y requieren confirmación. Las operaciones potencialmente disruptivas incorporan advertencias especiales cuando se detecta una sesión RDP y todavía requieren más validación manual controlada. Si es necesario reiniciar Windows, se informa sin hacerlo automáticamente.
+Las acciones son independientes y requieren confirmación; UAC se solicita cuando corresponde. Entrar en Red solo consulta información: ninguna herramienta modificadora se ejecuta automáticamente. Las operaciones potencialmente disruptivas incorporan advertencias especiales cuando se detecta una sesión RDP. Si es necesario reiniciar Windows, se informa sin hacerlo automáticamente.
+
+Se han validado manualmente la lectura y actualización de Red, el reinicio de un adaptador Ethernet y el restablecimiento Winsock. DHCP se detiene de forma segura cuando no existen interfaces elegibles. TCP/IP cuenta con pruebas controladas, pero permanece sin validación manual real por su posible impacto sobre la configuración de red. Estas comprobaciones no equivalen a una validación exhaustiva en todos los equipos.
 
 ### Limpieza
 
@@ -109,6 +113,9 @@ Las suites automatizadas disponibles están en [Tests/](Tests/):
 | Suite | Alcance |
 |---|---|
 | [HomeInformationChecks.ps1](Tests/HomeInformationChecks.ps1) | Datos y presentación de Inicio: CPU, GPU, RAM, red y discos. |
+| [NetworkOutputChecks.ps1](Tests/NetworkOutputChecks.ps1) | Bytes UTF-8/legacy, parsers Winsock y TCP/IP ES/EN, logs y regresiones de red simuladas. |
+| [NetworkPresentationChecks.ps1](Tests/NetworkPresentationChecks.ps1) | Cabecera de Red, tarjetas compartidas de tres columnas, 1–6 adaptadores y ambos temas. |
+| [NetworkStaticChecks.ps1](Tests/NetworkStaticChecks.ps1) | Estructura, bindings y captura de salida de Red, sin cargar el EXE. |
 | [DiagnosticIntegrityChecks.ps1](Tests/DiagnosticIntegrityChecks.ps1) | Integridad de solo lectura, VerifyOnly, combinación de resultados y UAC simulado. |
 | [ActivityHistoryChecks.ps1](Tests/ActivityHistoryChecks.ps1) | Historial de sesión, snapshots y cierre de resultados. |
 | [ToastRepairPresentationChecks.ps1](Tests/ToastRepairPresentationChecks.ps1) | Toast y herramientas de Reparación en ambos temas, con operaciones simuladas. |
@@ -128,7 +135,7 @@ Tras compilar Debug, pueden ejecutarse individualmente con Windows PowerShell 5.
 powershell.exe -NoProfile -STA -File .\Tests\ThemePersistenceChecks.ps1
 ```
 
-Las suites disponibles no equivalen a una validación completa de la beta. En la preparación del candidato visual pasaron las comprobaciones estáticas de toast/Reparación, pero Smart App Control bloqueó la ejecución local de las suites de presentación toast/Reparación, Diagnóstico y tema. Esas ejecuciones bloqueadas no se consideran superadas. La regresión histórica de CHKDSK en español («Acceso denegado») permanece pendiente; este proceso de publicación no cambia su parser.
+Las suites disponibles no equivalen a una validación completa de la beta. En la preparación de Beta 2 se ejecutaron las suites relevantes de Red, Inicio, Diagnóstico, Actividad, toast/Reparación y tema con datos controlados, sin herramientas modificadoras ni UAC reales. Smart App Control bloqueó algunos harnesses en etapas anteriores; las ejecuciones bloqueadas no se consideran superadas. La regresión histórica de CHKDSK en español («Acceso denegado») permanece pendiente; Beta 2 no cambia su parser.
 
 Existen validaciones manuales previas de Inicio, Diagnóstico y DISM CheckHealth/ScanHealth/RestoreHealth. SFC y CHKDSK también han aportado salidas reales para identificar correcciones. Esto no valida todas las acciones ni sustituye las pruebas pendientes de los cambios más recientes. Las operaciones disruptivas de red y varias limpiezas necesitan validación manual controlada adicional.
 

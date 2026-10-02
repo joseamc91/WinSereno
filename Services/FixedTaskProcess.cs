@@ -11,6 +11,12 @@ namespace WinSereno.Services
     {
         [DllImport("kernel32.dll")] private static extern uint GetOEMCP();
         [DllImport("kernel32.dll")] private static extern uint GetACP();
+        [DllImport("kernel32.dll")] private static extern uint GetConsoleOutputCP();
+        internal static Encoding NetshLegacyEncoding()
+        {
+            uint codePage = GetConsoleOutputCP();
+            return Encoding.GetEncoding((int)(codePage == 0 || codePage == 65001 ? GetOEMCP() : codePage));
+        }
         // CHKDSK writes ANSI text to redirected pipes without a console; OEM decoding corrupts its accents.
         internal static Encoding ChkdskOutputEncoding() => Encoding.GetEncoding((int)GetACP());
         // Accept only an allowlisted ID; resolve executable and arguments again at the execution boundary.
@@ -18,7 +24,8 @@ namespace WinSereno.Services
         {
             var task = ElevatedTaskCatalog.Get(taskId);
             if (task.TaskType != TaskType.Command) throw new ArgumentException("La tarea no es un comando individual.");
-            return await RunCommandAsync(task, taskId == ElevatedTaskCatalog.SfcId || taskId == ElevatedTaskCatalog.SfcVerifyOnlyId ? Encoding.Unicode : taskId == ElevatedTaskCatalog.ChkdskId ? ChkdskOutputEncoding() : (taskId == ElevatedTaskCatalog.FlushDnsId || taskId == ElevatedTaskCatalog.ResetWinsockId || taskId == ElevatedTaskCatalog.ResetTcpIpId) ? Encoding.GetEncoding((int)GetOEMCP()) : null, started, output, error).ConfigureAwait(false);
+            bool netsh = taskId == ElevatedTaskCatalog.ResetWinsockId || taskId == ElevatedTaskCatalog.ResetTcpIpId;
+            return await RunCommandAsync(task, taskId == ElevatedTaskCatalog.SfcId || taskId == ElevatedTaskCatalog.SfcVerifyOnlyId ? Encoding.Unicode : taskId == ElevatedTaskCatalog.ChkdskId ? ChkdskOutputEncoding() : taskId == ElevatedTaskCatalog.FlushDnsId ? Encoding.GetEncoding((int)GetOEMCP()) : netsh ? NetshLegacyEncoding() : null, started, output, error, netsh).ConfigureAwait(false);
         }
         internal static async Task<MaintenanceTaskResult> RunDhcpCommandAsync(DhcpRenewalService service, DhcpRenewalPlan plan, int ordinal, Action<DateTimeOffset> started, Action<string> output, Action<string> error)
         {
@@ -30,9 +37,9 @@ namespace WinSereno.Services
             Action<DateTimeOffset> started, Action<string> output, Action<string> error)
         {
             service.ValidateTarget(adapter, attempt);
-            return await RunCommandAsync(AdapterRestartService.Command(adapter, attempt), Encoding.GetEncoding((int)GetOEMCP()), started, output, error).ConfigureAwait(false);
+            return await RunCommandAsync(AdapterRestartService.Command(adapter, attempt), NetshLegacyEncoding(), started, output, error, true).ConfigureAwait(false);
         }
-        private static async Task<MaintenanceTaskResult> RunCommandAsync(MaintenanceTask task, Encoding encoding, Action<DateTimeOffset> started, Action<string> output, Action<string> error)
+        private static async Task<MaintenanceTaskResult> RunCommandAsync(MaintenanceTask task, Encoding encoding, Action<DateTimeOffset> started, Action<string> output, Action<string> error, bool netsh = false)
         {
             if (!File.Exists(task.Command)) throw new FileNotFoundException("La herramienta no existe en el directorio del sistema.");
             var stdout = new StringBuilder(); var stderr = new StringBuilder();
@@ -43,11 +50,15 @@ namespace WinSereno.Services
                 if (!process.Start()) throw new InvalidOperationException("La herramienta no pudo iniciarse.");
                 var start = DateTimeOffset.Now; started(start);
                 var lines = task.Id == ElevatedTaskCatalog.SfcId || task.Id == ElevatedTaskCatalog.SfcVerifyOnlyId ? new OutputLineBuffer(output) : null;
-                var outTask = PumpAsync(process.StandardOutput, text => {
+                Action<string> receiveOutput = text => {
                     stdout.Append(text);
                     if (lines != null) lines.Append(text); else output(text);
-                }, lines == null ? null : (Action)lines.Complete);
-                var errTask = PumpAsync(process.StandardError, text => { stderr.Append(text); error(text); });
+                };
+                Action<string> receiveError = text => { stderr.Append(text); error(text); };
+                var outTask = netsh ? NetshOutputReader.PumpAsync(process.StandardOutput.BaseStream, encoding, receiveOutput) :
+                    PumpAsync(process.StandardOutput, receiveOutput, lines == null ? null : (Action)lines.Complete);
+                var errTask = netsh ? NetshOutputReader.PumpAsync(process.StandardError.BaseStream, encoding, receiveError) :
+                    PumpAsync(process.StandardError, receiveError);
                 await Task.WhenAll(outTask, errTask, Task.Run(() => process.WaitForExit())).ConfigureAwait(false);
                 var end = DateTimeOffset.Now;
                 return new MaintenanceTaskResult { StartedAt = start, FinishedAt = end, Duration = end - start,

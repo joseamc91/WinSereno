@@ -24,6 +24,7 @@ namespace WinSereno.Services
         private const string HttpsEndpoint = "https://www.microsoft.com/";
         private const string PublicIp = "1.1.1.1";
         private readonly ISessionLogger logger;
+        public string ProbeDetails { get; private set; }
         public NetworkDiagnosticCheck(ISessionLogger logger) { this.logger = logger; }
         public async Task<DiagnosticResult> RunAsync(CancellationToken token)
         {
@@ -64,11 +65,16 @@ namespace WinSereno.Services
             var dnsTask = DnsAsync();
             var httpsTask = HttpsAsync();
             var probes = await Task.WhenAll(gatewayTask, publicTask, dnsTask, httpsTask).ConfigureAwait(false);
+            var probeDetails = new StringBuilder();
+            if (adapter.NeutralMessage != null) probeDetails.AppendLine(adapter.NeutralMessage);
+            if (linkWarning) probeDetails.AppendLine("El enlace Ethernet negocia a 100 Mbps pese a admitir una velocidad superior. No se ha determinado la causa.");
             foreach (var probe in probes)
             {
                 details.AppendLine((probe.Success ? "✓ " : "— ") + probe.Name + ": " + probe.Detail);
+                probeDetails.AppendLine((probe.Success ? "✓ " : "— ") + probe.Name + ": " + probe.Detail + " · " + probe.Duration.TotalMilliseconds.ToString("0", CultureInfo.CurrentCulture) + " ms");
                 SystemQuery.Log(logger, "Red prueba " + probe.Name + ": " + probe.Detail + " | Duración=" + probe.Duration);
             }
+            ProbeDetails = probeDetails + "\nLa ausencia de respuesta ICMP no demuestra una avería. Un único endpoint no representa todo Internet.";
             bool https = probes[3].Success;
             var status = https ? linkWarning ? DiagnosticStatus.Attention : DiagnosticStatus.Healthy : DiagnosticStatus.Attention;
             var result = new DiagnosticResult { Id = "network", Name = "Red local e Internet", Status = status,

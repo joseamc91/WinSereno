@@ -7,6 +7,8 @@ namespace WinSereno.Services
     {
         private static readonly Regex Step = new Regex(
             @"^(?:Resetting|Restableciendo|Restablecimiento de)\s*(?<item>.*?)[,:]\s*(?<state>OK!|correcto[.!]?|correctamente[.!]?|failed[.!]?|error[.!]?|err[oó]neo[.!]?)$", RegexOptions.IgnoreCase);
+        private static readonly Regex SpanishStep = new Regex(
+            @"^(?:Restableciendo|Restablecimiento de)\s+(?<item>.+?)\s+(?<state>correcto[.!]?|correctamente[.!]?|error[.!]?|err[oó]neo[.!]?)$", RegexOptions.IgnoreCase);
         private static readonly string[] RestartMessages = {
             "Restart the computer to complete this action.", "You must restart the computer in order to complete the reset.",
             "Reinicie el equipo para completar esta acción.", "Reinicie el equipo para completar el restablecimiento.",
@@ -31,6 +33,7 @@ namespace WinSereno.Services
                 if (Is(line, RestartMessages)) { result.RequiresRestart = true; continue; }
                 if (Is(line, FailureMessages)) { failed++; continue; }
                 var match = Step.Match(line);
+                if (!match.Success) match = SpanishStep.Match(line);
                 if (!match.Success) { unrecognized++; continue; }
                 string state = match.Groups["state"].Value;
                 if (state.StartsWith("OK", StringComparison.OrdinalIgnoreCase) || state.StartsWith("correct", StringComparison.OrdinalIgnoreCase)) successful++; else failed++;
