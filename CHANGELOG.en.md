@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.1.0-beta.3 — 2026-10-02
+
+- TCP/IP reset now detects manual IPv4 configurations and shows their details with a second safety confirmation before execution.
+- Adapter details are now aligned at the bottom of Network cards.
+- Simplified Cleanup with a single analysis action, clearer controls, and compact per-category results.
+- WinSereno's visible public version is now separated from the technical assembly version so development builds and releases are identified correctly.
+
 ## 0.1.0-beta.2 — 2026-10-02
 
 - Fixed netsh output decoding to correctly interpret localized Winsock, TCP/IP, and adapter restart results, preserving restart notices.

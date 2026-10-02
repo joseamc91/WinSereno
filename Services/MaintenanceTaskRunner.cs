@@ -13,7 +13,7 @@ using WinSereno.Models;
 
 namespace WinSereno.Services
 {
-    public sealed class MaintenanceTaskRunner : IMaintenanceTaskRunner
+    public sealed class MaintenanceTaskRunner : IMaintenanceTaskRunner, ICleanupAnalysisRunner
     {
         private readonly CleanupBatchExecutor batch;
         private readonly RecycleBinCleanupService recycleBin;
@@ -156,7 +156,20 @@ namespace WinSereno.Services
             bool restart = requested.Id == ElevatedTaskCatalog.RestartAdapterId;
             var adapter = requested.RestartAdapter;
             var task = restart ? AdapterRestartService.PrepareTask(adapter) : ElevatedTaskCatalog.Get(requested.Id); // Ignore all caller-supplied execution fields.
+            if (task.Id == ElevatedTaskCatalog.ResetTcpIpId)
+            {
+                if (requested.TcpIpApproval == null) throw new InvalidOperationException("TCP/IP requiere el preflight y sus confirmaciones antes de solicitar UAC.");
+                requested.TcpIpApproval.Consume(); task.TcpIpApproval = requested.TcpIpApproval;
+            }
             return await RunElevatedCoreAsync(task, restart, adapter, null, null, null);
+        }
+        public async Task<MaintenanceTaskResult> RunCleanupAnalysisAsync(OperationLease lease, Action<TaskProgress> progress)
+        {
+            if (lease == null || !operations.Owns(lease) || lease.Name != "Análisis de Limpieza" || progress == null)
+                throw new InvalidOperationException("El análisis administrativo requiere la operación global de Limpieza activa.");
+            lease.Token.ThrowIfCancellationRequested();
+            lease.SetCancelable(false);
+            return await RunElevatedCoreAsync(ElevatedTaskCatalog.Get(ElevatedTaskCatalog.WindowsTempAnalyzeId), false, null, lease, null, progress);
         }
         internal async Task<MaintenanceTaskResult> RunDiagnosticAsync(OperationLease lease, Func<Task> normalChecks, Action<TaskProgress> progress)
         {
@@ -251,6 +264,11 @@ namespace WinSereno.Services
                             writer.Write(valid); writer.Flush();
                             if (!valid) throw new InvalidDataException("Handshake IPC inválido.");
                             if (restart) { WorkerProtocol.WriteText(writer, AdapterRestartService.Fingerprint(adapter)); writer.Flush(); logger.TaskStarted(task); }
+                            if (task.Id == ElevatedTaskCatalog.ResetTcpIpId)
+                            {
+                                WorkerProtocol.WriteText(writer, task.TcpIpApproval.Fingerprint);
+                                writer.Write(task.TcpIpApproval.WarningAccepted); writer.Flush();
+                            }
                             int restartAttempt = -1;
                             bool completed = false, started = false;
                             while (!completed)

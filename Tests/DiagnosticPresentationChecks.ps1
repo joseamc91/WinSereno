@@ -178,7 +178,7 @@ public static class DiagnosticPresentationChecks {
   Check(summary.ActualHeight<180,"Cabecera se adapta a menor ancho: "+summary.ActualHeight);
   Check(((ScrollViewer)window.FindName("PageScroll")).VerticalScrollBarVisibility==ScrollBarVisibility.Auto,"Scroll conservado para ventanas pequeñas");
   window.Close();
-  foreach(var item in vm.Navigation.Where(n=>n.Section!=NavigationSection.Home&&n.Section!=NavigationSection.Diagnosis&&n.Section!=NavigationSection.Repair&&n.Section!=NavigationSection.Network)) {
+  foreach(var item in vm.Navigation.Where(n=>n.Section!=NavigationSection.Home&&n.Section!=NavigationSection.Diagnosis&&n.Section!=NavigationSection.Repair&&n.Section!=NavigationSection.Network&&n.Section!=NavigationSection.Cleanup)) {
    // Bypass navigation callback so Network performs no real connectivity checks in these tests.
    typeof(MainViewModel).GetField("selectedNavigation",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(vm,item);
    Check(vm.HasPageNotice&&!string.IsNullOrWhiteSpace(vm.PageNotice),"Resto de notices intacto: "+item.Label);

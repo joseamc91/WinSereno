@@ -105,6 +105,19 @@ namespace WinSereno.Services
                             }
                             catch (Exception ex) { writer.Write((byte)WorkerMessage.TaskFailed); WorkerProtocol.WriteText(writer, ex.GetType().Name + ": " + ex.Message); writer.Flush(); return 5; }
                         }
+                        if (args[1] == ElevatedTaskCatalog.ResetTcpIpId)
+                        {
+                            try
+                            {
+                                string fingerprint = await WorkerProtocol.WithTimeout(Task.Run(() => WorkerProtocol.ReadText(reader)), pipe).ConfigureAwait(false);
+                                bool warningAccepted = await WorkerProtocol.WithTimeout(Task.Run(() => reader.ReadBoolean()), pipe).ConfigureAwait(false);
+                                var current = await Task.Run(() => new TcpIpResetPreflightService(null).Read()).ConfigureAwait(false);
+                                TcpIpResetPreflightService.ValidateContext(current, fingerprint, warningAccepted);
+                                writer.Write((byte)WorkerMessage.StdOutLine);
+                                WorkerProtocol.WriteText(writer, "[WinSereno] Contexto IPv4 revalidado antes de TCP/IP; interfaces=" + current.Interfaces.Count + ".\r\n"); writer.Flush();
+                            }
+                            catch (Exception ex) { writer.Write((byte)WorkerMessage.TaskFailed); WorkerProtocol.WriteText(writer, ex.GetType().Name + ": " + ex.Message); writer.Flush(); return 5; }
+                        }
                         if (args[1] == ElevatedTaskCatalog.DiagnosticIntegrityId && !await Task.Run(() => reader.ReadBoolean()).ConfigureAwait(false)) return 0;
                         return await ExecuteAsync(writer, args[1]).ConfigureAwait(false);
                     }

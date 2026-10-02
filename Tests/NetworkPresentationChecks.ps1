@@ -53,6 +53,13 @@ public static class NetworkPresentationChecks {
   for(int i=0;i<borders.Count;i++){
    Check(Math.Abs(borders[i].ActualWidth-(cellWidth-10))<0.5,"Equal column width even with empty cells: "+label+" / "+i);
    Check(Math.Abs(points[i].X-points[0].X-(i%3)*cellWidth)<0.5&&Math.Abs(points[i].Y-points[0].Y-(i/3)*cellHeight)<0.5,"Row/column placement: "+label+" / "+i);
+   Check(Math.Abs(borders[i].ActualHeight-borders[0].ActualHeight)<0.5,"Equal card height: "+label+" / "+i);
+   var details=Visual<Expander>(borders[i]).Single(e=>Convert.ToString(e.Header)=="Detalles del adaptador");
+   var footer=details.TransformToAncestor(borders[i]).Transform(new Point());
+   Check(Shown(details)&&Math.Abs(footer.Y+details.ActualHeight-(borders[i].ActualHeight-13))<0.5,"Details anchored at bottom, regardless of content: "+label+" / "+i);
+   foreach(var text in Visual<TextBlock>(details).Where(t=>Shown(t))){var p=text.TransformToAncestor(details).Transform(new Point());Check(p.Y>=-0.5&&p.Y+text.ActualHeight<=details.ActualHeight+0.5,"Expanded detail text not vertically clipped: "+label);}
+   var layout=(Grid)details.Parent;
+   Check(Grid.GetRow(details)==2&&layout.RowDefinitions[1].Height.IsStar&&layout.RowDefinitions[0].Height.IsAuto&&layout.RowDefinitions[2].Height.IsAuto,"Structural Auto/star/Auto footer: "+label);
    foreach(var text in Visual<TextBlock>(borders[i]).Where(t=>Shown(t))){var p=text.TransformToAncestor(borders[i]).Transform(new Point());Check(p.X>=-0.5&&p.X+text.ActualWidth<=borders[i].ActualWidth+0.5,"Text contained in adapter card: "+label+" / "+text.Text);}
   }
   var refresh=Visual<Button>(root).Single(b=>ReferenceEquals(b.Command,network.RefreshCommand));var buttonPoint=refresh.TransformToAncestor(root).Transform(new Point());
@@ -98,6 +105,10 @@ public static class NetworkPresentationChecks {
    var custom=new NetworkAdapterInformation{Name="Oficina LAN",Description="Other Ethernet Controller",Kind="Ethernet",Status="Conectado"};vm.Network.Adapters.Add(custom);Layout(root);
    Check(custom.HasInterfaceName&&Visual<TextBlock>(cards).Any(t=>Shown(t)&&t.Text==custom.Name),"Custom real interface name retained");
    wifi.Status="Desconectado";global.IsExpanded=false;
+   wifi.WifiDetails="Perfil Wi-Fi: prueba controlada\nSeñal: 75 %";cards.Items.Refresh();Layout(root,900);
+   var wifiExpander=Visual<Expander>(cards).Single(e=>ReferenceEquals(e.DataContext,wifi));wifiExpander.IsExpanded=true;Layout(root,900);
+   Check(Visual<TextBlock>(wifiExpander).Any(t=>Shown(t)&&t.Text==wifi.WifiDetails),"Expanded WiFi fields preserved at narrow width");
+   wifiExpander.IsExpanded=false;wifi.WifiDetails=null;cards.Items.Refresh();
    var samples=new[]{ethernet,wifi,custom,
     new NetworkAdapterInformation{Name="Ethernet 2",Description="Additional Ethernet Controller",Kind="Ethernet",Status="Conectado",LinkSpeed="1 Gbps",IPv4="192.0.2.14"},
     new NetworkAdapterInformation{Name="Wi-Fi 2",Description="Additional Wireless Controller",Kind="Wi-Fi",Status="Desconectado"},
@@ -106,6 +117,10 @@ public static class NetworkPresentationChecks {
    for(int total=1;total<=6;total++){
     vm.Network.Adapters.Clear();foreach(var adapter in samples.Take(total))vm.Network.Adapters.Add(adapter);
     foreach(double width in new[]{1150.0,900.0,1280.0}){Layout(root,width);CheckGrid(window,root,cards,vm.Network,theme+" / "+total+" adapters / "+width);}
+    var detailList=Visual<Expander>(cards).ToList();detailList[0].IsExpanded=true;Layout(root,900);
+    Check(Visual<TextBlock>(cards).Any(t=>Shown(t)&&t.Text=="Gateway: 192.0.2.1")&&Visual<TextBlock>(cards).Any(t=>Shown(t)&&t.Text=="DNS: 192.0.2.53"),"Expanded details retained at narrow width: "+total);
+    CheckGrid(window,root,cards,vm.Network,theme+" / expanded / "+total);
+    detailList[0].IsExpanded=false;
     Layout(root);if(total>=2&&total<=4)Save(root,Path.Combine(imageDir,"NetworkThreeColumns-"+total+"-"+theme+".png"));
    }
    var header=(Grid)window.FindName("NetworkStatusHeader");var heading=(TextBlock)window.FindName("NetworkConnectivityHeading");

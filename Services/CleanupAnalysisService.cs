@@ -23,14 +23,16 @@ namespace WinSereno.Services
             new CleanupCategoryResult { Category = CleanupCategory.RecycleBin, Name = "Papelera de reciclaje" }
         };
         public Task<CleanupAnalysisResult> AnalyzeAsync(IProgress<CleanupCategoryResult> progress, CancellationToken token)
-            => Task.Run(() => Analyze(progress, token));
-        private CleanupAnalysisResult Analyze(IProgress<CleanupCategoryResult> progress, CancellationToken token)
+            => Task.Run(() => Analyze(progress, token, true));
+        public Task<CleanupAnalysisResult> AnalyzeNormalAsync(IProgress<CleanupCategoryResult> progress, CancellationToken token)
+            => Task.Run(() => Analyze(progress, token, false));
+        private CleanupAnalysisResult Analyze(IProgress<CleanupCategoryResult> progress, CancellationToken token, bool includeWindows)
         {
             var watch = Stopwatch.StartNew(); var started = DateTimeOffset.Now;
             DateTime cutoff = started.UtcDateTime.AddHours(-ProtectedRecentHours);
             var results = new List<CleanupCategoryResult>();
             Log("Inicio análisis de Limpieza SOLO LECTURA | Inicio=" + started.ToString("O") + " | Protección=" + ProtectedRecentHours + " horas | Corte UTC=" + cutoff.ToString("O"));
-            foreach (var pending in CreatePendingResults())
+            foreach (var pending in CreatePendingResults().Where(p => includeWindows || p.Category != CleanupCategory.WindowsTemporary))
             {
                 if (token.IsCancellationRequested) break;
                 var categoryWatch = Stopwatch.StartNew(); var result = pending; result.WasAnalyzed = true;

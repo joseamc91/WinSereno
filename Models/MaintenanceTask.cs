@@ -16,6 +16,7 @@
         internal string ConfirmedUserTempRoot { get; set; }
         internal RestartAdapter RestartAdapter { get; set; }
         internal DhcpRenewalPlan DhcpPlan { get; set; }
+        internal Services.TcpIpResetApproval TcpIpApproval { get; set; }
         public string ConfirmationWarning { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }

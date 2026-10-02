@@ -24,6 +24,7 @@ namespace WinSereno.ViewModels
         private readonly PortableStorage storage;
         private readonly ThemeService themes;
         private readonly IDialogService dialogs;
+        private readonly ITcpIpResetPreflight tcpIpPreflight;
         private readonly AppSettings settings;
         public IMaintenanceTaskRunner Runner { get; }
         public ObservableCollection<NavigationItem> Navigation { get; } = new ObservableCollection<NavigationItem>();
@@ -50,7 +51,6 @@ namespace WinSereno.ViewModels
         public RelayCommand FlushDnsCommand { get; }
         public RelayCommand ResetTcpIpCommand { get; }
         public RelayCommand CleanUserTempCommand { get; }
-        public RelayCommand AnalyzeWindowsTempCommand { get; }
         public RelayCommand CleanWindowsTempCommand { get; }
         public RelayCommand CleanThumbnailsCommand { get; }
         public RelayCommand EmptyRecycleBinCommand { get; }
@@ -83,10 +83,10 @@ namespace WinSereno.ViewModels
         public NavigationSection DiagnosisNavigationTarget => NavigationSection.Diagnosis;
         public NavigationSection RepairNavigationTarget => NavigationSection.Repair;
         public string PageTitle => CurrentSection == NavigationSection.Activity ? "Registro de acciones" : SelectedNavigation.Label;
-        public string ProductVersion => "v" + FileVersionInfo.GetVersionInfo(typeof(MainViewModel).Assembly.Location).FileVersion;
+        public string ProductVersion => ProductInformation.DisplayVersion;
         public bool HasPageNotice => !string.IsNullOrWhiteSpace(PageNotice);
-        public string PageNotice => CurrentSection == NavigationSection.Home || CurrentSection == NavigationSection.Diagnosis || CurrentSection == NavigationSection.Repair || CurrentSection == NavigationSection.Network ? "" : CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
-            : CurrentSection == NavigationSection.Cleanup ? "El análisis es de solo lectura. Los archivos en uso o protegidos se omitirán. Temporales de Windows requiere administrador." : "El tema y los logs se guardan junto a la aplicación.";
+        public string PageNotice => CurrentSection == NavigationSection.Home || CurrentSection == NavigationSection.Diagnosis || CurrentSection == NavigationSection.Repair || CurrentSection == NavigationSection.Network || CurrentSection == NavigationSection.Cleanup ? "" : CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
+            : "El tema y los logs se guardan junto a la aplicación.";
         public string PageDescription
         {
             get
@@ -97,7 +97,7 @@ namespace WinSereno.ViewModels
                     case NavigationSection.Diagnosis: return "Analiza el estado general del PC sin realizar reparaciones. La integridad de Windows requiere permisos de administrador.";
                     case NavigationSection.Repair: return "Comprueba y repara componentes de Windows mediante acciones explícitas; las herramientas administrativas solicitan confirmación y permisos de administrador antes de ejecutarse.";
                     case NavigationSection.Network: return "Consulta y actualiza el estado de la red; las herramientas solicitan confirmación y permisos de administrador cuando corresponde.";
-                    case NavigationSection.Cleanup: return "Análisis de cuatro categorías, limpieza de temporales y miniaturas, y vaciado de Papelera.";
+                    case NavigationSection.Cleanup: return "Analiza el espacio que puede recuperarse y elige qué categorías quieres limpiar.";
                     case NavigationSection.Settings: return "Personalización y almacenamiento de esta aplicación portable.";
                     default: return "Información del equipo obtenida directamente desde Windows.";
                 }
@@ -151,12 +151,15 @@ namespace WinSereno.ViewModels
             }
         }
 
-        public MainViewModel(PortableStorage storage, AppSettings settings, ThemeService themes, IDialogService dialogs, IMaintenanceTaskRunner runner, HomeViewModel home, DiagnosticViewModel diagnosis, OperationCoordinator operations, IntegritySessionState integrity, ISessionLogger logger, RecycleBinCleanupService recycleBin = null)
+        public MainViewModel(PortableStorage storage, AppSettings settings, ThemeService themes, IDialogService dialogs, IMaintenanceTaskRunner runner, HomeViewModel home, DiagnosticViewModel diagnosis, OperationCoordinator operations, IntegritySessionState integrity, ISessionLogger logger, RecycleBinCleanupService recycleBin = null, ITcpIpResetPreflight tcpIpPreflight = null, CleanupViewModel cleanup = null)
         {
+            this.tcpIpPreflight = tcpIpPreflight ?? new TcpIpResetPreflightService(logger);
             this.recycleBin = recycleBin ?? new RecycleBinCleanupService(logger);
             this.integrity = integrity; this.logger = logger;
             Network = new NetworkViewModel(logger, operations);
-            Cleanup = new CleanupViewModel(new CleanupAnalysisService(logger), operations, logger);
+            var cleanupRunner = runner as ICleanupAnalysisRunner;
+            Cleanup = cleanup ?? new CleanupViewModel(new CleanupAnalysisService(logger), operations, logger,
+                cleanupRunner == null ? (Func<OperationLease, Action<TaskProgress>, Task<MaintenanceTaskResult>>)null : cleanupRunner.RunCleanupAnalysisAsync);
             this.storage = storage; this.settings = settings; this.themes = themes; this.dialogs = dialogs; Runner = runner; Home = home; Diagnosis = diagnosis; Operations = operations;
             AddNavigation(NavigationSection.Home, "Inicio"); AddNavigation(NavigationSection.Diagnosis, "Diagnóstico");
             AddNavigation(NavigationSection.Repair, "Reparación"); AddNavigation(NavigationSection.Network, "Red");
@@ -166,12 +169,11 @@ namespace WinSereno.ViewModels
             NavigateCommand = new RelayCommand(p => { if (p is NavigationSection destination) Navigate(destination); });
             StartMockCommand = new RelayCommand(async p => await StartMockAsync(p as string != "NonCancelable"), p => !Operations.IsActive);
             RunRepairCommand = new RelayCommand(async p => await RunRepairAsync(p as string), p => !Operations.IsActive && ElevatedTaskCatalog.IsAllowed(p as string));
-            CleanSelectedCommand = new RelayCommand(async p => await CleanSelectedAsync(), p => !Operations.IsActive && Cleanup.HasSelectedCategories);
-            EmptyRecycleBinCommand = new RelayCommand(async p => await EmptyRecycleBinAsync(), p => !Operations.IsActive);
-            CleanThumbnailsCommand = new RelayCommand(async p => await CleanThumbnailsAsync(), p => !Operations.IsActive);
-            CleanWindowsTempCommand = new RelayCommand(async p => await CleanWindowsTempAsync(), p => !Operations.IsActive);
-            AnalyzeWindowsTempCommand = new RelayCommand(async p => await AnalyzeWindowsTempAsync(), p => !Operations.IsActive);
-            CleanUserTempCommand = new RelayCommand(async p => await CleanUserTempAsync(), p => !Operations.IsActive);
+            CleanSelectedCommand = new RelayCommand(async p => await CleanSelectedAsync(), p => !Operations.IsActive && Cleanup.CanCleanSelected);
+            EmptyRecycleBinCommand = new RelayCommand(async p => await EmptyRecycleBinAsync(), p => !Operations.IsActive && Cleanup.CanClean(CleanupCategory.RecycleBin));
+            CleanThumbnailsCommand = new RelayCommand(async p => await CleanThumbnailsAsync(), p => !Operations.IsActive && Cleanup.CanClean(CleanupCategory.ThumbnailCache));
+            CleanWindowsTempCommand = new RelayCommand(async p => await CleanWindowsTempAsync(), p => !Operations.IsActive && Cleanup.CanClean(CleanupCategory.WindowsTemporary));
+            CleanUserTempCommand = new RelayCommand(async p => await CleanUserTempAsync(), p => !Operations.IsActive && Cleanup.CanClean(CleanupCategory.UserTemporary));
             ResetTcpIpCommand = new RelayCommand(async p => await ResetTcpIpAsync(), p => !Operations.IsActive);
             ResetWinsockCommand = new RelayCommand(async p => await ResetWinsockAsync(), p => !Operations.IsActive);
             RestartAdapterCommand = new RelayCommand(async p => await RestartAdapterAsync(), p => !Operations.IsActive);
@@ -194,16 +196,16 @@ namespace WinSereno.ViewModels
             Runner.ProgressChanged += OnProgressChanged;
             Diagnosis.Completed += OnProgressChanged;
             Cleanup.Completed += OnProgressChanged;
-            Operations.Changed += (s, e) => { StartMockCommand.Refresh(); RunRepairCommand.Refresh(); FlushDnsCommand.Refresh(); RenewDhcpCommand.Refresh(); RestartAdapterCommand.Refresh(); ResetWinsockCommand.Refresh(); ResetTcpIpCommand.Refresh(); CleanUserTempCommand.Refresh(); AnalyzeWindowsTempCommand.Refresh(); CleanWindowsTempCommand.Refresh(); CleanThumbnailsCommand.Refresh(); EmptyRecycleBinCommand.Refresh(); CleanSelectedCommand.Refresh(); Raise(nameof(IsActive)); RefreshToastPresentation(); };
+            Operations.Changed += (s, e) => { StartMockCommand.Refresh(); RunRepairCommand.Refresh(); FlushDnsCommand.Refresh(); RenewDhcpCommand.Refresh(); RestartAdapterCommand.Refresh(); ResetWinsockCommand.Refresh(); ResetTcpIpCommand.Refresh(); RefreshCleanupCommands(); Raise(nameof(IsActive)); RefreshToastPresentation(); };
             analysisToastTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             analysisToastTimer.Tick += (s, e) => RefreshToastPresentation();
-            Cleanup.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(CleanupViewModel.HasSelectedCategories)) CleanSelectedCommand.Refresh(); if (e.PropertyName == nameof(CleanupViewModel.IsRunning)) ObserveAnalysisPresentation(); if (e.PropertyName == nameof(CleanupViewModel.Summary)) RefreshToastPresentation(); };
+            Cleanup.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(CleanupViewModel.CanCleanSelected)) RefreshCleanupCommands(); if (e.PropertyName == nameof(CleanupViewModel.IsRunning)) ObserveAnalysisPresentation(); if (e.PropertyName == nameof(CleanupViewModel.Summary)) RefreshToastPresentation(); };
             Diagnosis.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(DiagnosticViewModel.IsRunning)) ObserveAnalysisPresentation(); else RefreshToastPresentation(); };
         }
         private async Task CleanSelectedAsync()
         {
             var selection = Cleanup.SelectedCategories;
-            if (Operations.IsActive || selection == CleanupSelection.None) return;
+            if (Operations.IsActive || !Cleanup.CanCleanSelected) return;
             try
             {
                 if (selection.HasFlag(CleanupSelection.RecycleBin)) {
@@ -223,7 +225,7 @@ namespace WinSereno.ViewModels
         }
         private async Task EmptyRecycleBinAsync()
         {
-            if (Operations.IsActive) return;
+            if (Operations.IsActive || !Cleanup.CanClean(CleanupCategory.RecycleBin)) return;
             try
             {
                 CleanupCategoryResult current;
@@ -241,17 +243,9 @@ namespace WinSereno.ViewModels
         }
         private async Task CleanThumbnailsAsync()
         {
-            if (Operations.IsActive) return;
+            if (Operations.IsActive || !Cleanup.CanClean(CleanupCategory.ThumbnailCache)) return;
             try
             {
-                if (Cleanup.ThumbnailAnalysis == null || !Cleanup.ThumbnailAnalysis.WasAnalyzed)
-                {
-                    using (Operations.Begin("Análisis previo de miniaturas (solo lectura)", false))
-                    {
-                        var estimate = await Task.Run(() => new CleanupAnalysisService(logger).AnalyzeThumbnails());
-                        Cleanup.SetThumbnailAnalysis(estimate);
-                    }
-                }
                 var task = ThumbnailsCleanupService.Prepare(Cleanup.ThumbnailAnalysis);
                 logger.Write("Solicitud limpieza miniaturas | TaskId=" + task.Id);
                 if (!dialogs.ConfirmTask(task)) { logger.Write("Confirmación limpieza miniaturas cancelada; sin borrado ni UAC."); return; }
@@ -263,7 +257,7 @@ namespace WinSereno.ViewModels
         }
         private async Task CleanWindowsTempAsync()
         {
-            if (Operations.IsActive) return;
+            if (Operations.IsActive || !Cleanup.CanClean(CleanupCategory.WindowsTemporary)) return;
             var task = WindowsTempCleanupService.Prepare(Cleanup.ElevatedWindowsTempAnalysis);
             logger.Write("Solicitud limpieza de temporales Windows | TaskId=" + task.Id);
             if (!dialogs.ConfirmTask(task)) { logger.Write("Confirmación limpieza Windows cancelada; sin UAC ni borrado."); return; }
@@ -271,19 +265,9 @@ namespace WinSereno.ViewModels
             try { var result = await Runner.RunAsync(task); if (result.WindowsTempAnalysis != null) Cleanup.SetWindowsTempAnalysis(result.WindowsTempAnalysis); }
             catch (Exception ex) { logger.Write("Error limpieza temporales Windows: " + ex); dialogs.ShowMessage("No se pudo completar la limpieza de temporales de Windows. Consulta el log."); }
         }
-        private async Task AnalyzeWindowsTempAsync()
-        {
-            if (Operations.IsActive) return;
-            var task = ElevatedTaskCatalog.Get(ElevatedTaskCatalog.WindowsTempAnalyzeId);
-            logger.Write("Solicitud análisis administrativo de temporales Windows (solo lectura)");
-            if (!dialogs.ConfirmTask(task)) { logger.Write("Confirmación cancelada; sin UAC ni análisis elevado."); return; }
-            if (Operations.IsActive) return;
-            try { var result = await Runner.RunAsync(task); if (result.WindowsTempAnalysis != null) Cleanup.SetWindowsTempAnalysis(result.WindowsTempAnalysis); }
-            catch (Exception ex) { logger.Write("Error análisis administrativo TEMP Windows: " + ex); dialogs.ShowMessage("No se pudo completar el análisis administrativo. Consulta el log."); }
-        }
         private async Task CleanUserTempAsync()
         {
-            if (Operations.IsActive) return;
+            if (Operations.IsActive || !Cleanup.CanClean(CleanupCategory.UserTemporary)) return;
             try
             {
                 var task = UserTempCleanupService.Prepare(Cleanup.LastResult);
@@ -298,12 +282,38 @@ namespace WinSereno.ViewModels
         private async Task ResetTcpIpAsync()
         {
             if (Operations.IsActive) return;
-            var task = ElevatedTaskCatalog.Get(ElevatedTaskCatalog.ResetTcpIpId);
-            var session = RemoteSessionService.Read(); task.ConfirmationWarning = RemoteSessionService.GetWarning(session);
-            logger.Write("Solicitud Restablecer TCP/IP | TaskId=" + task.Id + " | Sesión remota=" + session.IsRemote + " | Detección fiable=" + session.IsKnown + " | API=" + session.Source);
-            if (!dialogs.ConfirmTask(task)) { logger.Write("Confirmación TCP/IP cancelada; sin elevación ni comandos."); return; }
-            if (Operations.IsActive) return;
-            try { var result = await Runner.RunAsync(task); Network.SetTcpIpResult(result); }
+            try
+            {
+                TcpIpResetSnapshot snapshot;
+                using (var operation = Operations.Begin("Comprobar configuración IPv4", true))
+                {
+                    logger.Write("Preflight TCP/IP iniciado; solo lectura, sin comandos ni elevación.");
+                    snapshot = await Task.Run(() => tcpIpPreflight.Read());
+                    if (operation.Token.IsCancellationRequested) { logger.Write("Preflight TCP/IP cancelado; sin UAC ni comandos."); return; }
+                }
+                logger.Write("Preflight TCP/IP | Interfaces revisadas=" + snapshot.Interfaces.Count +
+                    " | DHCP=" + System.Linq.Enumerable.Count(snapshot.Interfaces, a => a.Mode == Ipv4ConfigurationMode.Dhcp) +
+                    " | Manual=" + System.Linq.Enumerable.Count(snapshot.Interfaces, a => a.Mode == Ipv4ConfigurationMode.Manual) +
+                    " | Indeterminado=" + System.Linq.Enumerable.Count(snapshot.Interfaces, a => a.Mode == Ipv4ConfigurationMode.Unknown) +
+                    " | Lectura completa=" + snapshot.ReadComplete + " | Segunda advertencia requerida=" + snapshot.RequiresWarning);
+                var task = ElevatedTaskCatalog.Get(ElevatedTaskCatalog.ResetTcpIpId);
+                var session = RemoteSessionService.Read(); task.ConfirmationWarning = RemoteSessionService.GetWarning(session);
+                logger.Write("Solicitud Restablecer TCP/IP | TaskId=" + task.Id + " | Sesión remota=" + session.IsRemote + " | Detección fiable=" + session.IsKnown + " | API=" + session.Source);
+                if (Operations.IsActive) return;
+                if (!dialogs.ConfirmTask(task)) { logger.Write("Confirmación TCP/IP cancelada; sin elevación ni comandos."); return; }
+                bool warningAccepted = false;
+                if (snapshot.RequiresWarning)
+                {
+                    var warningDialogs = dialogs as ITcpIpResetDialogs;
+                    warningAccepted = warningDialogs != null && warningDialogs.ConfirmTcpIpReset(snapshot);
+                    logger.Write("Segunda advertencia TCP/IP " + (warningAccepted ? "aceptada" : "cancelada") + "; aún sin UAC ni comandos.");
+                    if (!warningAccepted) return;
+                }
+                if (Operations.IsActive) return;
+                task.TcpIpApproval = new TcpIpResetApproval(snapshot, warningAccepted);
+                logger.Write("Confirmaciones TCP/IP completadas; se permite solicitar UAC y revalidar en el worker.");
+                var result = await Runner.RunAsync(task); Network.SetTcpIpResult(result);
+            }
             catch (Exception ex) { logger.Write("Error Restablecer TCP/IP: " + ex); dialogs.ShowMessage("No se pudo completar el restablecimiento TCP/IP. Consulta el log."); }
         }
         private async Task ResetWinsockAsync()
@@ -452,6 +462,10 @@ namespace WinSereno.ViewModels
             Raise(nameof(HasPercentage)); Raise(nameof(ToastPercentage)); Raise(nameof(ToastLastRelevantLine));
             Raise(nameof(CanCancelToast)); Raise(nameof(ShowDiagnosticToastCounts));
             CancelTaskCommand.Refresh(); DetailsCommand.Refresh(); RefreshTaskPanel();
+        }
+        private void RefreshCleanupCommands()
+        {
+            CleanUserTempCommand.Refresh(); CleanWindowsTempCommand.Refresh(); CleanThumbnailsCommand.Refresh(); EmptyRecycleBinCommand.Refresh(); CleanSelectedCommand.Refresh();
         }
         private TaskProgress CreateToastDetails()
         {

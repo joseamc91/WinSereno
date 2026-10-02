@@ -5,6 +5,10 @@ using WinSereno.Models;
 
 namespace WinSereno.Services
 {
+    public interface ICleanupAnalysisRunner
+    {
+        Task<MaintenanceTaskResult> RunCleanupAnalysisAsync(OperationLease lease, Action<TaskProgress> progress);
+    }
     public interface IMaintenanceTaskRunner
     {
         bool IsActive { get; }

@@ -81,7 +81,7 @@ public static class ActivityHistoryChecks {
    Set(result,"Duration",TimeSpan.FromSeconds(1));return Task.FromResult(result);
   };
   return (CleanupViewModel)typeof(CleanupViewModel).GetConstructors(BindingFlags.NonPublic|BindingFlags.Instance)
-   .Single().Invoke(new object[]{collect,new OperationCoordinator(),new HistoryLogger()});
+   .Single().Invoke(new object[]{collect,new OperationCoordinator(),new HistoryLogger(),null});
  }
  public static string Run(string project) {
   var app=Application.Current??new Application {ShutdownMode=ShutdownMode.OnExplicitShutdown};

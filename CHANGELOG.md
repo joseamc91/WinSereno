@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.1.0-beta.3 — 2026-10-02
+
+- Restablecer TCP/IP detecta configuraciones IPv4 manuales y muestra su información con una segunda confirmación de seguridad antes de ejecutar.
+- Detalles del adaptador queda alineado en la parte inferior de las tarjetas de Red.
+- Limpieza simplificada con una única acción de análisis, controles más claros y resultados compactos por categoría.
+- La versión pública visible de WinSereno se separa de la versión técnica del ensamblado para identificar correctamente builds de desarrollo y releases.
+
 ## 0.1.0-beta.2 — 2026-10-02
 
 - Corregida la decodificación de la salida de netsh para interpretar correctamente resultados localizados de Winsock, TCP/IP y reinicio de adaptador, preservando los avisos de reinicio.

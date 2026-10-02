@@ -1,7 +1,8 @@
+﻿param([switch]$CompileOnly)
 $ErrorActionPreference = 'Stop'
 $project = Split-Path $PSScriptRoot -Parent
 $exe = Join-Path $project 'bin\Debug\WinSereno.exe'
-[void][Reflection.Assembly]::LoadFrom($exe)
+if (!$CompileOnly) { [void][Reflection.Assembly]::LoadFrom($exe) }
 Add-Type -AssemblyName PresentationFramework, WindowsBase
 $source = @'
 using System;
@@ -35,7 +36,7 @@ public static class WindowsTempSnapshotChecks {
    var r=new CleanupAnalysisResult();Set(r,"Categories",Array.AsReadOnly(categories));return Task.FromResult(r);
   };
   return (CleanupViewModel)typeof(CleanupViewModel).GetConstructors(BindingFlags.NonPublic|BindingFlags.Instance).Single()
-   .Invoke(new object[]{analyze,new OperationCoordinator(),null});
+   .Invoke(new object[]{analyze,new OperationCoordinator(),null,null});
  }
  static void Pump(Task task){
   var frame=new DispatcherFrame();
@@ -87,13 +88,13 @@ public static class WindowsTempSnapshotChecks {
   var vm=View();Check(vm.ElevatedWindowsTempAnalysis==null,"Sesion inicial sin snapshot");
   Pump(vm.AnalyzeAsync());
   var initial=vm.Categories.Single(c=>c.IsWindowsTemporary);
-  Check(!initial.Result.IsAvailable && initial.Summary.Contains("No disponible")&&!initial.Summary.Contains("0 B"),"Sin acceso no equivale a vacio");
-  Check(initial.CanAnalyzeElevated&&!initial.HasElevatedAnalysisTime,"Accion explicita sin timestamp falso");
+  Check(!initial.Result.IsAvailable && initial.Summary.Contains("No comprobado")&&!initial.Summary.Contains("0 B"),"Sin acceso no equivale a vacio");
+  Check(!initial.CanClean&&!initial.HasElevatedAnalysisTime,"Sin análisis válido no hay limpieza ni timestamp falso");
   var first=RoundTrip(Sample(CleanupCategory.WindowsTemporary,1000,DateTimeOffset.Now.AddHours(-2)));
   vm.SetWindowsTempAnalysis(first);Expect(vm,first);
   Check(first.PotentiallyCleanableBytes==500&&first.FileCount==10&&!first.IsPartial,"Contadores IPC");
-  Check(vm.Categories[1].CanAnalyzeElevated,"Permite repetir analisis con permisos aunque completo");
-  for(int i=0;i<3;i++){Pump(vm.AnalyzeAsync());Expect(vm,first);}
+  Check(vm.Categories[1].CanClean,"Un snapshot válido habilita la acción individual");
+  for(int i=0;i<3;i++){Pump(vm.AnalyzeAsync(false));Expect(vm,first);}
   Check(vm.Categories[0].Result.TotalBytes==123&&vm.Categories[2].Result.TotalBytes==123,"Otras categorias actualizadas");
   var second=RoundTrip(Sample(CleanupCategory.WindowsTemporary,2000,DateTimeOffset.Now.AddHours(-1),true,true));
   vm.SetWindowsTempAnalysis(second);Expect(vm,second);Check(second.IsPartial,"Snapshot parcial valido conservado");
@@ -157,6 +158,7 @@ foreach($reference in @($exe,'System.dll','System.Core.dll','System.Xaml.dll',
 }
 $compiled=$provider.CompileAssemblyFromSource($parameters,$source)
 if($compiled.Errors.HasErrors) { throw ($compiled.Errors | Out-String) }
+if ($CompileOnly) { Write-Output 'Harness Windows Temp compilado sin cargar WinSereno.'; return }
 $fixture=Join-Path $PSScriptRoot ('snapshot-fixture-'+[Guid]::NewGuid().ToString('N'))
 [void][IO.Directory]::CreateDirectory($fixture)
 try { [WindowsTempSnapshotChecks]::Run($project,$fixture) }

@@ -4,8 +4,9 @@ using WinSereno.Services;
 
 namespace WinSereno.Views
 {
-    public sealed class DialogService : IDialogService
+    public sealed class DialogService : IDialogService, ITcpIpResetDialogs
     {
+        public bool ConfirmTcpIpReset(TcpIpResetSnapshot snapshot) => new TcpIpResetWarningWindow(snapshot) { Owner = Application.Current.MainWindow }.ShowDialog() == true;
         public RestartAdapter SelectRestartAdapter(System.Collections.Generic.IReadOnlyList<RestartAdapter> adapters)
         {
             var window = new Window { Title = "Seleccionar adaptador", Width = 640, Height = 240, ResizeMode = ResizeMode.NoResize,

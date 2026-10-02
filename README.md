@@ -4,7 +4,9 @@ Aplicación portable para Windows centrada en diagnóstico, mantenimiento y repa
 
 ## Estado
 
-WinSereno está en fase **Beta / pre-release**. **v0.1.0-beta.2** es la segunda beta pública; no es una versión estable.
+WinSereno está en fase **Beta / pre-release**. **v0.1.0-beta.3** es la beta pública actual; no es una versión estable.
+
+La versión pública visible sigue los tags y pre-releases. AssemblyVersion y FileVersion permanecen actualmente en `0.1.0.0`.
 
 Las funciones implementadas y su validación son aspectos distintos: algunas cuentan con pruebas manuales y otras requieren más validación en equipos reales.
 
@@ -16,7 +18,7 @@ Las funciones implementadas y su validación son aspectos distintos: algunas cue
 | Diagnóstico | Seis comprobaciones: espacio de almacenamiento, salud básica de almacenamiento, red local e Internet, servicios críticos, eventos de Windows e integridad de Windows. Las cinco primeras utilizan permisos normales; Integridad ejecuta DISM CheckHealth y SFC VerifyOnly con un único UAC. Ninguna realiza reparaciones. |
 | Reparación | DISM CheckHealth, ScanHealth y RestoreHealth; SFC /scannow; CHKDSK de solo lectura; StartComponentCleanup y Reparación completa condicional. |
 | Red | Tarjetas compactas de adaptadores físicos en tres columnas, estado de conectividad simplificado y detalles separados por adaptador y pruebas globales. Caché DNS, DHCP, reinicio de adaptador y restablecimientos Winsock/TCP/IP. |
-| Limpieza | Análisis y limpieza individual o por selección de temporales, miniaturas y Papelera, con estimaciones y resultados por categoría. |
+| Limpieza | Una única acción de análisis para temporales, miniaturas y Papelera, con Windows Temp integrado mediante UAC. Limpieza individual o de categorías marcadas únicamente tras un análisis válido, con resultados compactos. |
 | Ajustes | Tema claro/oscuro persistente y apertura de la carpeta de logs. La búsqueda de actualizaciones permanece deshabilitada. |
 | Actividad | Historial de acciones de la sesión con resumen, duración y detalles. No se conserva al cerrar; los TXT de Logs siguen siendo el registro persistente. |
 
@@ -54,7 +56,9 @@ Herramientas disponibles:
 
 Las acciones son independientes y requieren confirmación; UAC se solicita cuando corresponde. Entrar en Red solo consulta información: ninguna herramienta modificadora se ejecuta automáticamente. Las operaciones potencialmente disruptivas incorporan advertencias especiales cuando se detecta una sesión RDP. Si es necesario reiniciar Windows, se informa sin hacerlo automáticamente.
 
-Se han validado manualmente la lectura y actualización de Red, el reinicio de un adaptador Ethernet y el restablecimiento Winsock. DHCP se detiene de forma segura cuando no existen interfaces elegibles. TCP/IP cuenta con pruebas controladas, pero permanece sin validación manual real por su posible impacto sobre la configuración de red. Estas comprobaciones no equivalen a una validación exhaustiva en todos los equipos.
+**Restablecer TCP/IP** realiza un preflight de configuración IPv4. Cuando detecta configuración manual, muestra IP, máscara/prefijo, gateway y DNS y exige una segunda confirmación explícita antes de solicitar UAC. Una configuración indeterminada también requiere advertencia y segunda confirmación. WinSereno no guarda ni restaura automáticamente esos datos; el restablecimiento sigue siendo una acción administrativa explícita.
+
+Se han validado manualmente la lectura y actualización de Red, el reinicio de un adaptador Ethernet y el restablecimiento Winsock. DHCP se detiene de forma segura cuando no existen interfaces elegibles. También se ha validado manualmente el flujo preventivo de TCP/IP con una IPv4 estática real, sin ejecutar el restablecimiento. El comando TCP/IP permanece sin validación manual real por su posible impacto sobre la configuración de red. Estas comprobaciones no equivalen a una validación exhaustiva en todos los equipos.
 
 ### Limpieza
 
@@ -65,11 +69,11 @@ Categorías disponibles:
 - Caché de miniaturas del usuario.
 - Papelera de reciclaje.
 
-El análisis previo muestra tamaño, cantidad de elementos y espacio recuperable estimado; la estimación no garantiza el espacio finalmente liberado. Los archivos protegidos, en uso o no eliminables se omiten, y los resultados parciales se distinguen de una limpieza completa.
+El análisis previo muestra de forma compacta el espacio encontrado y recuperable estimado; no borra archivos ni inicia limpiezas automáticamente. La estimación no garantiza el espacio finalmente liberado. La política de borrado es conservadora: los archivos protegidos, en uso o no elegibles se omiten, y los resultados parciales se distinguen de una limpieza completa.
 
-Se puede limpiar cada categoría o usar **Limpiar seleccionados**. Las tres primeras están seleccionadas inicialmente; Papelera no. Vaciar la Papelera elimina la posibilidad de restaurar sus elementos desde ella y requiere una confirmación explícita.
+Se puede limpiar cada categoría o usar **Limpiar categorías marcadas**. Las tres primeras están seleccionadas inicialmente; Papelera no. Vaciar la Papelera elimina la posibilidad de restaurar sus elementos desde ella y requiere una confirmación explícita.
 
-El análisis completo de Windows Temp puede solicitarse con permisos de administrador. Su último snapshot elevado conserva la hora del análisis durante la sesión. La limpieza de Windows Temp requiere elevación y reanaliza dentro del mismo worker. La limpieza seleccionada solicita un único UAC antes de borrar si incluye esta categoría. Al terminar se actualizan las categorías afectadas.
+La acción **Analizar** consulta las cuatro categorías y solicita un único UAC para integrar Windows Temp. Si se cancela, las categorías normales conservan sus resultados y Windows Temp queda sin comprobar. Las acciones de borrado requieren un análisis válido de su categoría. Su último snapshot elevado conserva la hora del análisis durante la sesión. La limpieza de Windows Temp requiere elevación y reanaliza dentro del mismo worker. La limpieza seleccionada solicita un único UAC antes de borrar si incluye esta categoría. Al terminar se actualizan las categorías afectadas.
 
 ## Portabilidad y logs
 
@@ -123,6 +127,11 @@ Las suites automatizadas disponibles están en [Tests/](Tests/):
 | [IntegritySessionChecks.ps1](Tests/IntegritySessionChecks.ps1) | Selección temporal de integridad DISM, cancelaciones y separación de SFC. |
 | [SfcStreamingChecks.ps1](Tests/SfcStreamingChecks.ps1) | Reconstrucción de líneas, salida íntegra y progreso SFC español/inglés. |
 | [WindowsTempSnapshotChecks.ps1](Tests/WindowsTempSnapshotChecks.ps1) | Snapshot elevado, timestamp y reanálisis con proveedores controlados. |
+| [CleanupExperienceChecks.ps1](Tests/CleanupExperienceChecks.ps1) | Análisis unificado, habilitación de acciones, UAC simulado e historial único. |
+| [CleanupStaticChecks.ps1](Tests/CleanupStaticChecks.ps1) | Presentación, análisis de solo lectura y versión pública, sin cargar el EXE. |
+| [CleanupXamlPresentationChecks.ps1](Tests/CleanupXamlPresentationChecks.ps1) | XAML fuente con datos simulados en claro/oscuro, antes y después del análisis. |
+| [TcpIpResetSafetyChecks.ps1](Tests/TcpIpResetSafetyChecks.ps1) | Preflight, configuración manual/indeterminada y doble confirmación simulada. |
+| [TcpIpResetStaticChecks.ps1](Tests/TcpIpResetStaticChecks.ps1) | Protecciones, comando fijo y advertencia TCP/IP, sin ejecutar herramientas. |
 | [ThemePersistenceChecks.ps1](Tests/ThemePersistenceChecks.ps1) | Configuración portable y persistencia del tema. |
 | [DiagnosticPresentationChecks.ps1](Tests/DiagnosticPresentationChecks.ps1) | Presentación inicial compacta y conservación de resultados reales en ambos temas. |
 | [ChkdskRegressionChecks.ps1](Tests/ChkdskRegressionChecks.ps1) | Parser ES/EN, decodificación, streaming, IPC y logs simulados de CHKDSK. |
@@ -135,7 +144,7 @@ Tras compilar Debug, pueden ejecutarse individualmente con Windows PowerShell 5.
 powershell.exe -NoProfile -STA -File .\Tests\ThemePersistenceChecks.ps1
 ```
 
-Las suites disponibles no equivalen a una validación completa de la beta. En la preparación de Beta 2 se ejecutaron las suites relevantes de Red, Inicio, Diagnóstico, Actividad, toast/Reparación y tema con datos controlados, sin herramientas modificadoras ni UAC reales. Smart App Control bloqueó algunos harnesses en etapas anteriores; las ejecuciones bloqueadas no se consideran superadas. La regresión histórica de CHKDSK en español («Acceso denegado») permanece pendiente; Beta 2 no cambia su parser.
+Las suites disponibles no equivalen a una validación completa de la beta. Durante el desarrollo de Beta 3 se ejecutaron comprobaciones estáticas y de presentación WPF con datos simulados. Smart App Control bloqueó los harnesses que cargan el ensamblado local; esas ejecuciones no se consideran superadas. La regresión histórica de CHKDSK en español («Acceso denegado») permanece pendiente; Beta 3 no cambia su parser.
 
 Existen validaciones manuales previas de Inicio, Diagnóstico y DISM CheckHealth/ScanHealth/RestoreHealth. SFC y CHKDSK también han aportado salidas reales para identificar correcciones. Esto no valida todas las acciones ni sustituye las pruebas pendientes de los cambios más recientes. Las operaciones disruptivas de red y varias limpiezas necesitan validación manual controlada adicional.
 
