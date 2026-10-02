@@ -52,6 +52,7 @@ namespace WinSereno.Services
     {
         public static void Apply(string id, MaintenanceTaskResult result)
         {
+            if (id == ElevatedTaskCatalog.SfcVerifyOnlyId) { SfcVerifyOnlyResultParser.Apply(result); return; }
             if (id == ElevatedTaskCatalog.ComponentCleanupId) { DismComponentCleanupResultParser.Apply(result); return; }
             if (id == ElevatedTaskCatalog.ChkdskId) { ChkdskResultParser.Apply(result); return; }
             if (id == ElevatedTaskCatalog.ResetTcpIpId) { TcpIpResetResultParser.Apply(result); return; }

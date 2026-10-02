@@ -19,6 +19,7 @@ namespace WinSereno.Models
         public NavigationSection? NavigationTarget { get; set; }
         public string NavigationLabel { get; set; }
         public bool HasNavigation => NavigationTarget.HasValue;
+        public string CardStatusLabel => StatusLabel.ToUpperInvariant();
         public string StatusLabel
         {
             get

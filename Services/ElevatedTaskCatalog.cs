@@ -6,6 +6,8 @@ namespace WinSereno.Services
 {
     public static class ElevatedTaskCatalog
     {
+        public const string DiagnosticIntegrityId = "diagnosis.integrity";
+        public const string SfcVerifyOnlyId = "diagnosis.sfc.verifyonly";
         public const string CleanupSelectedId = "cleanup.selected";
         public const string WindowsTempCleanupId = "cleanup.windowstemp";
         public const string WindowsTempAnalyzeId = "cleanup.windowstemp.analyze";
@@ -22,10 +24,19 @@ namespace WinSereno.Services
         public const string RenewDhcpId = "network.renewdhcp";
         public const string FlushDnsId = "network.flushdns";
         public const string CompleteId = "repair.complete";
-        public static bool IsAllowed(string id) => id == ComponentCleanupId || id == ChkdskId || id == CheckHealthId || id == ScanHealthId || id == RestoreHealthId || id == SfcId || id == CompleteId || id == FlushDnsId || id == RenewDhcpId || id == RestartAdapterId || id == ResetWinsockId || id == ResetTcpIpId || id == WindowsTempAnalyzeId || id == WindowsTempCleanupId || id == CleanupSelectedId;
+        public static bool IsAllowed(string id) => id == DiagnosticIntegrityId || id == SfcVerifyOnlyId || id == ComponentCleanupId || id == ChkdskId || id == CheckHealthId || id == ScanHealthId || id == RestoreHealthId || id == SfcId || id == CompleteId || id == FlushDnsId || id == RenewDhcpId || id == RestartAdapterId || id == ResetWinsockId || id == ResetTcpIpId || id == WindowsTempAnalyzeId || id == WindowsTempCleanupId || id == CleanupSelectedId;
         public static MaintenanceTask Get(string id)
         {
             if (!IsAllowed(id)) throw new ArgumentException("TaskId administrativo no permitido.");
+            if (id == DiagnosticIntegrityId)
+                return new MaintenanceTask { Id = id, Name = "Comprobar integridad de Windows", Category = TaskCategory.Diagnosis,
+                    TaskType = TaskType.Internal, ImpactLevel = ImpactLevel.Information, RequiresElevation = true, CanBeCancelled = false,
+                    Command = Get(CheckHealthId).Command + " " + CheckHealthArguments + "\n" + Get(SfcVerifyOnlyId).Command + " /verifyonly",
+                    Arguments = "Secuencia fija de solo lectura; sin argumentos externos." };
+            if (id == SfcVerifyOnlyId)
+                return new MaintenanceTask { Id = id, Name = "Verificar archivos protegidos", Category = TaskCategory.Diagnosis,
+                    TaskType = TaskType.Command, ImpactLevel = ImpactLevel.Information, RequiresElevation = true, CanBeCancelled = false,
+                    Command = SystemPath("sfc.exe"), Arguments = "/verifyonly", MayRequireRestart = false };
             if (id == ComponentCleanupId)
                 return new MaintenanceTask { Id = id, Name = "Limpiar almacén de componentes", Category = TaskCategory.Repair,
                     ShortDescription = "Elimina versiones reemplazadas de componentes de Windows.",

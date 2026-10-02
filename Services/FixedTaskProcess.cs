@@ -18,7 +18,7 @@ namespace WinSereno.Services
         {
             var task = ElevatedTaskCatalog.Get(taskId);
             if (task.TaskType != TaskType.Command) throw new ArgumentException("La tarea no es un comando individual.");
-            return await RunCommandAsync(task, taskId == ElevatedTaskCatalog.SfcId ? Encoding.Unicode : taskId == ElevatedTaskCatalog.ChkdskId ? ChkdskOutputEncoding() : (taskId == ElevatedTaskCatalog.FlushDnsId || taskId == ElevatedTaskCatalog.ResetWinsockId || taskId == ElevatedTaskCatalog.ResetTcpIpId) ? Encoding.GetEncoding((int)GetOEMCP()) : null, started, output, error).ConfigureAwait(false);
+            return await RunCommandAsync(task, taskId == ElevatedTaskCatalog.SfcId || taskId == ElevatedTaskCatalog.SfcVerifyOnlyId ? Encoding.Unicode : taskId == ElevatedTaskCatalog.ChkdskId ? ChkdskOutputEncoding() : (taskId == ElevatedTaskCatalog.FlushDnsId || taskId == ElevatedTaskCatalog.ResetWinsockId || taskId == ElevatedTaskCatalog.ResetTcpIpId) ? Encoding.GetEncoding((int)GetOEMCP()) : null, started, output, error).ConfigureAwait(false);
         }
         internal static async Task<MaintenanceTaskResult> RunDhcpCommandAsync(DhcpRenewalService service, DhcpRenewalPlan plan, int ordinal, Action<DateTimeOffset> started, Action<string> output, Action<string> error)
         {
@@ -42,7 +42,7 @@ namespace WinSereno.Services
             {
                 if (!process.Start()) throw new InvalidOperationException("La herramienta no pudo iniciarse.");
                 var start = DateTimeOffset.Now; started(start);
-                var lines = task.Id == ElevatedTaskCatalog.SfcId ? new OutputLineBuffer(output) : null;
+                var lines = task.Id == ElevatedTaskCatalog.SfcId || task.Id == ElevatedTaskCatalog.SfcVerifyOnlyId ? new OutputLineBuffer(output) : null;
                 var outTask = PumpAsync(process.StandardOutput, text => {
                     stdout.Append(text);
                     if (lines != null) lines.Append(text); else output(text);

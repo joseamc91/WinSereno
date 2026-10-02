@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -145,6 +145,8 @@ namespace WinSereno.Services
         public Task WaitForIdleAsync() => operations.WaitForIdleAsync();
         public async Task<MaintenanceTaskResult> RunAsync(MaintenanceTask requested)
         {
+            if (requested.Id == ElevatedTaskCatalog.DiagnosticIntegrityId)
+                throw new InvalidOperationException("La integridad de Diagnóstico requiere su operación global y no se ejecuta como acción independiente.");
             if (requested.Id == CleanupBatchExecutor.TaskId) return await RunCleanupBatchAsync(requested);
             if (requested.Id == RecycleBinCleanupService.TaskId) return await RunRecycleBinAsync(requested);
             if (requested.Id == ThumbnailsCleanupService.TaskId) return await RunThumbnailsAsync(requested);
@@ -154,12 +156,37 @@ namespace WinSereno.Services
             bool restart = requested.Id == ElevatedTaskCatalog.RestartAdapterId;
             var adapter = requested.RestartAdapter;
             var task = restart ? AdapterRestartService.PrepareTask(adapter) : ElevatedTaskCatalog.Get(requested.Id); // Ignore all caller-supplied execution fields.
-            using (var lease = operations.Begin(task.Name, false))
+            return await RunElevatedCoreAsync(task, restart, adapter, null, null, null);
+        }
+        internal async Task<MaintenanceTaskResult> RunDiagnosticAsync(OperationLease lease, Func<Task> normalChecks, Action<TaskProgress> progress)
+        {
+            if (lease == null || !operations.Owns(lease) || lease.Name != "Diagnóstico") throw new InvalidOperationException("Se requiere la operación global de Diagnóstico activa.");
+            if (normalChecks == null || progress == null) throw new ArgumentNullException("El diagnóstico requiere sus callbacks internos.");
+            bool normalRan = false;
+            lease.SetCancelable(false);
+            Func<Task> beforeIntegrity = async () => {
+                normalRan = true; lease.SetCancelable(true);
+                try { await normalChecks(); lease.Token.ThrowIfCancellationRequested(); }
+                finally { lease.SetCancelable(false); }
+            };
+            try { return await RunElevatedCoreAsync(ElevatedTaskCatalog.Get(ElevatedTaskCatalog.DiagnosticIntegrityId), false, null, lease, beforeIntegrity, progress); }
+            finally {
+                // A rejected UAC/failed connection must not suppress the ordinary read-only checks.
+                if (!normalRan) await beforeIntegrity();
+            }
+        }
+        private async Task<MaintenanceTaskResult> RunElevatedCoreAsync(MaintenanceTask task, bool restart, RestartAdapter adapter,
+            OperationLease externalLease, Func<Task> normalChecks, Action<TaskProgress> internalProgress)
+        {
+            Action<TaskProgress> report = internalProgress ?? Publish;
+            using (var lease = externalLease == null ? operations.Begin(task.Name, false) : null)
             {
                 var watch = Stopwatch.StartNew();
                 var stdout = new StringBuilder(); var stderr = new StringBuilder();
                 var result = new MaintenanceTaskResult { StartedAt = DateTimeOffset.Now };
-                bool sequence = task.Id == ElevatedTaskCatalog.CompleteId;
+                bool diagnostic = task.Id == ElevatedTaskCatalog.DiagnosticIntegrityId;
+                bool sequence = task.Id == ElevatedTaskCatalog.CompleteId || diagnostic;
+                var sequenceIds = diagnostic ? DiagnosticIntegritySequence.TaskIds : RepairCompleteSequence.TaskIds;
                 MaintenanceTask activeTask = task;
                 MaintenanceTaskResult stepResult = null;
                 var stepOut = new StringBuilder(); var stepErr = new StringBuilder();
@@ -168,13 +195,13 @@ namespace WinSereno.Services
                 string pendingProgress = "";
                 string last = task.RequiresElevation ? "Solicitando permisos de administrador..." : "Ejecutando con permisos normales...";
                 var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
-                Action publish = () => Publish(new TaskProgress { CurrentTask = task, State = RunnerState.Running,
+                Action publish = () => report(new TaskProgress { CurrentTask = task, State = RunnerState.Running,
                     StartedAt = result.StartedAt, Elapsed = watch.Elapsed, LastRelevantLine = last, StdOut = stdout.ToString(), StdErr = stderr.ToString(), Percentage = percentage, StepLabel = stepLabel });
                 publish(); timer.Tick += (s, e) => publish(); timer.Start();
                 Process worker = null;
                 try
                 {
-                    logger.Write("Confirmación aceptada | TaskId=" + task.Id);
+                    logger.Write((diagnostic ? "Solicitud explícita de Analizar este PC" : "Confirmación aceptada") + " | TaskId=" + task.Id);
                     logger.Write("Comando confirmado=" + task.Command + " " + task.Arguments + " | Requiere elevación inicial=" + task.RequiresElevation + " | Cancelable=False");
                     if (task.Id == ElevatedTaskCatalog.FlushDnsId)
                     {
@@ -234,6 +261,12 @@ namespace WinSereno.Services
                                     case WorkerMessage.WorkerStarted:
                                         logger.Write("Worker elevado autenticado | TaskId=" + task.Id);
                                         if (sequence) logger.TaskStarted(task);
+                                        if (diagnostic) {
+                                            timer.Stop();
+                                            try { await normalChecks(); writer.Write(true); writer.Flush(); }
+                                            catch (OperationCanceledException) { writer.Write(false); writer.Flush(); throw; }
+                                            finally { timer.Start(); }
+                                        }
                                         break;
                                     case WorkerMessage.RestartNote:
                                         if (!restart) throw new InvalidDataException("Nota de reinicio inesperada.");
@@ -271,11 +304,11 @@ namespace WinSereno.Services
                                         if (!sequence || stepResult != null) throw new InvalidDataException("Paso IPC inesperado.");
                                         string stepId = await Task.Run(() => WorkerProtocol.ReadText(reader));
                                         int index = result.SequenceSteps.Count;
-                                        if (index >= RepairCompleteSequence.TaskIds.Count || RepairCompleteSequence.TaskIds[index] != stepId)
+                                        if (index >= sequenceIds.Count || sequenceIds[index] != stepId)
                                             throw new InvalidDataException("Paso fuera de la secuencia fija.");
                                         activeTask = ElevatedTaskCatalog.Get(stepId); stepResult = new MaintenanceTaskResult();
                                         stepOut.Clear(); stepErr.Clear(); percentage = null; pendingProgress = ""; started = false;
-                                        stepLabel = "Paso " + (index + 1) + " de 3 · " + activeTask.Name;
+                                        stepLabel = "Paso " + (index + 1) + " de " + sequenceIds.Count + " · " + activeTask.Name;
                                         stdout.AppendLine("\n=== " + stepLabel + " ==="); stderr.AppendLine("\n=== " + stepLabel + " ===");
                                         logger.Write(stepLabel + " | TaskId=" + stepId); break;
                                     case WorkerMessage.WindowsTempCleanupProgress:
@@ -307,7 +340,7 @@ namespace WinSereno.Services
                                         pendingProgress += line;
                                         string[] segments = pendingProgress.Split(new[] { '\r', '\n' });
                                         foreach (string segment in segments)
-                                        { var value = ToolProgressParser.Parse(activeTask.Id, segment); if (value.HasValue && value != percentage) { percentage = value; logger.Write("Progreso real=" + value.Value + "% | TaskId=" + activeTask.Id); } }
+                                        { var value = ToolProgressParser.Parse(activeTask.Id == ElevatedTaskCatalog.SfcVerifyOnlyId ? ElevatedTaskCatalog.SfcId : activeTask.Id, segment); if (value.HasValue && value != percentage) { percentage = value; logger.Write("Progreso real=" + value.Value + "% | TaskId=" + activeTask.Id); } }
                                         pendingProgress = segments[segments.Length - 1]; break;
                                     case WorkerMessage.StdErrLine:
                                         string error = await Task.Run(() => WorkerProtocol.ReadText(reader)); stderr.Append(error); if (!string.IsNullOrWhiteSpace(error)) last = LastLine(error);
@@ -330,17 +363,30 @@ namespace WinSereno.Services
                                         }
                                         else { receivedCompletion = true; completed = true; }
                                         break;
+                                    case WorkerMessage.DiagnosticStepFailed:
+                                        if (!diagnostic || stepResult == null) throw new InvalidDataException("Fallo de paso inesperado.");
+                                        stepResult.CommandStarted = await Task.Run(() => reader.ReadBoolean());
+                                        stepResult.StartedAt = new DateTimeOffset(await Task.Run(() => reader.ReadInt64()), TimeSpan.Zero).ToLocalTime();
+                                        stepResult.FinishedAt = new DateTimeOffset(await Task.Run(() => reader.ReadInt64()), TimeSpan.Zero).ToLocalTime();
+                                        string failure = await Task.Run(() => WorkerProtocol.ReadText(reader));
+                                        stepResult.Duration = stepResult.FinishedAt - stepResult.StartedAt;
+                                        stepResult.ExecutionStatus = ExecutionStatus.Failed; stepResult.FindingStatus = FindingStatus.Unknown;
+                                        stepResult.UserSummary = "No se pudo ejecutar o confirmar la comprobación.";
+                                        stepResult.StdOut = stepOut.ToString(); stepResult.StdErr = stepErr.ToString() + failure;
+                                        result.SequenceSteps.Add(new SequenceStepResult { TaskId = activeTask.Id, Result = stepResult });
+                                        logger.Write("Error técnico de integridad | " + activeTask.Id + " | " + failure); logger.TaskFinished(activeTask, stepResult);
+                                        stepResult = null; started = false; percentage = null; break;
                                     case WorkerMessage.StepSkipped:
-                                        if (!sequence || stepResult != null) throw new InvalidDataException("Omisión IPC inesperada.");
+                                        if (!sequence || diagnostic || stepResult != null) throw new InvalidDataException("Omisión IPC inesperada.");
                                         string skippedId = await Task.Run(() => WorkerProtocol.ReadText(reader));
-                                        if (result.SequenceSteps.Count >= RepairCompleteSequence.TaskIds.Count || RepairCompleteSequence.TaskIds[result.SequenceSteps.Count] != skippedId)
+                                        if (result.SequenceSteps.Count >= sequenceIds.Count || sequenceIds[result.SequenceSteps.Count] != skippedId)
                                             throw new InvalidDataException("Omisión fuera de secuencia.");
                                         string reason = await Task.Run(() => WorkerProtocol.ReadText(reader));
                                         result.SequenceSteps.Add(new SequenceStepResult { TaskId = skippedId, WasSkipped = true, SkipReason = reason });
                                         logger.Write("Paso Skipped | TaskId=" + skippedId + " | Motivo=" + reason);
                                         stdout.AppendLine("\nOmitido " + ElevatedTaskCatalog.Get(skippedId).Name + ": " + reason); break;
                                     case WorkerMessage.SequenceCompleted:
-                                        if (!sequence || stepResult != null || result.SequenceSteps.Count != 3) throw new InvalidDataException("Secuencia incompleta.");
+                                        if (!sequence || stepResult != null || result.SequenceSteps.Count != sequenceIds.Count) throw new InvalidDataException("Secuencia incompleta.");
                                         receivedCompletion = true; completed = true; break;
                                     case WorkerMessage.TaskFailed: throw new IOException("Worker: " + await Task.Run(() => WorkerProtocol.ReadText(reader)));
                                     default: throw new InvalidDataException("Mensaje IPC desconocido.");
@@ -349,6 +395,11 @@ namespace WinSereno.Services
                             }
                         }
                     }
+                }
+                catch (OperationCanceledException) when (diagnostic)
+                {
+                    result.ExecutionStatus = ExecutionStatus.Cancelled;
+                    logger.Write("Diagnóstico cancelado antes de iniciar integridad.");
                 }
                 catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
                 {
@@ -384,10 +435,11 @@ namespace WinSereno.Services
                             result.SequenceSteps.Add(new SequenceStepResult { TaskId = activeTask.Id, Result = stepResult }); logger.TaskFinished(activeTask, stepResult);
                         }
                         int recorded = result.SequenceSteps.Count;
-                        RepairCompleteSequence.MarkUnexecuted(result, result.ExecutionStatus == ExecutionStatus.Cancelled ? "Elevación cancelada por el usuario; la secuencia no se inició." : "La secuencia se interrumpió por un fallo técnico.");
+                        if (diagnostic) DiagnosticIntegritySequence.CompleteMissing(result);
+                        else RepairCompleteSequence.MarkUnexecuted(result, result.ExecutionStatus == ExecutionStatus.Cancelled ? "Elevación cancelada por el usuario; la secuencia no se inició." : "La secuencia se interrumpió por un fallo técnico.");
                         for (int i = recorded; i < result.SequenceSteps.Count; i++)
                         { var skip = result.SequenceSteps[i]; logger.Write("Paso Skipped | TaskId=" + skip.TaskId + " | Motivo=" + skip.SkipReason); }
-                        RepairCompleteSequence.Summarize(result);
+                        if (diagnostic) DiagnosticIntegritySequence.Summarize(result); else RepairCompleteSequence.Summarize(result);
                         if (!receivedCompletion && result.ExecutionStatus == ExecutionStatus.Success)
                         { result.ExecutionStatus = ExecutionStatus.Failed; result.FindingStatus = FindingStatus.Unknown; result.UserSummary = "No se pudo confirmar la finalización de la secuencia por un fallo del worker o IPC."; }
                     }
@@ -411,7 +463,7 @@ namespace WinSereno.Services
                     else if (task.Id == ElevatedTaskCatalog.WindowsTempAnalyzeId) WindowsTempAnalysisProtocol.Apply(result);
                     else RepairResultInterpreter.Apply(task.Id, result);
                     try { logger.TaskFinished(task, result); }
-                    finally { Publish(new TaskProgress { CurrentTask = task, State = RunnerState.Completed, StartedAt = result.StartedAt,
+                    finally { report(new TaskProgress { CurrentTask = task, State = RunnerState.Completed, StartedAt = result.StartedAt,
                         Elapsed = result.Duration, LastRelevantLine = result.UserSummary, StdOut = result.StdOut, StdErr = result.StdErr, Percentage = percentage, Result = result }); }
                 }
                 return result;

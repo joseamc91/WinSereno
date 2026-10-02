@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WinSereno.Models;
@@ -11,30 +12,57 @@ namespace WinSereno.Services
     {
         private readonly ISessionLogger logger;
         private readonly BasicDiagnosticChecks basic;
-        private readonly IntegritySessionState integrity;
-        public DiagnosticService(SystemInformationService information, ISessionLogger logger, IntegritySessionState integrity) { this.logger = logger; this.integrity = integrity; basic = new BasicDiagnosticChecks(information, logger); }
+        private readonly Func<OperationLease, Func<Task>, Action<TaskProgress>, Task<MaintenanceTaskResult>> elevatedIntegrity;
+        private readonly Func<string, CancellationToken, Task<DiagnosticResult>> readCheck;
+        public DiagnosticService(SystemInformationService information, ISessionLogger logger, IntegritySessionState integrity,
+            Func<OperationLease, Func<Task>, Action<TaskProgress>, Task<MaintenanceTaskResult>> elevatedIntegrity = null,
+            Func<string, CancellationToken, Task<DiagnosticResult>> readCheck = null)
+        { this.logger = logger; basic = new BasicDiagnosticChecks(information, logger); this.elevatedIntegrity = elevatedIntegrity; this.readCheck = readCheck; }
         public static IList<DiagnosticResult> CreatePendingResults()
         {
             var items = new List<DiagnosticResult>();
-            foreach (var pair in new[] { Tuple.Create("space", "Espacio de almacenamiento"), Tuple.Create("storage-health", "Salud básica de almacenamiento"),
-                Tuple.Create("network", "Red local e Internet"), Tuple.Create("services", "Servicios críticos"), Tuple.Create("power", "Plan de energía"), Tuple.Create("events", "Eventos de Windows"), Tuple.Create("integrity", "Integridad de Windows") })
-                items.Add(new DiagnosticResult { Id = pair.Item1, Name = pair.Item2, Status = DiagnosticStatus.NotChecked, Summary = pair.Item1 == "integrity" ? "La comprobación de integridad requiere una acción administrativa explícita." : "Aún no se ha realizado esta comprobación.",
-                    Recommendation = pair.Item1 == "integrity" ? "Revisar las opciones de Reparación; no se ejecutará DISM en este análisis." : "Pulsar Analizar este PC.",
-                    NavigationTarget = pair.Item1 == "integrity" ? (NavigationSection?)NavigationSection.Repair : null, NavigationLabel = pair.Item1 == "integrity" ? "Ir a Reparación" : null });
+            foreach (var pair in new[] {
+                Tuple.Create("space", "Espacio de almacenamiento", "Comprueba si las unidades tienen suficiente espacio libre."),
+                Tuple.Create("storage-health", "Salud básica de almacenamiento", "Consulta el estado básico que Windows informa de los discos físicos."),
+                Tuple.Create("network", "Red local e Internet", "Comprueba si el equipo tiene red activa y acceso funcional a Internet."),
+                Tuple.Create("services", "Servicios críticos", "Comprueba que los servicios esenciales de Windows estén funcionando."),
+                Tuple.Create("events", "Eventos de Windows", "Busca errores o avisos recientes relevantes en los registros de Windows."),
+                Tuple.Create("integrity", "Integridad de Windows", "Comprueba el almacén de componentes y los archivos protegidos de Windows sin repararlos.") })
+                items.Add(new DiagnosticResult { Id = pair.Item1, Name = pair.Item2, Status = DiagnosticStatus.NotChecked, Summary = pair.Item3 });
             return items;
         }
-        public async Task RunAsync(IProgress<DiagnosticResult> progress, CancellationToken token)
+        public async Task RunAsync(IProgress<DiagnosticResult> progress, OperationLease operation, IProgress<TaskProgress> phase)
         {
+            var token = operation.Token;
             var watch = Stopwatch.StartNew();
-            SystemQuery.Log(logger, "Inicio de diagnóstico | Solo lectura | Sin elevación");
+            SystemQuery.Log(logger, "Inicio de diagnóstico | Solo lectura | Integridad mediante un worker elevado");
             try
             {
-                foreach (var item in CreatePendingResults())
+                Func<Task> normal = async () =>
                 {
-                    token.ThrowIfCancellationRequested();
-                    var result = await RunCheckAsync(item.Id, token).ConfigureAwait(false);
-                    progress.Report(result);
+                    phase.Report(new TaskProgress { State = RunnerState.Running, LastRelevantLine = "Analizando..." });
+                    foreach (var item in CreatePendingResults().Where(r => r.Id != "integrity"))
+                    {
+                        token.ThrowIfCancellationRequested();
+                        DiagnosticResult result;
+                        try { result = await (readCheck == null ? RunCheckAsync(item.Id, token) : readCheck(item.Id, token)).ConfigureAwait(false); }
+                        catch (OperationCanceledException) { throw; }
+                        catch (Exception ex) { SystemQuery.Log(logger, "Error técnico diagnóstico " + item.Id + ": " + ex); result = item; result.Summary = "No se pudo obtener información fiable para esta comprobación."; }
+                        progress.Report(result);
+                    }
+                };
+                MaintenanceTaskResult integrityResult;
+                if (elevatedIntegrity == null)
+                {
+                    await normal().ConfigureAwait(false);
+                    integrityResult = new MaintenanceTaskResult { ExecutionStatus = ExecutionStatus.Failed, UserSummary = "No está disponible el transporte administrativo de integridad." };
                 }
+                else integrityResult = await elevatedIntegrity(operation, normal, value => phase.Report(value)).ConfigureAwait(false);
+                token.ThrowIfCancellationRequested();
+                DiagnosticIntegritySequence.CompleteMissing(integrityResult);
+                var integrityCard = DiagnosticIntegritySequence.ToDiagnostic(integrityResult);
+                progress.Report(integrityCard);
+                SystemQuery.Log(logger, "Integridad combinada | Estado=" + integrityCard.Status + " | " + integrityCard.Summary);
             }
             finally { SystemQuery.Log(logger, "Fin de diagnóstico | Duración=" + watch.Elapsed + " | Cancelación=" + token.IsCancellationRequested); }
         }
@@ -54,9 +82,8 @@ namespace WinSereno.Services
                         case "storage-health": return basic.StorageHealth();
                         case "network": return await new NetworkDiagnosticCheck(logger).RunAsync(token).ConfigureAwait(false);
                         case "services": return basic.Services();
-                        case "power": return basic.Power();
                         case "events": return new EventDiagnosticCheck(logger).Run(token);
-                        case "integrity": return integrity.Read();
+                        case "integrity": throw new InvalidOperationException("Integridad se ejecuta dentro del diagnóstico general mediante su secuencia fija de solo lectura.");
                         default: throw new ArgumentException("Comprobación desconocida", nameof(id));
                     }
                 }).ConfigureAwait(false);

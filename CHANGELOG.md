@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Diagnóstico ahora incluye la comprobación de integridad de Windows con un único UAC, utilizando DISM CheckHealth y SFC VerifyOnly sin realizar reparaciones.
+- Diagnóstico se ha simplificado y compactado, con explicaciones previas, resultados más claros y estados alineados.
+- El panel global de operaciones se ha sustituido por un toast flotante que conserva progreso, detalles e historial sin ocupar espacio en las páginas.
+- Reparación presenta ahora una cabecera simplificada y herramientas individuales más compactas, con nombres descriptivos y sus términos técnicos.
 - Inicio muestra información más completa y compacta de CPU, GPU, RAM, red y discos.
 - Se elimina el indicador global de reinicio pendiente de Inicio y Diagnóstico; se mantienen los avisos de reinicio de operaciones concretas.
 - Registro de acciones de la sesión y cierre de resultados terminados del panel global sin perder sus detalles.

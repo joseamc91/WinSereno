@@ -43,7 +43,7 @@ namespace WinSereno
                 var information = new SystemInformationService(logger);
                 home = new HomeViewModel(information, logger);
                 var integrity = new IntegritySessionState();
-                var diagnosis = new DiagnosticViewModel(new DiagnosticService(information, logger, integrity), operations, logger, dialogs, integrity);
+                var diagnosis = new DiagnosticViewModel(new DiagnosticService(information, logger, integrity, runner.RunDiagnosticAsync), operations, logger, dialogs, integrity);
                 var window = new MainWindow(new MainViewModel(storage, settings, themes, dialogs, runner, home, diagnosis, operations, integrity, logger), dialogs);
                 MainWindow = window;
                 window.Show();

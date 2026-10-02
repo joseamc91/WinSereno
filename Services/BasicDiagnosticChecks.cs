@@ -71,12 +71,5 @@ namespace WinSereno.Services
                 Summary = stopped ? "Un servicio esencial está detenido." : unknown || transition ? "No se pudo confirmar el estado esperado de todos los servicios." : "Los tres servicios esenciales están en ejecución.",
                 DetailedDescription = string.Join("\n", lines), Recommendation = stopped ? "Revisar el motivo de la detención; la aplicación no inicia ni modifica servicios." : "Solo se consultan RPC, DCOM y Registro de eventos; no servicios iniciados bajo demanda." };
         }
-        public DiagnosticResult Power()
-        {
-            string name = NativePowerInformation.Read();
-            return new DiagnosticResult { Id = "power", Name = "Plan de energía", Status = string.IsNullOrWhiteSpace(name) ? DiagnosticStatus.NotChecked : DiagnosticStatus.Healthy,
-                Summary = string.IsNullOrWhiteSpace(name) ? "No se pudo obtener el nombre del plan activo." : "Plan activo: " + name,
-                Recommendation = "Información de solo lectura. No se valora ni cambia el plan seleccionado." };
-        }
     }
 }

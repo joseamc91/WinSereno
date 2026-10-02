@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $project = Split-Path $PSScriptRoot -Parent
 $exe = Join-Path $project 'bin\Debug\WinSereno.exe'
 [void][Reflection.Assembly]::LoadFrom($exe)
@@ -100,8 +100,8 @@ public static class SfcStreamingChecks {
   RepairResultInterpreter.Apply(ElevatedTaskCatalog.SfcId,result);
   Check(result.FindingStatus==FindingStatus.Unknown,"ExitCode 0 no implica Healthy");
   string implementation=File.ReadAllText(Path.Combine(project,"Services","FixedTaskProcess.cs"));
-  Check(implementation.Contains("task.Id == ElevatedTaskCatalog.SfcId ? new OutputLineBuffer(output) : null") &&
-   implementation.Contains("if (lines != null) lines.Append(text); else output(text);"),"Buffer solo para SFC");
+  Check(implementation.Contains("task.Id == ElevatedTaskCatalog.SfcId || task.Id == ElevatedTaskCatalog.SfcVerifyOnlyId ? new OutputLineBuffer(output) : null") &&
+   implementation.Contains("if (lines != null) lines.Append(text); else output(text);"),"Buffer para SFC scannow y verifyonly");
   return count+" comprobaciones nuevas correctas; sin SFC, procesos de mantenimiento ni UAC.";
  }
 }

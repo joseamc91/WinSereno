@@ -6,29 +6,6 @@ using Microsoft.Win32;
 
 namespace WinSereno.Services
 {
-    internal static class NativePowerInformation
-    {
-        [DllImport("powrprof.dll")] private static extern uint PowerGetActiveScheme(IntPtr root, out IntPtr scheme);
-        [DllImport("powrprof.dll")] private static extern uint PowerReadFriendlyName(IntPtr root, ref Guid scheme, IntPtr subgroup, IntPtr setting, byte[] buffer, ref uint size);
-        [DllImport("kernel32.dll")] private static extern IntPtr LocalFree(IntPtr memory);
-        public static string Read()
-        {
-            uint error = PowerGetActiveScheme(IntPtr.Zero, out IntPtr pointer);
-            if (error != 0) throw new Win32Exception((int)error);
-            try
-            {
-                var scheme = Marshal.PtrToStructure<Guid>(pointer);
-                uint size = 0;
-                error = PowerReadFriendlyName(IntPtr.Zero, ref scheme, IntPtr.Zero, IntPtr.Zero, null, ref size);
-                if ((error != 0 && error != 234) || size == 0 || size > 65536) throw new Win32Exception((int)error);
-                var buffer = new byte[size];
-                error = PowerReadFriendlyName(IntPtr.Zero, ref scheme, IntPtr.Zero, IntPtr.Zero, buffer, ref size);
-                if (error != 0) throw new Win32Exception((int)error);
-                return Encoding.Unicode.GetString(buffer).TrimEnd('\0');
-            }
-            finally { LocalFree(pointer); }
-        }
-    }
     internal sealed class WifiInformation
     {
         public string Ssid { get; set; }

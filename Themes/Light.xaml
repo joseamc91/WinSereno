@@ -14,4 +14,14 @@
   <SolidColorBrush x:Key="GoodBrush" Color="#226E50"/>
   <SolidColorBrush x:Key="WarningBrush" Color="#8A5908"/>
   <SolidColorBrush x:Key="ErrorBrush" Color="#B02D42"/>
+  <!-- A consistently dark operation surface, distinct from page cards in both themes. -->
+  <SolidColorBrush x:Key="ToastBackgroundBrush" Color="#141E2D"/>
+  <SolidColorBrush x:Key="ToastTextBrush" Color="#FFFFFF"/>
+  <SolidColorBrush x:Key="ToastMutedBrush" Color="#AFBDD2"/>
+  <SolidColorBrush x:Key="ToastBorderBrush" Color="#344359"/>
+  <SolidColorBrush x:Key="ToastButtonBrush" Color="#253247"/>
+  <SolidColorBrush x:Key="ToastCloseBrush" Color="#B02D42"/>
+  <SolidColorBrush x:Key="ToastGoodBrush" Color="#80D7AB"/>
+  <SolidColorBrush x:Key="ToastWarningBrush" Color="#F1C477"/>
+  <SolidColorBrush x:Key="ToastErrorBrush" Color="#FF98A8"/>
 </ResourceDictionary>

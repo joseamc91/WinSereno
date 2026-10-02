@@ -38,6 +38,16 @@ namespace WinSereno.Services
             lock (sync) { if (current == lease) current = null; }
             Changed?.Invoke(this, EventArgs.Empty);
         }
+        internal void SetCancelable(OperationLease lease, bool value)
+        {
+            lock (sync)
+            {
+                if (current != lease) throw new InvalidOperationException("La operación ya no está activa.");
+                lease.ChangeCancellation(value);
+            }
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
+        internal bool Owns(OperationLease lease) { lock (sync) return current == lease; }
     }
     public sealed class OperationLease : IDisposable
     {
@@ -45,11 +55,13 @@ namespace WinSereno.Services
         private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
         private readonly TaskCompletionSource<bool> completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         public string Name { get; }
-        public bool CanBeCancelled { get; }
+        public bool CanBeCancelled { get; private set; }
         public CancellationToken Token => cancellation.Token;
         internal Task Completion => completion.Task;
         internal OperationLease(OperationCoordinator owner, string name, bool cancelable) { this.owner = owner; Name = name; CanBeCancelled = cancelable; }
         internal void Cancel() => cancellation.Cancel();
+        internal void ChangeCancellation(bool value) { CanBeCancelled = value; }
+        internal void SetCancelable(bool value) => owner.SetCancelable(this, value);
         public void Dispose()
         {
             var previous = Interlocked.Exchange(ref owner, null);

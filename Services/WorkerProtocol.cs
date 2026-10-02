@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WinSereno.Services
 {
-    internal enum WorkerMessage : byte { WorkerStarted = 1, TaskStarted, StdOutLine, StdErrLine, TaskCompleted, TaskFailed, StepStarted, StepCompleted, StepSkipped, SequenceCompleted, DhcpStepStarted, DhcpStepCompleted, DhcpStepSkipped, DhcpCompleted, RestartStepStarted, RestartStepCompleted, RestartNote, RestartCompleted, WindowsTempAnalyzed, WindowsTempCleanupProgress, WindowsTempCleaned, CleanupBatchCounters }
+    internal enum WorkerMessage : byte { WorkerStarted = 1, TaskStarted, StdOutLine, StdErrLine, TaskCompleted, TaskFailed, StepStarted, StepCompleted, StepSkipped, SequenceCompleted, DhcpStepStarted, DhcpStepCompleted, DhcpStepSkipped, DhcpCompleted, RestartStepStarted, RestartStepCompleted, RestartNote, RestartCompleted, WindowsTempAnalyzed, WindowsTempCleanupProgress, WindowsTempCleaned, CleanupBatchCounters, DiagnosticStepFailed }
     internal static class WorkerProtocol
     {
         public const int HandshakeTimeout = 15000;

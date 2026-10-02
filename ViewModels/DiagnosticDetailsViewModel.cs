@@ -13,6 +13,7 @@ namespace WinSereno.ViewModels
             Name = result.Name;
             var text = new StringBuilder(result.StatusLabel + " · " + result.Summary + "\n\n");
             text.AppendLine(result.DetailedDescription);
+            if (!string.IsNullOrWhiteSpace(result.Recommendation)) text.AppendLine("Recomendación: " + result.Recommendation);
             if (!string.IsNullOrWhiteSpace(result.TechnicalDetails)) text.AppendLine(result.TechnicalDetails);
             foreach (var item in result.Events)
             {

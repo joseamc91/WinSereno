@@ -27,6 +27,12 @@ namespace WinSereno.Views
             var host = (ContentControl)sender;
             if (host.Content == null) host.Content = new DiagnosticCard();
         }
+        private void ToastLayer_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            // Canvas does not reserve page height. Clamp the overlay to the actual main area, not the window/sidebar.
+            TaskExecutionHost.Width = System.Math.Max(0, System.Math.Min(500, e.NewSize.Width));
+            TaskExecutionHost.MaxHeight = System.Math.Max(0, e.NewSize.Height);
+        }
         private async void OnClosing(object sender, CancelEventArgs e)
         {
             if (!viewModel.Operations.IsActive) return;

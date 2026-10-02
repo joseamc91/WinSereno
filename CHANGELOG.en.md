@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Diagnostics now includes Windows integrity checks with a single UAC prompt, using DISM CheckHealth and SFC VerifyOnly without performing repairs.
+- Diagnostics has been simplified and made more compact, with explanations before analysis, clearer results, and aligned statuses.
+- The global operation panel has been replaced by a floating toast that retains progress, details, and history without taking up space on the pages.
+- Repair now features a simplified header and more compact individual tools, with descriptive names and their technical terms.
 - Home displays more complete and compact CPU, GPU, RAM, network, and disk information.
 - Removed the global pending restart indicator from Home and Diagnostics; restart notices for specific operations are retained.
 - Session action history and dismissal of completed results from the global panel without losing their details.

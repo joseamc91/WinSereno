@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -34,6 +34,9 @@ namespace WinSereno.ViewModels
         public OperationCoordinator Operations { get; }
         private readonly ActionHistoryService history = new ActionHistoryService();
         private readonly OperationPanelState panel = new OperationPanelState();
+        private readonly Stopwatch analysisToastWatch = new Stopwatch();
+        private readonly System.Windows.Threading.DispatcherTimer analysisToastTimer;
+        public ObservableCollection<OperationToastCount> DiagnosticToastCounts { get; } = new ObservableCollection<OperationToastCount>();
         public ReadOnlyObservableCollection<ActionHistoryEntry> ActionHistory => history.Entries;
         public bool HasHistory => ActionHistory.Count != 0;
         public RelayCommand HistoryDetailsCommand { get; }
@@ -82,10 +85,8 @@ namespace WinSereno.ViewModels
         public string PageTitle => CurrentSection == NavigationSection.Activity ? "Registro de acciones" : SelectedNavigation.Label;
         public string ProductVersion => "v" + FileVersionInfo.GetVersionInfo(typeof(MainViewModel).Assembly.Location).FileVersion;
         public bool HasPageNotice => !string.IsNullOrWhiteSpace(PageNotice);
-        public string PageNotice => CurrentSection == NavigationSection.Home ? "" : CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
-            : CurrentSection == NavigationSection.Diagnosis
-            ? "Información y diagnóstico de solo lectura. Sin elevación ni reparación automática."
-            : CurrentSection == NavigationSection.Cleanup ? "El análisis es de solo lectura. Los archivos en uso o protegidos se omitirán. Temporales de Windows requiere administrador." : CurrentSection == NavigationSection.Network ? "Información real de red. Vaciar caché DNS, renovar DHCP y reiniciar adaptador requieren confirmación; restablecer Winsock y TCP/IP requieren confirmación y UAC. No se combinan automáticamente." : CurrentSection == NavigationSection.Repair ? "DISM y SFC requieren confirmación y UAC. RestoreHealth y SFC realizan reparaciones." : "El tema y los logs se guardan junto a la aplicación.";
+        public string PageNotice => CurrentSection == NavigationSection.Home || CurrentSection == NavigationSection.Diagnosis || CurrentSection == NavigationSection.Repair ? "" : CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
+            : CurrentSection == NavigationSection.Cleanup ? "El análisis es de solo lectura. Los archivos en uso o protegidos se omitirán. Temporales de Windows requiere administrador." : CurrentSection == NavigationSection.Network ? "Información real de red. Vaciar caché DNS, renovar DHCP y reiniciar adaptador requieren confirmación; restablecer Winsock y TCP/IP requieren confirmación y UAC. No se combinan automáticamente." : "El tema y los logs se guardan junto a la aplicación.";
         public string PageDescription
         {
             get
@@ -93,8 +94,8 @@ namespace WinSereno.ViewModels
                 switch (CurrentSection)
                 {
                     case NavigationSection.Activity: return "Acciones realizadas durante esta sesión, de más reciente a más antigua.";
-                    case NavigationSection.Diagnosis: return "Analiza este PC como usuario normal. Los resultados se conservan solo durante esta sesión.";
-                    case NavigationSection.Repair: return "Comprobaciones y reparaciones explícitas. Ninguna herramienta se ejecuta al entrar en esta página.";
+                    case NavigationSection.Diagnosis: return "Analiza el estado general del PC sin realizar reparaciones. La integridad de Windows requiere permisos de administrador.";
+                    case NavigationSection.Repair: return "Comprueba y repara componentes de Windows mediante acciones explícitas; las herramientas administrativas solicitan confirmación y permisos de administrador antes de ejecutarse.";
                     case NavigationSection.Network: return "Adaptadores y conectividad de solo lectura. Actualiza al entrar o mediante Actualizar.";
                     case NavigationSection.Cleanup: return "Análisis de cuatro categorías, limpieza de temporales y miniaturas, y vaciado de Papelera.";
                     case NavigationSection.Settings: return "Personalización y almacenamiento de esta aplicación portable.";
@@ -123,17 +124,25 @@ namespace WinSereno.ViewModels
         }
         private TaskProgress progress = new TaskProgress { State = RunnerState.Idle };
         public TaskProgress Progress { get => progress; private set => Set(ref progress, value); }
-        public bool HasTask => Progress.CurrentTask != null && !Diagnosis.IsRunning && !Cleanup.IsRunning;
-        public bool ShowTaskPanel => HasTask && !panel.IsDismissed;
+        public bool HasTask => Progress.CurrentTask != null || Diagnosis.IsRunning || Cleanup.IsRunning;
+        public bool ShowTaskPanel => HasTask && (!panel.IsDismissed || Operations.IsActive);
         public bool CanDismissTaskPanel => ShowTaskPanel && panel.CanDismiss(Progress, Operations.IsActive);
         public bool IsActive => Operations.IsActive;
-        public bool HasPercentage => Progress.Percentage.HasValue;
-        public string ElapsedText => Progress.Elapsed.ToString(@"hh\:mm\:ss");
-        public string TaskName => Progress.CurrentTask?.Name ?? "Sin tarea activa";
+        public double? ToastPercentage => Diagnosis.IsRunning ? Diagnosis.LiveProgress?.Percentage : Cleanup.IsRunning ? null : Progress.Percentage;
+        public bool HasPercentage => IsActive && ToastPercentage.HasValue;
+        public bool CanCancelToast => IsActive && (Diagnosis.IsRunning ? Diagnosis.CancelCommand.CanExecute(null) : Cleanup.IsRunning ? Operations.CanBeCancelled : CancelTaskCommand.CanExecute(null));
+        public bool ShowDiagnosticToastCounts => !IsActive && !Diagnosis.IsRunning && !Cleanup.IsRunning && Progress.State == RunnerState.Completed && Progress.Result != null && Progress.CurrentTask?.Id == "diagnosis.general";
+        public string ToastLastRelevantLine => Diagnosis.IsRunning ? Diagnosis.LiveProgress?.LastRelevantLine : Cleanup.IsRunning ? null : Progress.LastRelevantLine;
+        public string ElapsedText => (Diagnosis.IsRunning || Cleanup.IsRunning ? analysisToastWatch.Elapsed : Progress.Elapsed).ToString(@"hh\:mm\:ss");
+        public string TaskName => Diagnosis.IsRunning ? "Diagnóstico" : Cleanup.IsRunning ? "Análisis de Limpieza" : Progress.CurrentTask?.Name ?? "Sin tarea activa";
         public string StatusText
         {
             get
             {
+                if (Diagnosis.IsRunning) return Diagnosis.LiveProgress?.StepLabel ?? Diagnosis.Summary;
+                if (Cleanup.IsRunning) return Cleanup.Summary;
+                if (ShowDiagnosticToastCounts) return Progress.Result.ExecutionStatus == ExecutionStatus.Cancelled ? "Diagnóstico cancelado." :
+                    Progress.Result.ExecutionStatus == ExecutionStatus.Failed ? "No se pudo completar el diagnóstico. Los resultados obtenidos se conservan." : "Diagnóstico finalizado.";
                 if (Progress.State == RunnerState.Running) return Progress.StepLabel ?? (Progress.CurrentTask?.IsMock == true ? "Ejecutando... (simulación)" : "Ejecutando " + TaskName + "...");
                 if (Progress.State == RunnerState.Cancelling) return "Cancelando simulación...";
                 if (Progress.Result != null)
@@ -175,8 +184,9 @@ namespace WinSereno.ViewModels
             RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.ComponentCleanupId, "DISM StartComponentCleanup · Mantenimiento", integrity));
             RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.ChkdskId, "CHKDSK · Solo lectura", integrity));
             RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.CompleteId, "Secuencia · RestoreHealth condicional · Un único UAC", integrity));
-            CancelTaskCommand = new RelayCommand(p => Runner.RequestCancellation(), p => Runner.IsActive && Runner.Current.CurrentTask.CanBeCancelled);
-            DetailsCommand = new RelayCommand(p => dialogs.ShowOutput(Progress), p => HasTask);
+            CancelTaskCommand = new RelayCommand(p => { if (Diagnosis.IsRunning) Diagnosis.CancelCommand.Execute(null); else if (Cleanup.IsRunning) Operations.RequestCancellation(); else Runner.RequestCancellation(); },
+                p => Diagnosis.IsRunning ? Diagnosis.CancelCommand.CanExecute(null) : Cleanup.IsRunning ? Operations.CanBeCancelled : Runner.IsActive && Runner.Current.CurrentTask.CanBeCancelled);
+            DetailsCommand = new RelayCommand(p => dialogs.ShowOutput(CreateToastDetails()), p => HasTask);
             HistoryDetailsCommand = new RelayCommand(p => { if (p is ActionHistoryEntry entry) dialogs.ShowOutput(entry.CreateDetailsProgress()); });
             DismissTaskPanelCommand = new RelayCommand(p => { panel.Dismiss(Progress, Operations.IsActive); RefreshTaskPanel(); }, p => CanDismissTaskPanel);
             CheckUpdatesCommand = new RelayCommand(p => { }, p => false);
@@ -184,9 +194,11 @@ namespace WinSereno.ViewModels
             Runner.ProgressChanged += OnProgressChanged;
             Diagnosis.Completed += OnProgressChanged;
             Cleanup.Completed += OnProgressChanged;
-            Operations.Changed += (s, e) => { StartMockCommand.Refresh(); RunRepairCommand.Refresh(); FlushDnsCommand.Refresh(); RenewDhcpCommand.Refresh(); RestartAdapterCommand.Refresh(); ResetWinsockCommand.Refresh(); ResetTcpIpCommand.Refresh(); CleanUserTempCommand.Refresh(); AnalyzeWindowsTempCommand.Refresh(); CleanWindowsTempCommand.Refresh(); CleanThumbnailsCommand.Refresh(); EmptyRecycleBinCommand.Refresh(); CleanSelectedCommand.Refresh(); Raise(nameof(IsActive)); RefreshTaskPanel(); };
-            Cleanup.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(CleanupViewModel.HasSelectedCategories)) CleanSelectedCommand.Refresh(); if (e.PropertyName == nameof(CleanupViewModel.IsRunning)) { Raise(nameof(HasTask)); RefreshTaskPanel(); } };
-            Diagnosis.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(DiagnosticViewModel.IsRunning)) { Raise(nameof(HasTask)); RefreshTaskPanel(); } };
+            Operations.Changed += (s, e) => { StartMockCommand.Refresh(); RunRepairCommand.Refresh(); FlushDnsCommand.Refresh(); RenewDhcpCommand.Refresh(); RestartAdapterCommand.Refresh(); ResetWinsockCommand.Refresh(); ResetTcpIpCommand.Refresh(); CleanUserTempCommand.Refresh(); AnalyzeWindowsTempCommand.Refresh(); CleanWindowsTempCommand.Refresh(); CleanThumbnailsCommand.Refresh(); EmptyRecycleBinCommand.Refresh(); CleanSelectedCommand.Refresh(); Raise(nameof(IsActive)); RefreshToastPresentation(); };
+            analysisToastTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+            analysisToastTimer.Tick += (s, e) => RefreshToastPresentation();
+            Cleanup.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(CleanupViewModel.HasSelectedCategories)) CleanSelectedCommand.Refresh(); if (e.PropertyName == nameof(CleanupViewModel.IsRunning)) ObserveAnalysisPresentation(); if (e.PropertyName == nameof(CleanupViewModel.Summary)) RefreshToastPresentation(); };
+            Diagnosis.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(DiagnosticViewModel.IsRunning)) ObserveAnalysisPresentation(); else RefreshToastPresentation(); };
         }
         private async Task CleanSelectedAsync()
         {
@@ -408,10 +420,51 @@ namespace WinSereno.ViewModels
             panel.Observe(value);
             RecordHistory(sender, value);
             Progress = value;
+            if (value.State == RunnerState.Completed && value.CurrentTask?.Id == "diagnosis.general")
+            {
+                DiagnosticToastCounts.Clear();
+                AddDiagnosticToastCount("Healthy", Diagnosis.HealthyCount);
+                AddDiagnosticToastCount("Attention", Diagnosis.AttentionCount);
+                AddDiagnosticToastCount("Error", Diagnosis.ErrorCount);
+                AddDiagnosticToastCount("NotChecked", Diagnosis.NotCheckedCount);
+            }
             Raise(nameof(HasTask)); Raise(nameof(IsActive)); Raise(nameof(HasPercentage)); Raise(nameof(ElapsedText));
             Raise(nameof(TaskName)); Raise(nameof(StatusText));
             StartMockCommand.Refresh(); CancelTaskCommand.Refresh(); DetailsCommand.Refresh();
             RefreshTaskPanel();
+            RefreshToastPresentation();
+        }
+        private void AddDiagnosticToastCount(string status, int count)
+        { if (count > 0) DiagnosticToastCounts.Add(new OperationToastCount(status, count, DiagnosticToastCounts.Count == 0)); }
+        private void ObserveAnalysisPresentation()
+        {
+            if (Diagnosis.IsRunning || Cleanup.IsRunning)
+            {
+                analysisToastWatch.Restart(); analysisToastTimer.Start();
+                panel.Observe(new TaskProgress { State = RunnerState.Running });
+            }
+            else { analysisToastTimer.Stop(); analysisToastWatch.Stop(); }
+            RefreshToastPresentation();
+        }
+        private void RefreshToastPresentation()
+        {
+            Raise(nameof(HasTask)); Raise(nameof(TaskName)); Raise(nameof(StatusText)); Raise(nameof(ElapsedText));
+            Raise(nameof(HasPercentage)); Raise(nameof(ToastPercentage)); Raise(nameof(ToastLastRelevantLine));
+            Raise(nameof(CanCancelToast)); Raise(nameof(ShowDiagnosticToastCounts));
+            CancelTaskCommand.Refresh(); DetailsCommand.Refresh(); RefreshTaskPanel();
+        }
+        private TaskProgress CreateToastDetails()
+        {
+            if (!Diagnosis.IsRunning && !Cleanup.IsRunning) return Progress;
+            var text = new System.Text.StringBuilder();
+            if (Diagnosis.IsRunning)
+            {
+                foreach (var result in Diagnosis.Results) text.AppendLine(result.Name + "\n" + new DiagnosticDetailsViewModel(result).Text + "\n");
+                text.AppendLine(Diagnosis.LiveProgress?.StdOut);
+            }
+            else foreach (var row in Cleanup.Categories) text.AppendLine(row.Name + "\n" + row.Summary + "\n" + row.Details + "\n");
+            return new TaskProgress { State = RunnerState.Running, CurrentTask = new MaintenanceTask { Name = TaskName },
+                Elapsed = analysisToastWatch.Elapsed, StdOut = text.ToString(), StdErr = Diagnosis.IsRunning ? Diagnosis.LiveProgress?.StdErr : null };
         }
         private void RecordHistory(object sender, TaskProgress value)
         {

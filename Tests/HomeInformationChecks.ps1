@@ -106,7 +106,7 @@ public static class HomeInformationChecks {
   Check(assembly.GetType("WinSereno.Models.RestartPendingInformation")==null,"Global restart data removed");
   Check(assembly.GetType("WinSereno.Models.RestartPendingStatus")==null,"Global restart enum removed");
   var pending=DiagnosticService.CreatePendingResults();
-  Check(pending.Count==7&&!pending.Any(d=>d.Id=="restart"),"Seven diagnostics, no restart check");
+  Check(pending.Count==6&&!pending.Any(d=>d.Id=="restart"||d.Id=="power"),"Six diagnostics, no restart or power check");
   Check(assembly.GetType("WinSereno.Services.BasicDiagnosticChecks").GetMethod("Restart")==null,"Global diagnostic implementation removed");
   Check(File.ReadAllText(Path.Combine(project,"Services","SystemInformationService.cs")).Contains("GetPhysicallyInstalledSystemMemory"),"Reliable native installed total retained");
 
@@ -359,7 +359,7 @@ public static class HomeInformationChecks {
    Check(scroll.VerticalScrollBarVisibility==ScrollBarVisibility.Auto,"Small-window scrolling retained: "+theme);
    Check(Logical<Button>(content).Any(b=>Convert.ToString(b.Content)=="Actualizar"&&ReferenceEquals(b.Command,home.RefreshCommand)),"Refresh command retained");
    window.Close();
-   foreach(var item in vm.Navigation.Where(n=>n.Section!=NavigationSection.Home)) {
+   foreach(var item in vm.Navigation.Where(n=>n.Section!=NavigationSection.Home&&n.Section!=NavigationSection.Diagnosis&&n.Section!=NavigationSection.Repair)) {
     // Change only the test backing field: normal Network navigation would perform real connectivity queries.
     typeof(MainViewModel).GetField("selectedNavigation",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(vm,item);
     Check(vm.HasPageNotice&&!string.IsNullOrWhiteSpace(vm.PageNotice),"Other notice content retained: "+item.Label);

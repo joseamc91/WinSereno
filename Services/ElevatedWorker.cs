@@ -105,6 +105,7 @@ namespace WinSereno.Services
                             }
                             catch (Exception ex) { writer.Write((byte)WorkerMessage.TaskFailed); WorkerProtocol.WriteText(writer, ex.GetType().Name + ": " + ex.Message); writer.Flush(); return 5; }
                         }
+                        if (args[1] == ElevatedTaskCatalog.DiagnosticIntegrityId && !await Task.Run(() => reader.ReadBoolean()).ConfigureAwait(false)) return 0;
                         return await ExecuteAsync(writer, args[1]).ConfigureAwait(false);
                     }
                 }
@@ -189,6 +190,14 @@ namespace WinSereno.Services
         }
         private static async Task<int> ExecuteAsync(BinaryWriter writer, string taskId)
         {
+            if (taskId == ElevatedTaskCatalog.DiagnosticIntegrityId)
+            {
+                await DiagnosticIntegritySequence.RunAsync(async id => {
+                    writer.Write((byte)WorkerMessage.StepStarted); WorkerProtocol.WriteText(writer, id); writer.Flush();
+                    return await ExecuteSingleAsync(writer, id, true, true).ConfigureAwait(false);
+                }).ConfigureAwait(false);
+                writer.Write((byte)WorkerMessage.SequenceCompleted); writer.Flush(); return 0;
+            }
             if (taskId != ElevatedTaskCatalog.CompleteId)
             { await ExecuteSingleAsync(writer, taskId, false).ConfigureAwait(false); return 0; }
             await RepairCompleteSequence.RunAsync(async id =>
@@ -203,7 +212,7 @@ namespace WinSereno.Services
             writer.Write((byte)WorkerMessage.SequenceCompleted); writer.Flush();
             return 0;
         }
-        private static async Task<MaintenanceTaskResult> ExecuteSingleAsync(BinaryWriter writer, string taskId, bool sequence)
+        private static async Task<MaintenanceTaskResult> ExecuteSingleAsync(BinaryWriter writer, string taskId, bool sequence, bool diagnostic = false)
         {
             var task = ElevatedTaskCatalog.Get(taskId);
             var result = new MaintenanceTaskResult { StartedAt = DateTimeOffset.Now };
@@ -222,6 +231,7 @@ namespace WinSereno.Services
             {
                 result = await FixedTaskProcess.RunAsync(taskId, start =>
                 {
+                    result.StartedAt = start; result.CommandStarted = true;
                     lock (outputLock)
                     {
                         try { writer.Write((byte)WorkerMessage.TaskStarted); writer.Write(start.UtcTicks); writer.Flush(); }
@@ -238,6 +248,19 @@ namespace WinSereno.Services
             }
             catch (Exception ex)
             {
+                if (diagnostic)
+                {
+                    result.ExecutionStatus = ExecutionStatus.Failed; result.FindingStatus = FindingStatus.Unknown;
+                    result.FinishedAt = DateTimeOffset.Now; result.Duration = result.FinishedAt - result.StartedAt;
+                    lock (outputLock)
+                    {
+                        if (!connected) throw;
+                        writer.Write((byte)WorkerMessage.DiagnosticStepFailed); writer.Write(result.CommandStarted);
+                        writer.Write(result.StartedAt.UtcTicks); writer.Write(result.FinishedAt.UtcTicks);
+                        WorkerProtocol.WriteText(writer, ex.GetType().Name + ": " + ex.Message); writer.Flush();
+                    }
+                    return result;
+                }
                 send(WorkerMessage.TaskFailed, ex.GetType().Name + ": " + ex.Message);
                 if (sequence) throw;
                 result.ExecutionStatus = ExecutionStatus.Failed; return result;

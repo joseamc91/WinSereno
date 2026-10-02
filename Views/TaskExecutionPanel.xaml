@@ -1,22 +1,46 @@
-﻿<UserControl x:Class="WinSereno.Views.TaskExecutionPanel" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <Border Margin="0" Visibility="{Binding ShowTaskPanel, Converter={StaticResource BoolVisibility}}">
-    <Border.Style><Style TargetType="Border" BasedOn="{StaticResource Card}"><Style.Triggers><DataTrigger Binding="{Binding IsActive}" Value="False"><Setter Property="Padding" Value="12"/></DataTrigger></Style.Triggers></Style></Border.Style>
-    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+<UserControl x:Class="WinSereno.Views.TaskExecutionPanel" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <UserControl.Resources>
+    <Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource ToastTextBrush}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style x:Key="ToastButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+      <Setter Property="Foreground" Value="{DynamicResource ToastTextBrush}"/><Setter Property="Background" Value="{DynamicResource ToastButtonBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource ToastBorderBrush}"/><Setter Property="Padding" Value="10,5"/><Setter Property="Margin" Value="0"/><Setter Property="FontSize" Value="12"/>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+        <Border x:Name="Shell" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}"><TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" FontWeight="{TemplateBinding FontWeight}" FontSize="{TemplateBinding FontSize}" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Shell" Property="Opacity" Value="0.85"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Shell" Property="BorderBrush" Value="{DynamicResource ToastTextBrush}"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter TargetName="Shell" Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers>
+      </ControlTemplate></Setter.Value></Setter>
+    </Style>
+  </UserControl.Resources>
+  <Border x:Name="ToastShell" Margin="4" Padding="14" CornerRadius="10" Background="{DynamicResource ToastBackgroundBrush}" BorderBrush="{DynamicResource ToastBorderBrush}" BorderThickness="1" Visibility="{Binding ShowTaskPanel, Converter={StaticResource BoolVisibility}}">
+    <Border.Effect><DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.25"/></Border.Effect>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <StackPanel>
-        <TextBlock Text="{Binding TaskName}" FontWeight="SemiBold"/>
-        <TextBlock Text="{Binding StatusText}" Margin="0,5,0,0"/>
+        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+          <TextBlock Text="{Binding TaskName}" Foreground="{DynamicResource ToastTextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,10,0"/>
+          <Button x:Name="ToastClose" Grid.Column="1" Content="X" ToolTip="Ocultar resultado" AutomationProperties.Name="Ocultar resultado terminado" Command="{Binding DismissTaskPanelCommand}" Style="{StaticResource ToastButton}" Background="{DynamicResource ToastCloseBrush}" Foreground="{DynamicResource ToastTextBrush}" Padding="7,3" FontWeight="SemiBold" Visibility="{Binding CanDismissTaskPanel, Converter={StaticResource BoolVisibility}}"/>
+        </Grid>
+        <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource ToastTextBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+        <ItemsControl x:Name="ToastCounters" ItemsSource="{Binding DiagnosticToastCounts}" Visibility="{Binding ShowDiagnosticToastCounts, Converter={StaticResource BoolVisibility}}" Margin="0,6,0,0">
+          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate><DataTemplate><StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Separator}" Foreground="{DynamicResource ToastMutedBrush}"/>
+            <TextBlock Text="{Binding Text}" FontWeight="SemiBold"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource ToastMutedBrush}"/><Style.Triggers>
+              <DataTrigger Binding="{Binding StatusCode}" Value="Healthy"><Setter Property="Foreground" Value="{DynamicResource ToastGoodBrush}"/></DataTrigger>
+              <DataTrigger Binding="{Binding StatusCode}" Value="Attention"><Setter Property="Foreground" Value="{DynamicResource ToastWarningBrush}"/></DataTrigger>
+              <DataTrigger Binding="{Binding StatusCode}" Value="Error"><Setter Property="Foreground" Value="{DynamicResource ToastErrorBrush}"/></DataTrigger>
+            </Style.Triggers></Style></TextBlock.Style></TextBlock>
+          </StackPanel></DataTemplate></ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="{Binding ElapsedText, StringFormat=Tiempo transcurrido: {0}}" Foreground="{DynamicResource ToastMutedBrush}" FontSize="12" Margin="0,6,0,0"/>
         <StackPanel Visibility="{Binding IsActive, Converter={StaticResource BoolVisibility}}">
-        <TextBlock Text="{Binding ElapsedText, StringFormat=Tiempo transcurrido: {0}}" Style="{StaticResource Muted}" Margin="0,5,0,0"/>
-        <TextBlock Text="{Binding Progress.LastRelevantLine}" Style="{StaticResource Muted}" Margin="0,5,12,0"/>
-        <TextBlock Text="{Binding Progress.Percentage, StringFormat=Progreso real: {0:0.#}%}" Visibility="{Binding HasPercentage, Converter={StaticResource BoolVisibility}}"/>
-        <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress.Percentage}" IsIndeterminate="False" Height="6" Margin="0,10,12,0" Visibility="{Binding HasPercentage, Converter={StaticResource BoolVisibility}}"/>
+          <TextBlock Text="{Binding ToastLastRelevantLine}" Foreground="{DynamicResource ToastMutedBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
+          <TextBlock Text="{Binding ToastPercentage, StringFormat=Progreso real: {0:0.#}%}" Foreground="{DynamicResource ToastTextBrush}" FontSize="12" Margin="0,4,0,0" Visibility="{Binding HasPercentage, Converter={StaticResource BoolVisibility}}"/>
+          <ProgressBar Minimum="0" Maximum="100" Value="{Binding ToastPercentage, Mode=OneWay}" IsIndeterminate="False" Foreground="{DynamicResource ToastGoodBrush}" Background="{DynamicResource ToastBorderBrush}" Height="6" Margin="0,6,0,0" Visibility="{Binding HasPercentage, Converter={StaticResource BoolVisibility}}"/>
         </StackPanel>
+        <WrapPanel HorizontalAlignment="Right" Margin="0,10,0,0">
+          <Button Content="Ver detalles" Command="{Binding DetailsCommand}" Style="{StaticResource ToastButton}"/>
+          <Button Content="Cancelar" Command="{Binding CancelTaskCommand}" Style="{StaticResource ToastButton}" Margin="8,0,0,0" Visibility="{Binding CanCancelToast, Converter={StaticResource BoolVisibility}}"/>
+        </WrapPanel>
       </StackPanel>
-      <StackPanel Grid.Column="1" VerticalAlignment="Center">
-        <Button Content="X" ToolTip="Ocultar resultado" AutomationProperties.Name="Ocultar resultado terminado" Command="{Binding DismissTaskPanelCommand}" HorizontalAlignment="Right" Padding="6,2" Margin="0,0,0,6" FontSize="12" Visibility="{Binding CanDismissTaskPanel, Converter={StaticResource BoolVisibility}}"/>
-        <Button Content="Ver detalles" Command="{Binding DetailsCommand}" Margin="0,0,0,8"/>
-        <Button Content="Cancelar tarea" Command="{Binding CancelTaskCommand}" Margin="0" Visibility="{Binding IsActive, Converter={StaticResource BoolVisibility}}"/>
-      </StackPanel>
-    </Grid>
+    </ScrollViewer>
   </Border>
 </UserControl>
