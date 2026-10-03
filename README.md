@@ -4,9 +4,9 @@ Aplicación portable para Windows centrada en diagnóstico, mantenimiento y repa
 
 ## Estado
 
-WinSereno está en fase **Beta / pre-release**. **v0.1.0-beta.5** es la beta pública actual; no es una versión estable.
+**v1.0.0** es la primera versión estable pública de WinSereno.
 
-La versión pública visible sigue los tags y pre-releases. AssemblyVersion y FileVersion permanecen actualmente en `0.1.0.0`.
+La versión pública visible es `1.0.0` y sigue los tags de release. AssemblyVersion y FileVersion son `1.0.0.0`.
 
 Las funciones implementadas y su validación son aspectos distintos: algunas cuentan con pruebas manuales y otras requieren más validación en equipos reales.
 
@@ -58,7 +58,7 @@ Las acciones son independientes y requieren confirmación; UAC se solicita cuand
 
 **Restablecer TCP/IP** realiza un preflight de configuración IPv4. Cuando detecta configuración manual, muestra IP, máscara/prefijo, gateway y DNS y exige una segunda confirmación explícita antes de solicitar UAC. Una configuración indeterminada también requiere advertencia y segunda confirmación. WinSereno no guarda ni restaura automáticamente esos datos; el restablecimiento sigue siendo una acción administrativa explícita.
 
-Se han validado manualmente la lectura y actualización de Red, el reinicio de un adaptador Ethernet y el restablecimiento Winsock. DHCP se detiene de forma segura cuando no existen interfaces elegibles. También se ha validado manualmente el flujo preventivo de TCP/IP con una IPv4 estática real, sin ejecutar el restablecimiento. El comando TCP/IP permanece sin validación manual real por su posible impacto sobre la configuración de red. Estas comprobaciones no equivalen a una validación exhaustiva en todos los equipos.
+Se han validado manualmente la lectura y actualización de Red, el reinicio de un adaptador Ethernet y el restablecimiento Winsock. DHCP se detiene de forma segura cuando no existen interfaces elegibles. También se ha validado manualmente el flujo preventivo de TCP/IP con una IPv4 estática real, sin ejecutar el restablecimiento. En Windows 10 se observó un restablecimiento TCP/IP parcialmente aplicado con acceso denegado; el resultado conserva el error y distingue los cambios parciales. Estas comprobaciones no equivalen a una validación exhaustiva en todos los equipos.
 
 ### Limpieza
 
@@ -148,13 +148,13 @@ Tras compilar Debug, pueden ejecutarse individualmente con Windows PowerShell 5.
 powershell.exe -NoProfile -STA -File .\Tests\ThemePersistenceChecks.ps1
 ```
 
-Las suites disponibles no equivalen a una validación completa de la beta. En el cierre de Beta 4 se reprodujeron las comprobaciones estáticas, de presentación WPF y de regresión con datos simulados. Las suites relevantes para este bloque se ejecutaron sin bloqueos de Smart App Control. Beta 4 se publicó con la regresión histórica de CHKDSK en español («Acceso denegado»); Beta 5 incluye la corrección del reconocimiento de mensajes terminados en puntuación y sus regresiones ES/EN. Los bloqueos de harnesses registrados durante Beta 3 son evidencia histórica, no ejecuciones nuevas superadas.
+El CI compila Debug y Release y ejecuta automáticamente las 25 suites disponibles. Estas pruebas no equivalen a una validación exhaustiva en todos los equipos. En el cierre de Beta 4 se reprodujeron las comprobaciones estáticas, de presentación WPF y de regresión con datos simulados. Las suites relevantes para este bloque se ejecutaron sin bloqueos de Smart App Control. Beta 4 se publicó con la regresión histórica de CHKDSK en español («Acceso denegado»); Beta 5 incluye la corrección del reconocimiento de mensajes terminados en puntuación y sus regresiones ES/EN. Los bloqueos de harnesses registrados durante Beta 3 son evidencia histórica, no ejecuciones nuevas superadas.
 
 Existen validaciones manuales previas de Inicio, Diagnóstico y DISM CheckHealth/ScanHealth/RestoreHealth. SFC y CHKDSK también han aportado salidas reales para identificar correcciones. Esto no valida todas las acciones ni sustituye las pruebas pendientes de los cambios más recientes. Las operaciones disruptivas de red y varias limpiezas necesitan validación manual controlada adicional.
 
 ## Limitaciones conocidas
 
-- Smart App Control puede bloquear builds locales no firmadas o desconocidas. El EXE de esta beta no está firmado con Authenticode. WinSereno no modifica ni desactiva Smart App Control, Defender ni otras políticas de seguridad.
+- WinSereno no dispone actualmente de firma digital comercial; el EXE no está firmado con Authenticode. En determinados equipos, Smart App Control / Control inteligente de aplicaciones puede bloquearlo al no poder verificar su publicador. WinSereno no modifica ni desactiva esta protección, Defender ni otras políticas de seguridad.
 - Se requiere .NET Framework 4.8 y una carpeta portable local escribible.
 - Algunas operaciones requieren permisos de administrador mediante UAC.
 - Algunas operaciones disruptivas de Red todavía requieren más validación manual controlada.

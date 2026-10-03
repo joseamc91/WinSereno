@@ -2,12 +2,18 @@
 
 ## Unreleased
 
+## 1.0.0 — 2026-10-03
+
+First stable release: consolidates Home and system information, diagnostics, repair, networking, controlled cleanup, and activity history, with consistent navigation and Light/Dark/System themes developed during the betas.
+
 - Replaced raster UI branding with native WPF vector geometry that adapts to themes and display scaling.
 
 - Integrated WinSereno visual identity with the official application icon, a theme-aware logo, and branding in About.
 - WinSereno is now licensed under the GNU General Public License v3.0 (GPLv3).
 - Improved connectivity diagnosis when a specific HTTPS check times out while the other signals confirm Internet access.
 - More accurately classified TCP/IP resets partially applied by Windows, preserving errors and restart requirements.
+
+- Automated CI validation of Debug/Release and all available check suites; the executable artifact is uploaded only when all pass.
 
 ## 0.1.0-beta.5 — 2026-10-03
 

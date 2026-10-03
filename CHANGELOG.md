@@ -2,12 +2,18 @@
 
 ## Unreleased
 
+## 1.0.0 — 2026-10-03
+
+Primera versión estable: consolida Inicio e información del sistema, diagnóstico, reparación, red, limpieza controlada e historial de actividad, con navegación coherente y temas Claro/Oscuro/Sistema desarrollados durante las betas.
+
 - Sustituido el branding rasterizado de la interfaz por geometría vectorial WPF adaptable al tema y al escalado de pantalla.
 
 - Integrada la identidad visual de WinSereno con icono oficial, logotipo adaptado al tema y marca en Acerca de.
 - WinSereno se publica bajo la licencia GNU General Public License v3.0 (GPLv3).
 - Mejorada la robustez del diagnóstico de conectividad cuando una comprobación HTTPS concreta expira y las demás señales confirman acceso a Internet.
 - Clasificados con mayor precisión los restablecimientos TCP/IP que Windows aplica parcialmente, conservando los errores y el requisito de reinicio.
+
+- Validación automatizada en CI de Debug/Release y todas las suites disponibles; el ejecutable se publica como artifact solo si todas pasan.
 
 ## 0.1.0-beta.5 — 2026-10-03
 
