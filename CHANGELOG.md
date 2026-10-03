@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Corregido el reconocimiento de errores localizados de CHKDSK cuando Windows añade puntuación al mensaje.
+
 ## 0.1.0-beta.4 — 2026-10-03
 
 - Navegación lateral rediseñada con iconos lineales, Ajustes separado y enlaces directos a GitHub.

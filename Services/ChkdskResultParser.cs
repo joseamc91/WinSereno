@@ -53,7 +53,7 @@ namespace WinSereno.Services
         private static bool Contains(string value, string[] phrases)
         {
             return Array.Exists(phrases, phrase => Regex.IsMatch(value,
-                @"(?:^|[.!?] )" + Regex.Escape(phrase) + @"(?= |$)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
+                @"(?:^|[.!?] )" + Regex.Escape(phrase) + @"(?= |[.!?:;,]+(?: |$)|$)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
         }
         public static void Apply(MaintenanceTaskResult result)
         {

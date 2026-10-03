@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed recognition of localized CHKDSK errors when Windows appends punctuation to the message.
+
 ## 0.1.0-beta.4 — 2026-10-03
 
 - Redesigned sidebar navigation with line icons, a separate Settings group, and direct GitHub links.

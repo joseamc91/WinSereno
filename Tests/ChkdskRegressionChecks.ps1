@@ -86,6 +86,51 @@ public static class ChkdskRegressionChecks {
    Parse(error,3,FindingStatus.ScanFailed,ExecutionStatus.Failed);
    Parse("",0,FindingStatus.ScanFailed,ExecutionStatus.Failed,error);
   }
+  // Recognized phrases may end with punctuation, but never inside a longer token.
+  string[] denied={"Acceso denegado porque no tiene privilegios suficientes",
+   "Access Denied as you do not have sufficient privileges"};
+  foreach(string phrase in denied) {
+   string summary=Parse(phrase,3,FindingStatus.ScanFailed,ExecutionStatus.Failed).UserSummary;
+   foreach(string ending in new[]{"",".","!","?",":",";",",","...","?!",", consulta los detalles."}) {
+    foreach(int code in new[]{0,3,5}) {
+     var punctuation=Parse(phrase+ending,code,FindingStatus.ScanFailed,ExecutionStatus.Failed);
+     Check(punctuation.UserSummary==summary,"Puntuación no cambia el mensaje funcional de error");
+     Parse("",code,FindingStatus.ScanFailed,ExecutionStatus.Failed,phrase+ending);
+    }
+   }
+   foreach(string invalid in new[]{phrase+"XYZ",phrase+".XYZ","X"+phrase+"."}) {
+    Parse(invalid,0,FindingStatus.Unknown,ExecutionStatus.Success);
+    Parse(invalid,3,FindingStatus.Unknown,ExecutionStatus.Unknown);
+    Parse("",0,FindingStatus.Unknown,ExecutionStatus.Success,invalid);
+   }
+  }
+  foreach(string healthy in new[]{"Windows comprobó el sistema de archivos y no encontró problemas.",
+   "Windows has checked the file system and found no problems."}) {
+   string summary=Parse(healthy,0,FindingStatus.Healthy,ExecutionStatus.Success).UserSummary;
+   foreach(string ending in new[]{"!","?",":",";",","})
+    Check(Parse(healthy+ending,0,FindingStatus.Healthy,ExecutionStatus.Success).UserSummary==summary,
+     "Puntuación no cambia Healthy ni su mensaje");
+   Parse(healthy+"XYZ",0,FindingStatus.Unknown,ExecutionStatus.Success);
+   Parse(healthy+"!",3,FindingStatus.Unknown,ExecutionStatus.Unknown);
+   foreach(string deniedPhrase in denied)
+    Parse(healthy+" "+deniedPhrase+"!",0,FindingStatus.ScanFailed,ExecutionStatus.Failed);
+  }
+  foreach(string attention in new[]{"Windows comprobó el sistema de archivos y detectó problemas.",
+   "Windows has checked the file system and found problems."}) {
+   string summary=Parse(attention,3,FindingStatus.Attention,ExecutionStatus.Success).UserSummary;
+   foreach(string ending in new[]{"!","?",":",";",","})
+    foreach(int code in new[]{0,1,2,3})
+     Check(Parse(attention+ending,code,FindingStatus.Attention,ExecutionStatus.Success).UserSummary==summary,
+      "Puntuación conserva Attention y las reglas de ExitCode");
+   Parse(attention+"XYZ",3,FindingStatus.Unknown,ExecutionStatus.Unknown);
+   Parse(attention+"!",5,FindingStatus.Unknown,ExecutionStatus.Failed);
+   foreach(string deniedPhrase in denied)
+    Parse(attention+" "+deniedPhrase+"?",3,FindingStatus.ScanFailed,ExecutionStatus.Failed);
+  }
+  string contradictory="Windows has checked the file system and found no problems.! "+
+   "Windows has checked the file system and found problems.?";
+  Parse(contradictory,0,FindingStatus.Unknown,ExecutionStatus.Success);
+  Parse(contradictory,3,FindingStatus.Unknown,ExecutionStatus.Unknown);
   foreach(string ambiguous in new[]{"Comprobación iniciada.","", "El mapa de bits del volumen es incorrecto.",
    "Windows has checked the file system and found no problems.\r\nWindows has checked the file system and found problems."}) {
    Parse(ambiguous,0,FindingStatus.Unknown,ExecutionStatus.Success);
