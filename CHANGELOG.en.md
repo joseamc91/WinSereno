@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- WinSereno is now licensed under the GNU General Public License v3.0 (GPLv3).
 - Improved connectivity diagnosis when a specific HTTPS check times out while the other signals confirm Internet access.
 - More accurately classified TCP/IP resets partially applied by Windows, preserving errors and restart requirements.
 

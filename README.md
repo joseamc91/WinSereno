@@ -167,4 +167,4 @@ La arquitectura y sus límites se describen en [AUDIT_PRIVILEGED_EXECUTION.md](A
 
 ## Licencia
 
-La licencia está pendiente de definir.
+WinSereno se publica bajo la GNU General Public License v3.0 (GPL-3.0). Consulta [LICENSE](LICENSE) para más detalles.
