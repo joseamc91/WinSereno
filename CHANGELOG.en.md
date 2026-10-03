@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Replaced raster UI branding with native WPF vector geometry that adapts to themes and display scaling.
+
 - Integrated WinSereno visual identity with the official application icon, a theme-aware logo, and branding in About.
 - WinSereno is now licensed under the GNU General Public License v3.0 (GPLv3).
 - Improved connectivity diagnosis when a specific HTTPS check times out while the other signals confirm Internet access.

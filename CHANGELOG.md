@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Sustituido el branding rasterizado de la interfaz por geometría vectorial WPF adaptable al tema y al escalado de pantalla.
+
 - Integrada la identidad visual de WinSereno con icono oficial, logotipo adaptado al tema y marca en Acerca de.
 - WinSereno se publica bajo la licencia GNU General Public License v3.0 (GPLv3).
 - Mejorada la robustez del diagnóstico de conectividad cuando una comprobación HTTPS concreta expira y las demás señales confirman acceso a Internet.
