@@ -64,8 +64,17 @@ public static class NetworkOutputChecks {
   var ambiguous=Result("Operation finished.");WinsockResetResultParser.Apply(ambiguous);Check(ambiguous.FindingStatus==FindingStatus.Unknown,"ExitCode0 alone not confirmed");
   var cancelled=new MaintenanceTaskResult{ExecutionStatus=ExecutionStatus.Cancelled};WinsockResetResultParser.Apply(cancelled);Check(cancelled.ExecutionStatus==ExecutionStatus.Cancelled&&!cancelled.RequiresRestart,"UAC cancellation semantics unchanged");
   var partial=Result("Restablecimiento de Interfaz correcto.\nRestablecimiento de Reenvío erróneo.\nAcceso denegado.\nReinicie el equipo para completar esta acción.");TcpIpResetResultParser.Apply(partial);
-  Check(partial.ExecutionStatus==ExecutionStatus.Failed&&partial.FindingStatus==FindingStatus.PartiallyCompleted&&partial.RequiresRestart,"TCPIP partial with restart");
+  Check(partial.ExecutionStatus==ExecutionStatus.Success&&partial.FindingStatus==FindingStatus.PartiallyCompleted&&partial.RequiresRestart,"TCPIP partial with restart remains an applied operation with warnings");
   var tcpUnknown=Result("Texto ambiguo.");TcpIpResetResultParser.Apply(tcpUnknown);Check(tcpUnknown.FindingStatus==FindingStatus.Unknown,"TCPIP ambiguous not confirmed");
+  foreach(string lang in new[]{"es","en"}){
+   string file=Path.Combine(project,"Tests","Fixtures","TcpIpResetPartial."+lang+".txt");byte[] bytes=File.ReadAllBytes(file);string expected=File.ReadAllText(file,Encoding.UTF8);
+   foreach(int size in new[]{1,2,7,1024}){
+    string decoded=Pump(bytes,size,legacy,out chunks);Check(decoded==expected,"Windows10 partial netsh output reconstructed "+lang+" / "+size);
+    var r=Result(decoded,1);TcpIpResetResultParser.Apply(r);
+    Check(r.ExecutionStatus==ExecutionStatus.Success&&r.FindingStatus==FindingStatus.PartiallyCompleted&&r.RequiresRestart,"Windows10 partial reset semantics survive byte capture "+lang);
+    Check(r.ExitCode==1&&r.StdOut==expected,"Nonzero exit and full localized errors preserved "+lang);
+   }
+  }
   foreach(string phrase in new[]{"Se vació correctamente la caché de resolución de DNS.","Successfully flushed the DNS Resolver Cache."}){
    string decoded;using(var reader=new StreamReader(new MemoryStream(legacy.GetBytes(phrase)),legacy))decoded=reader.ReadToEnd();
    var r=Result(decoded);FlushDnsResultParser.Apply(r);Check(r.ExecutionStatus==ExecutionStatus.Success&&r.FindingStatus==FindingStatus.Completed&&!r.RequiresRestart,"Flush DNS existing OEM path regression");

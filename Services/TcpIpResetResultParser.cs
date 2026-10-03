@@ -6,9 +6,13 @@ namespace WinSereno.Services
     public static class TcpIpResetResultParser
     {
         private static readonly Regex Step = new Regex(
-            @"^(?:Resetting|Restableciendo|Restablecimiento de)\s*(?<item>.*?)[,:]\s*(?<state>OK!|correcto[.!]?|correctamente[.!]?|failed[.!]?|error[.!]?|err[oó]neo[.!]?)$", RegexOptions.IgnoreCase);
+            @"^(?:Resetting|Restableciendo|Restablecimiento de)\s*(?<item>.*?)[,:]\s*(?<state>OK|correcto|correctamente|failed|error|err[oó]neo)[.!?:;,]*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly Regex SpanishStep = new Regex(
-            @"^(?:Restableciendo|Restablecimiento de)\s+(?<item>.+?)\s+(?<state>correcto[.!]?|correctamente[.!]?|error[.!]?|err[oó]neo[.!]?)$", RegexOptions.IgnoreCase);
+            @"^(?:Restableciendo|Restablecimiento de)\s+(?<item>.+?)\s+(?<state>correcto|correctamente|error|err[oó]neo)[.!?:;,]*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex SpanishCompleted = new Regex(
+            @"^(?!.*\bno\s+se\s+restableci[oó]\b)(?<item>[\p{L}\p{N}][\p{L}\p{N}\s/()._-]*?)\s+se\s+restableci[oó]\s+correctamente[.!?:;,]*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex SpanishFailed = new Regex(
+            @"^Error al restablecer(?:\s+.*?)?[.!?:;,]*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly string[] RestartMessages = {
             "Restart the computer to complete this action.", "You must restart the computer in order to complete the reset.",
             "Reinicie el equipo para completar esta acción.", "Reinicie el equipo para completar el restablecimiento.",
@@ -20,7 +24,8 @@ namespace WinSereno.Services
             "La operación solicitada requiere ejecución con elevación.",
             "La operación solicitada requiere elevación (Ejecutar como administrador)."
         };
-        private static bool Is(string line, string[] messages) => Array.Exists(messages, value => string.Equals(line, value, StringComparison.OrdinalIgnoreCase));
+        private static readonly char[] ClosingPunctuation = { '.', '!', '?', ':', ';', ',' };
+        private static bool Is(string line, string[] messages) => Array.Exists(messages, value => string.Equals(line.TrimEnd(ClosingPunctuation), value.TrimEnd(ClosingPunctuation), StringComparison.OrdinalIgnoreCase));
         public static void Apply(MaintenanceTaskResult result)
         {
             result.FindingStatus = FindingStatus.Unknown; result.RequiresRestart = false;
@@ -29,26 +34,33 @@ namespace WinSereno.Services
             int successful = 0, failed = 0, unrecognized = 0;
             foreach (string raw in ((result.StdOut ?? "") + "\n" + (result.StdErr ?? "")).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                string line = raw.Trim(); if (line.Length == 0) continue;
+                string line = Regex.Replace(raw.Trim(), @"\s+", " "); if (line.Length == 0) continue;
                 if (Is(line, RestartMessages)) { result.RequiresRestart = true; continue; }
-                if (Is(line, FailureMessages)) { failed++; continue; }
+                if (Is(line, FailureMessages) || SpanishFailed.IsMatch(line)) { failed++; continue; }
+                if (SpanishCompleted.IsMatch(line)) { successful++; continue; }
                 var match = Step.Match(line);
                 if (!match.Success) match = SpanishStep.Match(line);
                 if (!match.Success) { unrecognized++; continue; }
                 string state = match.Groups["state"].Value;
                 if (state.StartsWith("OK", StringComparison.OrdinalIgnoreCase) || state.StartsWith("correct", StringComparison.OrdinalIgnoreCase)) successful++; else failed++;
             }
-            bool executionFailed = !result.ExitCode.HasValue || result.ExitCode != 0;
-            result.ExecutionStatus = executionFailed || failed > 0 ? ExecutionStatus.Failed : ExecutionStatus.Success;
-            if (successful > 0 && (failed > 0 || executionFailed))
+            result.ExecutionStatus = ExecutionStatus.Failed;
+            if (!result.ExitCode.HasValue)
+                result.UserSummary = "No se obtuvo un resultado final del comando TCP/IP. Consulta la salida original; no se puede garantizar que no haya aplicado cambios.";
+            else if (successful > 0 && (failed > 0 || result.ExitCode != 0 || unrecognized > 0))
             {
+                result.ExecutionStatus = ExecutionStatus.Success;
                 result.FindingStatus = FindingStatus.PartiallyCompleted;
-                result.UserSummary = "Restablecimiento TCP/IP parcial: Windows confirmó " + successful + " pasos, pero también informó de fallos o no se confirmó la ejecución completa. La configuración puede haber cambiado parcialmente. Consulta stdout/stderr y ExitCode; no se ejecutará ninguna herramienta adicional.";
+                result.UserSummary = failed > 0 || result.ExitCode != 0
+                    ? "Windows restableció parcialmente TCP/IP, pero una o más entradas no pudieron modificarse."
+                    : "Windows confirmó cambios en TCP/IP, pero no se pudo interpretar toda la salida ni confirmar el restablecimiento completo.";
+                result.UserSummary += " Se confirmaron " + successful + " pasos. Consulta la salida original y ExitCode para ver los errores o datos no interpretados. Esto no garantiza la conectividad.";
             }
-            else if (executionFailed || failed > 0)
+            else if (result.ExitCode != 0 || failed > 0)
                 result.UserSummary = "Windows no pudo completar el restablecimiento TCP/IP. Consulta la salida original. No se puede garantizar que no haya aplicado cambios.";
             else if (successful > 0 && unrecognized == 0)
             {
+                result.ExecutionStatus = ExecutionStatus.Success;
                 result.FindingStatus = FindingStatus.Completed;
                 result.UserSummary = "Los pasos de restablecimiento TCP/IP informados por Windows terminaron correctamente. Esto no verifica ni garantiza la conectividad.";
             }

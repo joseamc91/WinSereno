@@ -15,6 +15,7 @@ namespace WinSereno.Services
     {
         public string Name { get; set; }
         public bool Success { get; set; }
+        public bool TimedOut { get; set; }
         public string Detail { get; set; }
         public TimeSpan Duration { get; set; }
     }
@@ -75,15 +76,30 @@ namespace WinSereno.Services
                 SystemQuery.Log(logger, "Red prueba " + probe.Name + ": " + probe.Detail + " | Duración=" + probe.Duration);
             }
             ProbeDetails = probeDetails + "\nLa ausencia de respuesta ICMP no demuestra una avería. Un único endpoint no representa todo Internet.";
+            var result = Summarize(adapter.NeutralMessage != null, linkWarning, probes, details.ToString());
+            SystemQuery.Log(logger, "Resultado general de red: " + result.Status + " | HTTPS=" + probes[3].Success + " | Timeout HTTPS=" + probes[3].TimedOut + " | DNS=" + probes[2].Success + " | ICMP gateway=" + probes[0].Success + " | ICMP público=" + probes[1].Success + " | Aviso Ethernet=" + linkWarning);
+            return result;
+        }
+        private static DiagnosticResult Summarize(bool adapterUnavailable, bool linkWarning, ConnectivityProbe[] probes, string details)
+        {
             bool https = probes[3].Success;
-            var status = https ? linkWarning ? DiagnosticStatus.Attention : DiagnosticStatus.Healthy : DiagnosticStatus.Attention;
-            var result = new DiagnosticResult { Id = "network", Name = "Red local e Internet", Status = status,
-                Summary = https ? linkWarning ? "Internet disponible; enlace Ethernet a 100 Mbps con capacidad superior confirmada." : "Conectividad funcional de Internet confirmada mediante HTTPS." : "No se pudo confirmar HTTPS con el endpoint de Microsoft.",
+            // A single endpoint timeout is inconclusive when all three independent signals agree.
+            // Certificate, proxy and other HTTPS failures retain their warning even with ICMP/DNS responses.
+            bool supportedTimeout = !https && probes[3].TimedOut && probes.Take(3).All(p => p.Success);
+            bool internetAvailable = https || supportedTimeout;
+            string summary = https ? "Conectividad funcional de Internet confirmada mediante HTTPS." : supportedTimeout
+                ? "Internet disponible según gateway, IP pública y DNS. La comprobación HTTPS específica no respondió dentro del tiempo esperado."
+                : "No se pudo confirmar HTTPS con el endpoint de Microsoft. Revisa las demás pruebas de conectividad.";
+            if (internetAvailable && linkWarning)
+                summary = "Internet disponible; enlace Ethernet a 100 Mbps con capacidad superior confirmada." + (supportedTimeout ? " La comprobación HTTPS específica no respondió dentro del tiempo esperado." : "");
+            var result = new DiagnosticResult { Id = "network", Name = "Red local e Internet",
+                Status = internetAvailable && !linkWarning ? DiagnosticStatus.Healthy : DiagnosticStatus.Attention,
+                Summary = summary,
                 DetailedDescription = details + "\nLa ausencia de respuesta ICMP no demuestra una avería. Un único endpoint tampoco representa todo Internet.",
-                Recommendation = https ? "Sin reparación automática. Las pruebas ICMP pueden estar bloqueadas por la red." : "Revisar los resultados de DNS, HTTPS y gateway antes de atribuir una causa. No se ha modificado la red.", NavigationTarget = NavigationSection.Network, NavigationLabel = "Ir a Red" };
-            if (adapter.NeutralMessage != null && !https && probes.All(p => !p.Success))
+                Recommendation = internetAvailable ? "Sin reparación automática. Las pruebas ICMP pueden estar bloqueadas por la red." : "Revisar los resultados de DNS, HTTPS y gateway antes de atribuir una causa. No se ha modificado la red.",
+                NavigationTarget = NavigationSection.Network, NavigationLabel = "Ir a Red" };
+            if (adapterUnavailable && probes.All(p => !p.Success))
             { result.Status = DiagnosticStatus.NotChecked; result.Summary = "No se obtuvo información suficiente para valorar la conectividad."; }
-            SystemQuery.Log(logger, "Resultado general de red: " + result.Status + " | HTTPS=" + https + " | DNS=" + probes[2].Success + " | ICMP gateway=" + probes[0].Success + " | ICMP público=" + probes[1].Success + " | Aviso Ethernet=" + linkWarning);
             return result;
         }
         private async Task<ConnectivityProbe> PingAsync(string name, string address, int timeout)
@@ -129,12 +145,11 @@ namespace WinSereno.Services
                 if (await Task.WhenAny(pending, Task.Delay(5000)).ConfigureAwait(false) != pending)
                 {
                     request.Abort(); ObserveFault(pending);
-                    return new ConnectivityProbe { Name = "HTTPS", Detail = "timeout de conexión (5 s); no comprobado", Duration = watch.Elapsed };
+                    return HttpsTimeout(watch.Elapsed);
                 }
                 using (var response = (HttpWebResponse)await pending.ConfigureAwait(false))
                 {
-                    int code = (int)response.StatusCode;
-                    return new ConnectivityProbe { Name = "HTTPS", Success = code != 407, Detail = "conexión TLS válida con Microsoft · HTTP " + code, Duration = watch.Elapsed };
+                    return HttpsResponse((int)response.StatusCode, response.ResponseUri, watch.Elapsed);
                 }
             }
             catch (WebException ex)
@@ -144,15 +159,23 @@ namespace WinSereno.Services
                 {
                     using (response)
                     {
-                        int code = (int)response.StatusCode;
-                        return new ConnectivityProbe { Name = "HTTPS", Success = code != 407 && response.ResponseUri.Scheme == "https" && response.ResponseUri.Host == new Uri(HttpsEndpoint).Host,
-                            Detail = "respuesta HTTPS recibida de Microsoft · HTTP " + code + " (el endpoint rechaza la petición HEAD)", Duration = watch.Elapsed };
+                        return HttpsResponse((int)response.StatusCode, response.ResponseUri, watch.Elapsed);
                     }
                 }
                 ex.Response?.Dispose();
                 SystemQuery.Log(logger, "Error técnico HTTPS: " + ex.Status);
+                if (ex.Status == WebExceptionStatus.Timeout) return HttpsTimeout(watch.Elapsed);
                 return new ConnectivityProbe { Name = "HTTPS", Detail = "no confirmado (" + ex.Status + ")", Duration = watch.Elapsed };
             }
+        }
+        private static ConnectivityProbe HttpsTimeout(TimeSpan duration) => new ConnectivityProbe {
+            Name = "HTTPS", TimedOut = true, Detail = "timeout de conexión (5 s); no comprobado", Duration = duration };
+        private static ConnectivityProbe HttpsResponse(int code, Uri endpoint, TimeSpan duration)
+        {
+            bool expectedEndpoint = endpoint != null && endpoint.Scheme == "https" && endpoint.Host == new Uri(HttpsEndpoint).Host;
+            return new ConnectivityProbe { Name = "HTTPS", Success = code != 407 && expectedEndpoint,
+                Detail = expectedEndpoint ? "respuesta HTTPS recibida de Microsoft · HTTP " + code + (code >= 400 ? " (el endpoint rechaza la petición HEAD)" : "") : "respuesta de un endpoint distinto; HTTPS no confirmado",
+                Duration = duration };
         }
         private static void ObserveFault(Task task) => task.ContinueWith(t => { var ignored = t.Exception; }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         private static string Speed(long speed) => speed >= 1000000000 ? (speed / 1000000000.0).ToString("0.##", CultureInfo.CurrentCulture) + " Gbps" : (speed / 1000000.0).ToString("0.##", CultureInfo.CurrentCulture) + " Mbps";

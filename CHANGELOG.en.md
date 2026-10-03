@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Improved connectivity diagnosis when a specific HTTPS check times out while the other signals confirm Internet access.
+- More accurately classified TCP/IP resets partially applied by Windows, preserving errors and restart requirements.
+
 ## 0.1.0-beta.5 — 2026-10-03
 
 - Fixed recognition of localized CHKDSK errors when Windows appends punctuation to the message.

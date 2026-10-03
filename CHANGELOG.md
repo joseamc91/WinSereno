@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Mejorada la robustez del diagnóstico de conectividad cuando una comprobación HTTPS concreta expira y las demás señales confirman acceso a Internet.
+- Clasificados con mayor precisión los restablecimientos TCP/IP que Windows aplica parcialmente, conservando los errores y el requisito de reinicio.
+
 ## 0.1.0-beta.5 — 2026-10-03
 
 - Corregido el reconocimiento de errores localizados de CHKDSK cuando Windows añade puntuación al mensaje.

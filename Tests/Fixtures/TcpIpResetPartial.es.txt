@@ -1,0 +1,6 @@
+Global se restableció correctamente.
+Interfaz se restableció correctamente.
+Ruta se restableció correctamente.
+Error al restablecer .
+Acceso denegado.
+Reinicie el equipo para completar esta acción.

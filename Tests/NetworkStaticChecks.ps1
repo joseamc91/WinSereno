@@ -56,6 +56,13 @@ $reader=Source 'Services/NetshOutputReader.cs'
 Check ($reader.Contains('new UTF8Encoding(false, true)') -and $reader.Contains('catch (DecoderFallbackException)')) 'Strict UTF8 with native legacy fallback'
 Check ($reader.Contains('if (line.Length > 0)') -and $reader.Contains('line.SetLength(0)')) 'Final tail and no repeated byte lines'
 Check (-not $reader.Contains('.Replace(')) 'No mojibake text substitutions'
+$diagnostic=Source 'Services/NetworkDiagnosticCheck.cs'
+Check ($diagnostic.Contains('probes[3].TimedOut && probes.Take(3).All(p => p.Success)')) 'HTTPS timeout exception requires all three independent positive signals'
+Check ($diagnostic.Contains('bool internetAvailable = https || supportedTimeout') -and $diagnostic.Contains('internetAvailable && !linkWarning')) 'General result is separate from HTTPS and retains link warnings'
+Check ($diagnostic.Contains('if (ex.Status == WebExceptionStatus.Timeout) return HttpsTimeout') -and $diagnostic.Contains('Name = "HTTPS", TimedOut = true')) 'Timeout is structured, never inferred from localized detail text'
+Check ($diagnostic.Contains('code != 407 && expectedEndpoint')) 'Proxy auth and unexpected endpoints never confirm HTTPS'
+Check ($diagnostic.Contains('request.Method = "HEAD"; request.Timeout = 5000; request.ReadWriteTimeout = 5000') -and $diagnostic.Contains('Task.Delay(5000)') -and $diagnostic.Contains('request.Abort()')) 'Read-only HEAD remains bounded and aborted on timeout'
+Check (-not $diagnostic.Contains('Process.Start') -and -not $diagnostic.Contains('SecurityProtocol =') -and -not $diagnostic.Contains('ServerCertificateValidationCallback')) 'No command fallback or weakened TLS validation'
 foreach($parser in @('WinsockResetResultParser.cs','TcpIpResetResultParser.cs')){
  $text=Source "Services/$parser"
  Check (-not $text.Contains('├') -and -not $text.Contains('Normalize(')) "Parser uses real uncorrupted phrases: $parser"
