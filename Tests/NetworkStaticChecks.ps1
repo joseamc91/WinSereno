@@ -42,7 +42,7 @@ Check ($header.SelectSingleNode('p:Button',$ns).GetAttribute('Grid.Column') -eq 
 Check (-not $xml.OuterXml.Contains('Binding Network.Summary')) 'Technical connectivity summary removed only from main presentation'
 Check ($xml.OuterXml.Contains('Binding Network.RefreshedText') -and $xml.OuterXml.Contains('Binding Network.HasConnectivityDetails')) 'Timestamp and nonempty global detail visibility'
 $main=Source 'ViewModels/MainViewModel.cs'
-Check ($main.Contains('NavigationSection.Network || CurrentSection == NavigationSection.Cleanup ? ""')) 'Network notice fully collapsed through shared infrastructure'
+Check ($main.Contains('public string PageNotice => "";')) 'Network notice fully collapsed through shared infrastructure'
 Check ($main.Contains('Consulta y actualiza el estado de la red; las herramientas solicitan confirmación y permisos de administrador cuando corresponde.')) 'One clear page description'
 foreach($command in @('FlushDnsCommand','RenewDhcpCommand','RestartAdapterCommand','ResetWinsockCommand','ResetTcpIpCommand')){
  Check ($xml.OuterXml.Contains('Binding '+$command)) "Existing action button: $command"

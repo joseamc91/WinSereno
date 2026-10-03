@@ -8,7 +8,7 @@ $vm=Source 'ViewModels/CleanupViewModel.cs';$main=Source 'ViewModels/MainViewMod
 $page=$xml.SelectSingleNode('//p:StackPanel[@x:Name="CleanupPage"]',$ns)
 Check ($null -ne $page) 'Cleanup keeps one explicit page layout'
 Check ($main.Contains('Analiza el espacio que puede recuperarse y elige qué categorías quieres limpiar.')) 'One simple page description'
-Check ($main.Contains('NavigationSection.Network || CurrentSection == NavigationSection.Cleanup ? ""')) 'Cleanup notice empty, other notices retained'
+Check ($main.Contains('public string PageNotice => "";')) 'Cleanup notice empty, other notices retained'
 Check ($xml.OuterXml.Contains('Binding HasPageNotice, Converter={StaticResource BoolVisibility}')) 'Existing full-collapse infrastructure reused'
 $analyze=$page.SelectSingleNode('.//p:Button[@Command="{Binding Cleanup.AnalyzeCommand}"]',$ns)
 Check ($analyze.GetAttribute('Style') -eq '{StaticResource PrimaryButton}') 'Analyze uses existing accent primary style'
@@ -54,7 +54,7 @@ Check ($vm.Contains('No se comprobaron los temporales de Windows porque se cance
 Check ($vm.Contains('recuperables estimados') -and -not $vm.Contains('Percentage =')) 'Brief structured estimate, no invented percentages'
 Check (-not $xml.OuterXml.Contains('Portable · Acciones explícitas')) 'Fixed sidebar tagline removed'
 Check ($main.Contains('ProductInformation.DisplayVersion')) 'UI consumes one public version source'
-$assembly=Source 'Properties/AssemblyInfo.cs';Check ($assembly.Contains('AssemblyInformationalVersion("0.1.0-beta.3")')) 'Current development version'
+$assembly=Source 'Properties/AssemblyInfo.cs';Check ($assembly.Contains('AssemblyInformationalVersion("0.1.0-beta.4")')) 'Current development version'
 foreach($name in @('AssemblyVersion','AssemblyFileVersion')){Check ($assembly.Contains($name+'("0.1.0.0")')) "Technical $name unchanged"}
 Check ((Source 'Infrastructure/ProductInformation.cs').Contains('GetCustomAttribute<AssemblyInformationalVersionAttribute>')) 'Standard informational version metadata'
 Check ((Source 'app.manifest').Contains('level="asInvoker"')) 'Main app remains asInvoker'

@@ -148,7 +148,7 @@ public static class ToastRepairPresentationChecks {
    Check(scroll.Focusable&&scroll.FocusVisualStyle==null,"Repair viewport retains keyboard scrolling but no giant focus rectangle");
    foreach(var list in Visual<ItemsControl>(root).Where(c=>BindingPath(c,ItemsControl.ItemsSourceProperty)=="RealRepairTasks"||BindingPath(c,ItemsControl.ItemsSourceProperty)=="RepairTools"))
     Check(!list.Focusable,"Non-interactive Repair list does not receive keyboard focus");
-   Check(Visual<ListBox>(root).Single().Focusable&&Visual<ListBox>(root).Single().FocusVisualStyle!=null,"Sidebar keyboard accessibility retained");
+   Check(Visual<ListBox>(root).Count()==2&&Visual<ListBox>(root).All(l=>l.Focusable&&l.FocusVisualStyle!=null),"Both sidebar groups retain keyboard accessibility");
    vm.Navigate(NavigationSection.Home);Layout(root);Check(scroll.FocusVisualStyle!=null,"Repair-only focus correction restores other page visuals");
    vm.Navigate(NavigationSection.Repair);Layout(root);
    Check(vm.PageDescription=="Comprueba y repara componentes de Windows mediante acciones explícitas; las herramientas administrativas solicitan confirmación y permisos de administrador antes de ejecutarse.","Single Repair description");

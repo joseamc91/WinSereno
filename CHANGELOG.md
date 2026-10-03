@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.1.0-beta.4 — 2026-10-03
+
+- Navegación lateral rediseñada con iconos lineales, Ajustes separado y enlaces directos a GitHub.
+- Mejorada la jerarquía visual de botones principales, especialmente en modo oscuro, y unificados sus tamaños de texto.
+- Ajustes reorganizado con tema Claro/Oscuro/Sistema, acceso a carpetas, información de la aplicación y restablecimiento de preferencias.
+- Simplificadas las cabeceras de Ajustes y Actividad.
+
 ## 0.1.0-beta.3 — 2026-10-02
 
 - Restablecer TCP/IP detecta configuraciones IPv4 manuales y muestra su información con una segunda confirmación de seguridad antes de ejecutar.

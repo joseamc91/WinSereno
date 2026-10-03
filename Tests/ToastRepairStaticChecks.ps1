@@ -34,7 +34,7 @@ Check (-not $main.Contains('UserSummary.Split') -and -not $main.Contains('Regex.
 $panel=Source 'Services\OperationPanelState.cs'
 Check (-not $panel.Contains('Timer') -and -not $panel.Contains('Task.Delay')) 'No timed dismissal'
 Check ($main.Contains('panel.Observe') -and $main.Contains('panel.Dismiss')) 'One existing panel state'
-Check ($main -match 'public string PageNotice => [^\r\n]*CurrentSection == NavigationSection\.Repair[^\r\n]*\? ""') 'Repair notice participates in collapsed notice logic'
+Check ($main.Contains('public string PageNotice => "";')) 'Repair notice participates in collapsed notice logic'
 Check ($main.Contains('Comprueba y repara componentes de Windows mediante acciones explícitas; las herramientas administrativas solicitan confirmación y permisos de administrador antes de ejecutarse.')) 'Exact Repair description'
 Check (-not $xaml.Contains('Control específico sobre las comprobaciones, reparaciones y mantenimiento.')) 'Redundant Repair subtitle removed'
 foreach($technical in @('DISM /CheckHealth','DISM /ScanHealth','DISM /RestoreHealth','SFC /scannow','DISM /StartComponentCleanup','CHKDSK')) { Check ($card.Contains('return "'+$technical+'"')) "Exact annotation $technical" }

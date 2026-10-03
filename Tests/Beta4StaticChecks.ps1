@@ -1,0 +1,55 @@
+﻿$ErrorActionPreference = 'Stop'
+$project = Split-Path $PSScriptRoot -Parent
+$script:count = 0
+function Check([bool]$condition, [string]$label) {
+    if (!$condition) { throw $label }
+    $script:count++
+}
+function Read([string]$path) { [IO.File]::ReadAllText((Join-Path $project $path)) }
+$main = Read 'Views/MainWindow.xaml'
+$styles = Read 'Themes/Styles.xaml'
+$vm = Read 'ViewModels/MainViewModel.cs'
+$shell = Read 'Services/ApplicationShellService.cs'
+$theme = Read 'Services/ThemeService.cs'
+$dialogs = Read 'Views/DialogService.cs'
+$assembly = Read 'Properties/AssemblyInfo.cs'
+foreach ($path in @('Views/MainWindow.xaml', 'Themes/Styles.xaml', 'Themes/Light.xaml', 'Themes/Dark.xaml')) {
+    [xml]$xml = Read $path
+    Check ($null -ne $xml.DocumentElement) "XML valid: $path"
+}
+foreach ($name in @('Home','Diagnosis','Repair','Network','Cleanup','Activity','Settings')) {
+    Check ($styles.Contains('x:Key="Navigation'+$name+'Icon"')) "Vector icon $name"
+    Check ($main.Contains('Resource Navigation'+$name+'Icon')) "Icon binding $name"
+}
+Check (([regex]::Matches($styles, '<Geometry x:Key="Navigation')).Count -eq 7) 'Exactly seven vector resources'
+Check (!$main.Contains('<Image') -and !$styles.Contains('<Image')) 'No external bitmap icons'
+Check ($main.Contains('StrokeThickness="1.6"') -and $main.Contains('Width="18" Height="18"')) 'Consistent icon scale'
+Check ($main.Contains('Value="{DynamicResource AccentBrush}"') -and $main.Contains('Property="Stroke" Value="{DynamicResource MutedBrush}"')) 'Adaptive icon colors'
+Check ($main.Contains('ItemsSource="{Binding MainNavigation}"') -and $main.Contains('ItemsSource="{Binding SettingsNavigation}"')) 'Separate navigation groups'
+Check ($main.Contains('Text="{Binding Label}"')) 'Labels retained with icons'
+Check ($main.Contains('Content="GitHub ↗"') -and $main.Contains('Command="{Binding OpenGitHubCommand}"')) 'Sidebar fixed GitHub command'
+Check ($vm.Contains('public string PageNotice => "";')) 'No redundant notice'
+Check ($vm.Contains('Personaliza la apariencia y consulta la configuración de WinSereno.')) 'Settings description'
+Check ($vm.Contains('Consulta las acciones realizadas durante esta sesión; los logs TXT conservan el registro persistente.')) 'Activity description'
+Check ($styles.Contains('<Setter Property="FontSize" Value="13"/>')) 'Common button font'
+Check (!$main.Contains('FontSize="12" Padding') -and !(Read 'Views/DiagnosticCard.xaml').Contains('FontSize="12"')) 'No obsolete compact button font override'
+foreach ($key in @('PrimaryBackgroundBrush','PrimaryForegroundBrush','PrimaryBorderBrush','PrimaryHoverBrush','PrimaryPressedBrush','NavigationHoverBrush','NavigationSelectedBrush')) {
+    foreach ($value in @('Light','Dark')) { Check ((Read ('Themes/'+$value+'.xaml')).Contains('x:Key="'+$key+'"')) "$key in $value" }
+}
+Check ($styles.Contains('Property="IsPressed"') -and $styles.Contains('Value="0.45"')) 'Pressed and disabled states'
+Check ($styles.Contains('Property="IsKeyboardFocusWithin"') -and $styles.Contains('Property="IsKeyboardFocused"')) 'Keyboard focus retained'
+Check ($shell.Contains('https://github.com/joseamc91/WinSereno') -and $shell.Contains('GitHubUrl + "/releases"')) 'Fixed public URLs'
+Check (!$shell.Contains('Arguments =') -and !$shell.Contains('runas')) 'No arbitrary shell arguments or elevation'
+Check ($shell.Contains('UseShellExecute = true') -and $shell.Contains('Verb = "open"')) 'Default shell opening'
+Check ($theme.Contains('AppsUseLightTheme') -and $theme.Contains('Registry.GetValue')) 'Read-only Windows theme source'
+Check (!$theme.Contains('SetValue') -and !$theme.Contains('CreateSubKey')) 'No registry writes'
+Check ((Read 'Services/PortableStorage.cs').Contains('"System"')) 'System config supported'
+Check ($vm.Contains('new AppSettings().Theme') -and $vm.Contains('ConfirmResetPreferences')) 'Confirmed reset to existing defaults'
+Check ($dialogs.Contains('Los logs y los datos del sistema no se modificarán.') -and $dialogs.Contains('Content = "Restablecer"')) 'Explicit reset confirmation'
+Check (!$shell.Contains('File.Delete') -and !$vm.Contains('Directory.Delete')) 'Preferences/folder links never delete data'
+Check ($assembly.Contains('AssemblyVersion("0.1.0.0")') -and $assembly.Contains('AssemblyFileVersion("0.1.0.0")')) 'Technical versions unchanged'
+Check ($assembly.Contains('AssemblyInformationalVersion("0.1.0-beta.4')) 'Central Beta4 public version'
+Check (!$main.Contains('Portable · Acciones explícitas')) 'Obsolete sidebar tagline absent'
+Check (!(Read 'WinSereno.csproj').Contains('PackageReference')) 'No NuGet icon dependencies'
+Check (!$main.Contains('x:Static') -and !$main.Contains('xmlns:local')) 'No local XAML second-pass references'
+Write-Output "$script:count comprobaciones estáticas Beta4 correctas; sin ejecutar aplicación, enlaces ni operaciones."

@@ -38,6 +38,7 @@ public sealed class CleanupUiRoot{
  public string CurrentSectionCode{get{return "Cleanup";}}public string PageTitle{get{return "Limpieza";}}public string PageDescription{get;set;}
  public string PageNotice{get{return "";}}public bool HasPageNotice{get{return false;}}public string ProductVersion{get;set;}
  public bool ShowTaskPanel{get{return false;}}public CleanupUiState Cleanup{get;set;}public object[] Navigation{get;set;}
+ public object[] MainNavigation{get;set;}public object[] SettingsNavigation{get;set;}public object SelectedNavigation{get;set;}
  public ICommand CleanUserTempCommand{get;set;}public ICommand CleanWindowsTempCommand{get;set;}public ICommand CleanThumbnailsCommand{get;set;}
  public ICommand EmptyRecycleBinCommand{get;set;}public ICommand CleanSelectedCommand{get;set;}
 }
@@ -57,7 +58,8 @@ public static class CleanupXamlPresentationChecks{
    Result=new{WasAnalyzed=ready}});
   string main=File.ReadAllText(Path.Combine(project,"ViewModels","MainViewModel.cs"));var description=Regex.Match(main,"case NavigationSection.Cleanup: return \"([^\"]+)\"").Groups[1].Value;
   string info=File.ReadAllText(Path.Combine(project,"Properties","AssemblyInfo.cs"));var version=Regex.Match(info,"AssemblyInformationalVersion\\(\"([^\"]+)\"\\)").Groups[1].Value;
-  return new CleanupUiRoot{PageDescription=description,ProductVersion="v"+version,Navigation=new[]{"Inicio","Diagnóstico","Reparación","Red","Limpieza","Ajustes","Actividad"}.Select(n=>(object)new{Label=n}).ToArray(),
+  var navigation=new[]{new{Label="Inicio",SectionCode="Home"},new{Label="Diagnóstico",SectionCode="Diagnosis"},new{Label="Reparación",SectionCode="Repair"},new{Label="Red",SectionCode="Network"},new{Label="Limpieza",SectionCode="Cleanup"},new{Label="Actividad",SectionCode="Activity"},new{Label="Ajustes",SectionCode="Settings"}};
+  return new CleanupUiRoot{PageDescription=description,ProductVersion="v"+version,Navigation=navigation.Cast<object>().ToArray(),MainNavigation=navigation.Take(6).Cast<object>().ToArray(),SettingsNavigation=navigation.Skip(6).Cast<object>().ToArray(),SelectedNavigation=navigation[4],
    Cleanup=new CleanupUiState{Categories=rows,AnalyzeLabel=ready?"Analizar de nuevo":"Analizar",AnalyzeCommand=new CleanupUiCommand{Enabled=true},SelectionSummary=!ready?"3 categorías marcadas":partial?"3 categorías marcadas · Estimación parcial: 35,7 MB":"3 categorías marcadas · Espacio recuperable estimado: 185,7 MB",Summary=!ready?"Aún no se ha realizado un análisis.":partial?"Análisis finalizado · Estimación parcial: 7,4 GB recuperables estimados":"Análisis finalizado · 7,6 GB recuperables estimados"},
    CleanUserTempCommand=new CleanupUiCommand{Enabled=ready},CleanWindowsTempCommand=new CleanupUiCommand{Enabled=ready&&!partial},CleanThumbnailsCommand=new CleanupUiCommand{Enabled=ready},EmptyRecycleBinCommand=new CleanupUiCommand{Enabled=ready},CleanSelectedCommand=new CleanupUiCommand{Enabled=ready&&!partial}};
  }
@@ -88,7 +90,7 @@ public static class CleanupXamlPresentationChecks{
      vm.Cleanup.CanChangeSelection=false;Layout(root,width);Check(boxes.All(b=>!b.IsEnabled),"Disabled selection state");
      Check(Visual<Grid>(boxes[0]).Any(g=>g.Name=="HitArea"&&g.Opacity==0.45),"Disabled appearance distinct");vm.Cleanup.CanChangeSelection=true;Layout(root,width);
      foreach(var text in Visual<TextBlock>(page).Where(t=>Shown(t))){var p=text.TransformToAncestor(page).Transform(new Point());Check(p.X>=-0.5&&p.X+text.ActualWidth<=page.ActualWidth+0.5,"No text overflow at "+width);Check(!text.Text.Contains("SHQuery")&&!text.Text.Contains("archivos accesibles")&&!text.Text.Contains("48 horas")&&!text.Text.Contains("Tamaño lógico"),"No technical counters/heuristics in normal view");}
-     Check(!Visual<TextBlock>(root).Any(t=>t.Text=="Portable · Acciones explícitas"),"Old sidebar tagline removed");Check(Visual<TextBlock>(root).Any(t=>t.Text=="v0.1.0-beta.3"),"Public development version visible");
+     Check(!Visual<TextBlock>(root).Any(t=>t.Text=="Portable · Acciones explícitas"),"Old sidebar tagline removed");Check(Visual<TextBlock>(root).Any(t=>t.Text=="v0.1.0-beta.4"),"Public development version visible");
      var details=Visual<Expander>(page).ToArray();Check(details.All(e=>!e.IsExpanded),"Details remain collapsed by default");
      if(state!="Before")foreach(var detail in details){detail.IsExpanded=true;Layout(root,width);Check(!Visual<TextBlock>(detail).Any(t=>t.Text.Contains("SHQuery")||t.Text.Contains("archivos accesibles")||t.Text.Contains("Tamaño lógico")),"Expanded details stay simple");detail.IsExpanded=false;}
     }

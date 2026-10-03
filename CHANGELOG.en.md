@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.1.0-beta.4 — 2026-10-03
+
+- Redesigned sidebar navigation with line icons, a separate Settings group, and direct GitHub links.
+- Improved primary button visibility, especially in dark mode, and standardized button text sizes.
+- Reorganized Settings with Light/Dark/System themes, folder access, application information, and preference reset.
+- Simplified the Settings and Activity headers.
+
 ## 0.1.0-beta.3 — 2026-10-02
 
 - TCP/IP reset now detects manual IPv4 configurations and shows their details with a second safety confirmation before execution.

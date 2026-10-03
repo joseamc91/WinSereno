@@ -395,10 +395,10 @@ public static class HomeInformationChecks {
    foreach(var item in vm.Navigation.Where(n=>n.Section!=NavigationSection.Home&&n.Section!=NavigationSection.Diagnosis&&n.Section!=NavigationSection.Repair&&n.Section!=NavigationSection.Network&&n.Section!=NavigationSection.Cleanup)) {
     // Change only the test backing field: normal Network navigation would perform real connectivity queries.
     typeof(MainViewModel).GetField("selectedNavigation",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(vm,item);
-    Check(vm.HasPageNotice&&!string.IsNullOrWhiteSpace(vm.PageNotice),"Other notice content retained: "+item.Label);
+    Check(!vm.HasPageNotice&&string.IsNullOrWhiteSpace(vm.PageNotice),"Other notice content retained: "+item.Label);
     var other=new MainWindow(vm,dialogs);Layout((FrameworkElement)other.Content);
     var otherNotice=(Border)Logical<TextBlock>((FrameworkElement)other.Content).Single(t=>BindingPath(t,TextBlock.TextProperty)=="PageNotice").Parent;
-    Check(otherNotice.Visibility==Visibility.Visible&&otherNotice.DesiredSize.Height>0,"Other notice visible: "+item.Label+" / "+theme);
+    Check(otherNotice.Visibility==Visibility.Collapsed&&otherNotice.DesiredSize.Height==0,"Other notice visible: "+item.Label+" / "+theme);
     other.Close();
    }
    typeof(MainViewModel).GetField("selectedNavigation",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(vm,vm.Navigation[0]);

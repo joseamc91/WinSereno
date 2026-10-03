@@ -4,8 +4,21 @@ using WinSereno.Services;
 
 namespace WinSereno.Views
 {
-    public sealed class DialogService : IDialogService, ITcpIpResetDialogs
+    public sealed class DialogService : IDialogService, ITcpIpResetDialogs, IPreferencesDialogs
     {
+        public bool ConfirmResetPreferences()
+        {
+            var window = new Window { Title = "Restablecer preferencias", Width = 520, SizeToContent = SizeToContent.Height,
+                ResizeMode = ResizeMode.NoResize, WindowStartupLocation = WindowStartupLocation.CenterOwner, Owner = Application.Current.MainWindow };
+            var layout = new System.Windows.Controls.StackPanel { Margin = new Thickness(20) };
+            layout.Children.Add(new System.Windows.Controls.TextBlock { Text = "Se restaurarán las preferencias visuales de WinSereno. Los logs y los datos del sistema no se modificarán.", TextWrapping = TextWrapping.Wrap });
+            var buttons = new System.Windows.Controls.StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 20, 0, 0) };
+            buttons.Children.Add(new System.Windows.Controls.Button { Content = "Cancelar", IsCancel = true });
+            var reset = new System.Windows.Controls.Button { Content = "Restablecer" };
+            reset.Click += (s, e) => window.DialogResult = true;
+            buttons.Children.Add(reset); layout.Children.Add(buttons); window.Content = layout;
+            return window.ShowDialog() == true;
+        }
         public bool ConfirmTcpIpReset(TcpIpResetSnapshot snapshot) => new TcpIpResetWarningWindow(snapshot) { Owner = Application.Current.MainWindow }.ShowDialog() == true;
         public RestartAdapter SelectRestartAdapter(System.Collections.Generic.IReadOnlyList<RestartAdapter> adapters)
         {

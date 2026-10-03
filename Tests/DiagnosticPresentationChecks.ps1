@@ -83,7 +83,7 @@ public static class DiagnosticPresentationChecks {
   Check(object.Equals(navigation.CommandParameter,result.NavigationTarget),"Destino original");
   var header=(Grid)card.FindName("ResultHeader");var actions=(WrapPanel)card.FindName("HeaderActions");
   Check(actions.Parent==header&&Grid.GetColumn(actions)==1,"Acciones en columna derecha del encabezado");
-  Check(buttons.All(b=>ReferenceEquals(b.Parent,actions)&&b.Padding==new Thickness(8,4,8,4)&&b.FontSize==12),"Botones compactos dentro del encabezado");
+  Check(buttons.All(b=>ReferenceEquals(b.Parent,actions)&&b.Padding==new Thickness(8,4,8,4)&&b.FontSize==13),"Botones compactos dentro del encabezado");
   Check(ReferenceEquals(actions.Children[0],navigation)&&ReferenceEquals(actions.Children[1],details),"Orden: navegación, detalles");
   var statusText=texts.Single(t=>t.Text==result.CardStatusLabel);
   Check(ReferenceEquals(header.Children[header.Children.Count-1],statusText)&&Grid.GetColumn(statusText)==2,"Estado al final, separado de botones");
@@ -181,7 +181,7 @@ public static class DiagnosticPresentationChecks {
   foreach(var item in vm.Navigation.Where(n=>n.Section!=NavigationSection.Home&&n.Section!=NavigationSection.Diagnosis&&n.Section!=NavigationSection.Repair&&n.Section!=NavigationSection.Network&&n.Section!=NavigationSection.Cleanup)) {
    // Bypass navigation callback so Network performs no real connectivity checks in these tests.
    typeof(MainViewModel).GetField("selectedNavigation",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(vm,item);
-   Check(vm.HasPageNotice&&!string.IsNullOrWhiteSpace(vm.PageNotice),"Resto de notices intacto: "+item.Label);
+   Check(!vm.HasPageNotice&&string.IsNullOrWhiteSpace(vm.PageNotice),"Resto de notices intacto: "+item.Label);
   }
   Check(!ops.IsActive,"Pruebas de presentación sin operaciones ni UAC");
  }

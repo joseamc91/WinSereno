@@ -75,7 +75,7 @@ namespace WinSereno.Services
             using (var stream = File.OpenRead(ConfigPath))
             {
                 var settings = (AppSettings)new DataContractJsonSerializer(typeof(AppSettings)).ReadObject(stream) ?? new AppSettings();
-                if (settings.Theme != "Light" && settings.Theme != "Dark") settings.Theme = "Light";
+                if (settings.Theme != "Light" && settings.Theme != "Dark" && settings.Theme != "System") settings.Theme = "Light";
                 return settings;
             }
         }

@@ -13,6 +13,7 @@ namespace WinSereno.ViewModels
     {
         public NavigationSection Section { get; set; }
         public string Label { get; set; }
+        public string SectionCode => Section.ToString();
     }
     public sealed class ToolPlaceholder
     {
@@ -26,8 +27,11 @@ namespace WinSereno.ViewModels
         private readonly IDialogService dialogs;
         private readonly ITcpIpResetPreflight tcpIpPreflight;
         private readonly AppSettings settings;
+        private readonly IApplicationShell shell;
         public IMaintenanceTaskRunner Runner { get; }
         public ObservableCollection<NavigationItem> Navigation { get; } = new ObservableCollection<NavigationItem>();
+        public ObservableCollection<NavigationItem> MainNavigation { get; } = new ObservableCollection<NavigationItem>();
+        public ObservableCollection<NavigationItem> SettingsNavigation { get; } = new ObservableCollection<NavigationItem>();
         public HomeViewModel Home { get; }
         public DiagnosticViewModel Diagnosis { get; }
         public NetworkViewModel Network { get; }
@@ -44,7 +48,7 @@ namespace WinSereno.ViewModels
         public RelayCommand DismissTaskPanelCommand { get; }
         public ObservableCollection<ToolPlaceholder> RepairTools { get; } = new ObservableCollection<ToolPlaceholder>();
         public ObservableCollection<ToolPlaceholder> NetworkTools { get; } = new ObservableCollection<ToolPlaceholder>();
-        public string[] ThemeChoices { get; } = { "Claro", "Oscuro" };
+        public string[] ThemeChoices { get; } = { "Claro", "Oscuro", "Sistema" };
         public RelayCommand NavigateCommand { get; }
         public RelayCommand StartMockCommand { get; }
         public RelayCommand RunRepairCommand { get; }
@@ -65,6 +69,10 @@ namespace WinSereno.ViewModels
         public RelayCommand CancelTaskCommand { get; }
         public RelayCommand DetailsCommand { get; }
         public RelayCommand OpenLogsCommand { get; }
+        public RelayCommand OpenApplicationFolderCommand { get; }
+        public RelayCommand OpenGitHubCommand { get; }
+        public RelayCommand OpenReleasesCommand { get; }
+        public RelayCommand ResetPreferencesCommand { get; }
         public RelayCommand CheckUpdatesCommand { get; }
 
         private NavigationItem selectedNavigation;
@@ -85,20 +93,19 @@ namespace WinSereno.ViewModels
         public string PageTitle => CurrentSection == NavigationSection.Activity ? "Registro de acciones" : SelectedNavigation.Label;
         public string ProductVersion => ProductInformation.DisplayVersion;
         public bool HasPageNotice => !string.IsNullOrWhiteSpace(PageNotice);
-        public string PageNotice => CurrentSection == NavigationSection.Home || CurrentSection == NavigationSection.Diagnosis || CurrentSection == NavigationSection.Repair || CurrentSection == NavigationSection.Network || CurrentSection == NavigationSection.Cleanup ? "" : CurrentSection == NavigationSection.Activity ? "Los archivos TXT de Logs conservan el registro persistente."
-            : "El tema y los logs se guardan junto a la aplicación.";
+        public string PageNotice => "";
         public string PageDescription
         {
             get
             {
                 switch (CurrentSection)
                 {
-                    case NavigationSection.Activity: return "Acciones realizadas durante esta sesión, de más reciente a más antigua.";
+                    case NavigationSection.Activity: return "Consulta las acciones realizadas durante esta sesión; los logs TXT conservan el registro persistente.";
                     case NavigationSection.Diagnosis: return "Analiza el estado general del PC sin realizar reparaciones. La integridad de Windows requiere permisos de administrador.";
                     case NavigationSection.Repair: return "Comprueba y repara componentes de Windows mediante acciones explícitas; las herramientas administrativas solicitan confirmación y permisos de administrador antes de ejecutarse.";
                     case NavigationSection.Network: return "Consulta y actualiza el estado de la red; las herramientas solicitan confirmación y permisos de administrador cuando corresponde.";
                     case NavigationSection.Cleanup: return "Analiza el espacio que puede recuperarse y elige qué categorías quieres limpiar.";
-                    case NavigationSection.Settings: return "Personalización y almacenamiento de esta aplicación portable.";
+                    case NavigationSection.Settings: return "Personaliza la apariencia y consulta la configuración de WinSereno.";
                     default: return "Información del equipo obtenida directamente desde Windows.";
                 }
             }
@@ -110,11 +117,11 @@ namespace WinSereno.ViewModels
         public event EventHandler RepairNavigationRequested;
         public string SelectedTheme
         {
-            get => settings.Theme == "Dark" ? "Oscuro" : "Claro";
+            get => settings.Theme == "System" ? "Sistema" : settings.Theme == "Dark" ? "Oscuro" : "Claro";
             set
             {
-                var theme = value == "Oscuro" ? "Dark" : "Light";
-                if (settings.Theme == theme) return;
+                var theme = value == "Sistema" ? "System" : value == "Oscuro" ? "Dark" : "Light";
+                if (settings.Theme == theme) { if (theme == "System") themes.Apply(theme); return; }
                 settings.Theme = theme;
                 themes.Apply(theme);
                 Raise();
@@ -151,8 +158,9 @@ namespace WinSereno.ViewModels
             }
         }
 
-        public MainViewModel(PortableStorage storage, AppSettings settings, ThemeService themes, IDialogService dialogs, IMaintenanceTaskRunner runner, HomeViewModel home, DiagnosticViewModel diagnosis, OperationCoordinator operations, IntegritySessionState integrity, ISessionLogger logger, RecycleBinCleanupService recycleBin = null, ITcpIpResetPreflight tcpIpPreflight = null, CleanupViewModel cleanup = null)
+        public MainViewModel(PortableStorage storage, AppSettings settings, ThemeService themes, IDialogService dialogs, IMaintenanceTaskRunner runner, HomeViewModel home, DiagnosticViewModel diagnosis, OperationCoordinator operations, IntegritySessionState integrity, ISessionLogger logger, RecycleBinCleanupService recycleBin = null, ITcpIpResetPreflight tcpIpPreflight = null, CleanupViewModel cleanup = null, IApplicationShell shell = null)
         {
+            this.shell = shell ?? new ApplicationShellService(storage);
             this.tcpIpPreflight = tcpIpPreflight ?? new TcpIpResetPreflightService(logger);
             this.recycleBin = recycleBin ?? new RecycleBinCleanupService(logger);
             this.integrity = integrity; this.logger = logger;
@@ -163,8 +171,8 @@ namespace WinSereno.ViewModels
             this.storage = storage; this.settings = settings; this.themes = themes; this.dialogs = dialogs; Runner = runner; Home = home; Diagnosis = diagnosis; Operations = operations;
             AddNavigation(NavigationSection.Home, "Inicio"); AddNavigation(NavigationSection.Diagnosis, "Diagnóstico");
             AddNavigation(NavigationSection.Repair, "Reparación"); AddNavigation(NavigationSection.Network, "Red");
-            AddNavigation(NavigationSection.Cleanup, "Limpieza"); AddNavigation(NavigationSection.Settings, "Ajustes");
-            AddNavigation(NavigationSection.Activity, "Actividad");
+            AddNavigation(NavigationSection.Cleanup, "Limpieza"); AddNavigation(NavigationSection.Activity, "Actividad");
+            AddNavigation(NavigationSection.Settings, "Ajustes");
             selectedNavigation = Navigation[0];
             NavigateCommand = new RelayCommand(p => { if (p is NavigationSection destination) Navigate(destination); });
             StartMockCommand = new RelayCommand(async p => await StartMockAsync(p as string != "NonCancelable"), p => !Operations.IsActive);
@@ -193,6 +201,10 @@ namespace WinSereno.ViewModels
             DismissTaskPanelCommand = new RelayCommand(p => { panel.Dismiss(Progress, Operations.IsActive); RefreshTaskPanel(); }, p => CanDismissTaskPanel);
             CheckUpdatesCommand = new RelayCommand(p => { }, p => false);
             OpenLogsCommand = new RelayCommand(p => OpenLogs());
+            OpenApplicationFolderCommand = new RelayCommand(p => OpenShell(this.shell.OpenApplicationFolder, "la carpeta de WinSereno"));
+            OpenGitHubCommand = new RelayCommand(p => OpenShell(this.shell.OpenGitHub, "GitHub"));
+            OpenReleasesCommand = new RelayCommand(p => OpenShell(this.shell.OpenReleases, "Releases"));
+            ResetPreferencesCommand = new RelayCommand(p => ResetPreferences());
             Runner.ProgressChanged += OnProgressChanged;
             Diagnosis.Completed += OnProgressChanged;
             Cleanup.Completed += OnProgressChanged;
@@ -506,11 +518,25 @@ namespace WinSereno.ViewModels
         {
             try
             {
-                new LogsFolderService(storage).Open();
+                shell.OpenLogs();
             }
             catch (Exception ex) { dialogs.ShowMessage("No se pudo abrir la carpeta de logs.\n" + ex.Message); }
         }
-        private void AddNavigation(NavigationSection section, string label) => Navigation.Add(new NavigationItem { Section = section, Label = label });
+        private void OpenShell(Action action, string name)
+        { try { action(); } catch (Exception ex) { dialogs.ShowMessage("No se pudo abrir " + name + ".\n" + ex.Message); } }
+        private void ResetPreferences()
+        {
+            if ((dialogs as IPreferencesDialogs)?.ConfirmResetPreferences() != true) return;
+            settings.Theme = new AppSettings().Theme;
+            themes.Apply(settings.Theme); Raise(nameof(SelectedTheme));
+            try { storage.SaveSettings(settings); }
+            catch (Exception ex) { dialogs.ShowMessage("Las preferencias se han aplicado, pero no se pudieron guardar.\n" + ex.Message); }
+        }
+        private void AddNavigation(NavigationSection section, string label)
+        {
+            var item = new NavigationItem { Section = section, Label = label }; Navigation.Add(item);
+            if (section == NavigationSection.Settings) SettingsNavigation.Add(item); else MainNavigation.Add(item);
+        }
         private static void AddTools(ObservableCollection<ToolPlaceholder> items, string[] names, string description)
         { foreach (var name in names) items.Add(new ToolPlaceholder { Name = name, Description = description }); }
     }
