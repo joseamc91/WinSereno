@@ -39,13 +39,18 @@ namespace WinSereno.ViewModels
         private CpuInformation currentCpu;
         private GpuInformation currentGpu;
         public ObservableCollection<InformationCardViewModel> Cards { get; } = new ObservableCollection<InformationCardViewModel>();
-        public ObservableCollection<DiskViewModel> Disks { get; } = new ObservableCollection<DiskViewModel>();
+        public ObservableCollection<DiskViewModel> LocalDisks { get; } = new ObservableCollection<DiskViewModel>();
+        public ObservableCollection<DiskViewModel> ExternalDisks { get; } = new ObservableCollection<DiskViewModel>();
+        public bool HasExternalDisks => ExternalDisks.Count > 0;
         public RelayCommand RefreshCommand { get; }
         private bool isRefreshing;
         public bool IsRefreshing { get => isRefreshing; private set { if (Set(ref isRefreshing, value)) RefreshCommand.Refresh(); } }
         private string disksMessage = "Consultando...";
         public string DisksMessage { get => disksMessage; private set => Set(ref disksMessage, value); }
         public bool HasDisksMessage => !string.IsNullOrEmpty(DisksMessage);
+        private string externalDisksMessage = "";
+        public string ExternalDisksMessage { get => externalDisksMessage; private set => Set(ref externalDisksMessage, value); }
+        public bool HasExternalDisksMessage => !string.IsNullOrEmpty(ExternalDisksMessage);
         private string refreshedText;
         public string RefreshedText { get => refreshedText; private set => Set(ref refreshedText, value); }
         private bool stopped;
@@ -65,7 +70,9 @@ namespace WinSereno.ViewModels
             currentCpu = null; currentGpu = null;
             Cards.First(c => c.Block == InformationBlock.Gpu).Title = "GPU";
             foreach (var card in Cards) { card.Value = "Consultando..."; card.Description = ""; }
-            Disks.Clear(); DisksMessage = "Consultando..."; Raise(nameof(HasDisksMessage)); RefreshedText = "Consultando información del equipo...";
+            LocalDisks.Clear(); ExternalDisks.Clear(); ExternalDisksMessage = "";
+            Raise(nameof(HasExternalDisks)); Raise(nameof(HasExternalDisksMessage));
+            DisksMessage = "Consultando..."; Raise(nameof(HasDisksMessage)); RefreshedText = "Consultando información del equipo...";
             try
             {
                 await service.CollectAsync(new Progress<InformationUpdate>(ApplyUpdate), lifetime.Token);
@@ -89,14 +96,19 @@ namespace WinSereno.ViewModels
             if (update.Block == InformationBlock.Disks)
             {
                 var collection = update.Data as DiskCollection;
-                Disks.Clear();
+                LocalDisks.Clear(); ExternalDisks.Clear();
                 if (collection != null)
-                    foreach (var disk in collection.Volumes)
-                        Disks.Add(new DiskViewModel { Name = disk.Unit + (string.IsNullOrWhiteSpace(disk.Label) ? "" : " · " + disk.Label),
+                    foreach (var disk in collection.Volumes.OrderBy(d => d.Unit, StringComparer.OrdinalIgnoreCase))
+                    {
+                        if (disk.DriveType != System.IO.DriveType.Fixed && disk.DriveType != System.IO.DriveType.Removable) continue;
+                        var target = disk.DriveType == System.IO.DriveType.Removable ? ExternalDisks : LocalDisks;
+                        target.Add(new DiskViewModel { Name = disk.Unit + (string.IsNullOrWhiteSpace(disk.Label) ? "" : " · " + disk.Label),
                             CapacityText = FormatBytes((ulong)disk.FreeBytes) + " libres de " + FormatBytes((ulong)disk.TotalBytes),
                             FreeText = disk.FreePercentage.ToString("0.#", CultureInfo.CurrentCulture) + " % libre", NeedsAttention = disk.NeedsAttention });
-                DisksMessage = collection == null ? "No se pudo consultar" : collection.HasErrors ? "Algunas unidades no se pudieron consultar" : Disks.Count == 0 ? "No hay volúmenes locales listos" : "";
-                Raise(nameof(HasDisksMessage)); return;
+                    }
+                DisksMessage = collection == null ? "No se pudo consultar" : collection.HasErrors ? "Algunas unidades no se pudieron consultar" : LocalDisks.Count == 0 ? "No hay volúmenes locales listos" : "";
+                ExternalDisksMessage = HasExternalDisks && collection.HasErrors ? "Algunas unidades no se pudieron consultar" : "";
+                Raise(nameof(HasDisksMessage)); Raise(nameof(HasExternalDisks)); Raise(nameof(HasExternalDisksMessage)); return;
             }
             var card = Cards.First(c => c.Block == update.Block);
             card.Description = "";

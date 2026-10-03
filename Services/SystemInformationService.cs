@@ -186,12 +186,13 @@ namespace WinSereno.Services
             {
                 try
                 {
-                    if ((drive.DriveType != DriveType.Fixed && drive.DriveType != DriveType.Removable) || !drive.IsReady) continue;
+                    var driveType = drive.DriveType;
+                    if ((driveType != DriveType.Fixed && driveType != DriveType.Removable) || !drive.IsReady) continue;
                     var total = drive.TotalSize;
                     if (total <= 0) continue;
                     string label = null;
                     try { label = drive.VolumeLabel; } catch (Exception ex) { SystemQuery.Log(logger, "Etiqueta de volumen " + drive.Name + " no disponible: " + ex.Message); }
-                    result.Volumes.Add(new DiskInformation { Unit = drive.Name.TrimEnd('\\'), Label = label, TotalBytes = total, FreeBytes = drive.TotalFreeSpace });
+                    result.Volumes.Add(new DiskInformation { DriveType = driveType, Unit = drive.Name.TrimEnd('\\'), Label = label, TotalBytes = total, FreeBytes = drive.TotalFreeSpace });
                     SystemQuery.Log(logger, "Unidad local detectada: " + drive.Name);
                 }
                 catch (Exception ex) { result.HasErrors = true; SystemQuery.Log(logger, "Error proveedor Disks en unidad " + drive.Name + ": " + ex); }

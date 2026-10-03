@@ -58,4 +58,12 @@ Check ($assembly.Contains('AssemblyInformationalVersion("0.1.0-beta.4')) 'Centra
 Check (!$main.Contains('Portable · Acciones explícitas')) 'Obsolete sidebar tagline absent'
 Check (!(Read 'WinSereno.csproj').Contains('PackageReference')) 'No NuGet icon dependencies'
 Check (!$main.Contains('x:Static') -and !$main.Contains('xmlns:local')) 'No local XAML second-pass references'
+Check ($main.Contains('x:Name="SettingsDataPreferencesRow"') -and $main.Contains('<ColumnDefinition Width="55*"/><ColumnDefinition Width="45*"/>')) 'Settings data/preferences share two adaptive columns'
+Check ($main.Contains('x:Name="SettingsDataCard" Style="{StaticResource Card}"') -and $main.Contains('x:Name="SettingsPreferencesCard" Grid.Column="1" Style="{StaticResource Card}"')) 'Two independent Settings cards keep the existing style'
+Check (([regex]::Matches($main,'ItemTemplate="\{StaticResource DiskCardTemplate\}"')).Count -eq 2) 'Local and external disks share exactly the same card template'
+Check ($main.Contains('ItemsSource="{Binding Home.LocalDisks}"') -and $main.Contains('ItemsSource="{Binding Home.ExternalDisks}"')) 'Separate disk collections without duplicate reads'
+Check ($main.Contains('x:Name="ExternalDisksSection" Visibility="{Binding Home.HasExternalDisks, Converter={StaticResource BoolVisibility}}"')) 'External section entirely collapses when empty'
+$disks = Read 'Services/SystemInformationService.cs'
+Check ($disks.Contains('DriveType = driveType') -and $disks.Contains('!drive.IsReady') -and $disks.Contains('if (total <= 0) continue;')) 'DriveInfo classification preserves ready/valid volume guards'
+Check (!(Read 'ViewModels/HomeViewModel.cs').Contains('public ObservableCollection<DiskViewModel> Disks ')) 'No ambiguous mixed Home disk collection remains'
 Write-Output "$script:count comprobaciones estáticas Beta4 correctas; sin ejecutar aplicación, enlaces ni operaciones."

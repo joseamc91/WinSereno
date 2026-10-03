@@ -4,6 +4,8 @@
 
 - Corregido el reconocimiento de errores localizados de CHKDSK cuando Windows añade puntuación al mensaje.
 - Corregida la navegación entre Ajustes y las secciones principales de la barra lateral para mantener una única página seleccionada.
+- Ajustes aprovecha mejor el espacio disponible colocando Datos y registros y Preferencias en paralelo.
+- Inicio separa las unidades externas de los discos locales cuando Windows las identifica como unidades removibles.
 
 ## 0.1.0-beta.4 — 2026-10-03
 

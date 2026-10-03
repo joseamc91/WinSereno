@@ -1,5 +1,15 @@
 <Window Style="{StaticResource {x:Type Window}}" x:Class="WinSereno.Views.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="WinSereno" Width="1180" Height="820" MinWidth="900" MinHeight="640" WindowStartupLocation="CenterScreen">
   <Window.Resources>
+    <ItemsPanelTemplate x:Key="DiskCardsPanel"><WrapPanel/></ItemsPanelTemplate>
+    <DataTemplate x:Key="DiskCardTemplate">
+      <Border Style="{StaticResource Card}" Width="252" Padding="12" Margin="0,0,10,10"><StackPanel>
+        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+        <TextBlock Text="{Binding CapacityText}" Style="{StaticResource Muted}" FontSize="12" Margin="0,5,0,5"/>
+        <WrapPanel><TextBlock Text="{Binding FreeText}" Style="{StaticResource Muted}" FontSize="12"/><TextBlock Text=" · " Style="{StaticResource Muted}" FontSize="12"/>
+          <TextBlock Text="{Binding StatusText}" FontSize="12"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource GoodBrush}"/><Style.Triggers><DataTrigger Binding="{Binding NeedsAttention}" Value="True"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+        </WrapPanel>
+      </StackPanel></Border>
+    </DataTemplate>
     <DataTemplate x:Key="SidebarNavigationTemplate">
       <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
         <Path Width="18" Height="18" Stretch="Uniform" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" VerticalAlignment="Center">
@@ -74,15 +84,12 @@
             <ItemsControl x:Name="HomeInformationCards" Style="{StaticResource ThreeColumnCards}" ItemsSource="{Binding Home.Cards}"><ItemsControl.ItemTemplate><DataTemplate><Border Style="{StaticResource ThreeColumnCard}"><StackPanel><TextBlock Text="{Binding Title}" Style="{StaticResource Muted}"/><TextBlock Text="{Binding Value}" FontSize="17" FontWeight="SemiBold" Margin="0,5,0,5"/><TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="12"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
             <TextBlock Text="Discos locales" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,10"/>
             <TextBlock Text="{Binding Home.DisksMessage}" Style="{StaticResource Muted}" Visibility="{Binding Home.HasDisksMessage, Converter={StaticResource BoolVisibility}}"/>
-            <ItemsControl ItemsSource="{Binding Home.Disks}"><ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel><ItemsControl.ItemTemplate><DataTemplate>
-              <Border Style="{StaticResource Card}" Width="252" Padding="12" Margin="0,0,10,10"><StackPanel>
-                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                <TextBlock Text="{Binding CapacityText}" Style="{StaticResource Muted}" FontSize="12" Margin="0,5,0,5"/>
-                <WrapPanel><TextBlock Text="{Binding FreeText}" Style="{StaticResource Muted}" FontSize="12"/><TextBlock Text=" · " Style="{StaticResource Muted}" FontSize="12"/>
-                  <TextBlock Text="{Binding StatusText}" FontSize="12"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource GoodBrush}"/><Style.Triggers><DataTrigger Binding="{Binding NeedsAttention}" Value="True"><Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
-                </WrapPanel>
-              </StackPanel></Border>
-            </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+            <ItemsControl x:Name="LocalDiskCards" ItemsSource="{Binding Home.LocalDisks}" ItemsPanel="{StaticResource DiskCardsPanel}" ItemTemplate="{StaticResource DiskCardTemplate}"/>
+            <StackPanel x:Name="ExternalDisksSection" Visibility="{Binding Home.HasExternalDisks, Converter={StaticResource BoolVisibility}}">
+              <TextBlock Text="Unidades externas" FontSize="18" FontWeight="SemiBold" Margin="0,4,0,10"/>
+              <TextBlock Text="{Binding Home.ExternalDisksMessage}" Style="{StaticResource Muted}" Visibility="{Binding Home.HasExternalDisksMessage, Converter={StaticResource BoolVisibility}}"/>
+              <ItemsControl x:Name="ExternalDiskCards" ItemsSource="{Binding Home.ExternalDisks}" ItemsPanel="{StaticResource DiskCardsPanel}" ItemTemplate="{StaticResource DiskCardTemplate}"/>
+            </StackPanel>
 
           </StackPanel>
           <StackPanel><StackPanel.Style><Style TargetType="StackPanel"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding CurrentSectionCode}" Value="Diagnosis"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></StackPanel.Style>
@@ -285,11 +292,18 @@
                 <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeChoices}" SelectedItem="{Binding SelectedTheme}" Width="160" VerticalAlignment="Center"/>
               </Grid>
             </StackPanel></Border>
-            <Border Style="{StaticResource Card}"><StackPanel>
-              <TextBlock Text="Datos y registros" FontSize="18" FontWeight="SemiBold"/>
-              <TextBlock Text="La configuración y los logs se guardan junto a la aplicación." Style="{StaticResource Muted}" FontSize="12" Margin="0,6,0,12"/>
-              <WrapPanel><Button Content="Abrir carpeta de logs" Command="{Binding OpenLogsCommand}" Margin="0,0,8,6"/><Button Content="Abrir carpeta de WinSereno" Command="{Binding OpenApplicationFolderCommand}" Margin="0,0,0,6"/></WrapPanel>
-            </StackPanel></Border>
+            <Grid x:Name="SettingsDataPreferencesRow"><Grid.ColumnDefinitions><ColumnDefinition Width="55*"/><ColumnDefinition Width="45*"/></Grid.ColumnDefinitions>
+              <Border x:Name="SettingsDataCard" Style="{StaticResource Card}" Margin="0,0,6,12"><StackPanel>
+                <TextBlock Text="Datos y registros" FontSize="18" FontWeight="SemiBold"/>
+                <TextBlock Text="La configuración y los logs se guardan junto a la aplicación." Style="{StaticResource Muted}" FontSize="12" Margin="0,6,0,12"/>
+                <WrapPanel><Button Content="Abrir carpeta de logs" Command="{Binding OpenLogsCommand}" Margin="0,0,8,6"/><Button Content="Abrir carpeta de WinSereno" Command="{Binding OpenApplicationFolderCommand}" Margin="0,0,0,6"/></WrapPanel>
+              </StackPanel></Border>
+              <Border x:Name="SettingsPreferencesCard" Grid.Column="1" Style="{StaticResource Card}" Margin="6,0,0,12"><StackPanel>
+                <TextBlock Text="Preferencias" FontSize="18" FontWeight="SemiBold"/>
+                <TextBlock Text="Restaura la apariencia predeterminada sin borrar logs ni modificar Windows." Style="{StaticResource Muted}" FontSize="12" Margin="0,6,0,12"/>
+                <Button Content="Restablecer preferencias" Command="{Binding ResetPreferencesCommand}" HorizontalAlignment="Left"/>
+              </StackPanel></Border>
+            </Grid>
             <Border Style="{StaticResource Card}"><StackPanel>
               <TextBlock Text="Acerca de" FontSize="18" FontWeight="SemiBold"/>
               <WrapPanel Margin="0,8,0,0"><TextBlock Text="WinSereno" FontWeight="SemiBold" Margin="0,0,8,0"/><TextBlock Text="{Binding ProductVersion}" Style="{StaticResource Muted}"/></WrapPanel>
@@ -297,11 +311,6 @@
               <WrapPanel><Button Content="GitHub ↗" Command="{Binding OpenGitHubCommand}" Style="{StaticResource LinkButton}" Margin="0,0,20,0"/><Button Content="Releases ↗" Command="{Binding OpenReleasesCommand}" Style="{StaticResource LinkButton}" Margin="0"/></WrapPanel>
               <TextBlock Text="Actualizaciones" FontWeight="SemiBold" Margin="0,14,0,0"/><TextBlock Text="La comprobación integrada de actualizaciones estará disponible próximamente." Style="{StaticResource Muted}" FontSize="12" Margin="0,5,0,8"/>
               <Button Content="Buscar actualizaciones" Command="{Binding CheckUpdatesCommand}" HorizontalAlignment="Left"/>
-            </StackPanel></Border>
-            <Border Style="{StaticResource Card}"><StackPanel>
-              <TextBlock Text="Preferencias" FontSize="18" FontWeight="SemiBold"/>
-              <TextBlock Text="Restaura la apariencia predeterminada sin borrar logs ni modificar Windows." Style="{StaticResource Muted}" FontSize="12" Margin="0,6,0,12"/>
-              <Button Content="Restablecer preferencias" Command="{Binding ResetPreferencesCommand}" HorizontalAlignment="Left"/>
             </StackPanel></Border>
           </StackPanel>
         </Grid>

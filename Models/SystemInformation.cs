@@ -47,6 +47,7 @@ namespace WinSereno.Models
     }
     public sealed class DiskInformation
     {
+        public System.IO.DriveType DriveType { get; set; } = System.IO.DriveType.Fixed;
         public string Unit { get; set; }
         public string Label { get; set; }
         public long TotalBytes { get; set; }

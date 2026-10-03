@@ -184,10 +184,10 @@ public static class HomeInformationChecks {
   disks.Volumes.Add(new DiskInformation {Unit="E:",TotalBytes=1000,FreeBytes=511});
   Apply(home,InformationBlock.Disks,disks);
   Check(SystemInformationPolicy.LowDiskSpacePercentage==10.0,"Disk threshold unchanged");
-  Check(home.Disks[0].NeedsAttention&&home.Disks[0].StatusText=="Atención","Below threshold warning retained");
-  Check(!home.Disks[1].NeedsAttention&&home.Disks[1].StatusText=="Correcto","Threshold boundary healthy");
-  Check(home.Disks[2].FreeText=="51,1 % libre","Readable percentage retained");
-  Check(home.Disks[0].Name=="C: · Windows"&&home.Disks[0].CapacityText.Contains("libres de"),"All disk fields retained");
+  Check(home.LocalDisks[0].NeedsAttention&&home.LocalDisks[0].StatusText=="Atención","Below threshold warning retained");
+  Check(!home.LocalDisks[1].NeedsAttention&&home.LocalDisks[1].StatusText=="Correcto","Threshold boundary healthy");
+  Check(home.LocalDisks[2].FreeText=="51,1 % libre","Readable percentage retained");
+  Check(home.LocalDisks[0].Name=="C: · Windows"&&home.LocalDisks[0].CapacityText.Contains("libres de"),"All disk fields retained");
   var gpu=Gpu(new GpuInformation {Name=" NVIDIA GeForce RTX 3070 Ti ",DriverVersion=" 32.0.15.6094 "});
   Check(gpu.Name=="NVIDIA GeForce RTX 3070 Ti"&&gpu.DriverVersion=="32.0.15.6094","GPU model and driver trimmed");
   Apply(home,InformationBlock.Gpu,gpu);
@@ -228,7 +228,7 @@ public static class HomeInformationChecks {
   Check(gpuFailure.Update.Block==InformationBlock.Gpu&&gpuFailure.Update.Status==InformationStatus.Failed,"GPU provider failure controlled independently");
   typeof(HomeViewModel).GetMethod("ApplyUpdate",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(home,new object[]{gpuFailure.Update});
   Check(home.Cards[2].Value=="No se pudo consultar"&&home.Cards[2].Description=="","GPU failure uses existing Home unavailable behavior");
-  Check(home.Cards.Where(c=>c.Block!=InformationBlock.Gpu).Select(c=>c.Value+"|"+c.Description).SequenceEqual(before)&&home.Disks.Count==3,"Other Home cards/disks survive GPU failure");
+  Check(home.Cards.Where(c=>c.Block!=InformationBlock.Gpu).Select(c=>c.Value+"|"+c.Description).SequenceEqual(before)&&home.LocalDisks.Count==3,"Other Home cards/disks survive GPU failure");
   Check(logger.Text.Contains("simulated GPU WMI failure"),"GPU failure logged");
   var gpuEmpty=new HomeGpuProgress();Func<object> noGpu=()=>null;
   ((System.Threading.Tasks.Task)readAsync.Invoke(service,new object[]{InformationBlock.Gpu,noGpu,gpuEmpty,System.Threading.CancellationToken.None})).GetAwaiter().GetResult();
@@ -356,7 +356,7 @@ public static class HomeInformationChecks {
    Check(notice.Visibility==Visibility.Collapsed&&notice.DesiredSize.Height==0,"Home notice really collapsed: "+theme);
    Check(((Grid)notice.Parent).RowDefinitions[1].ActualHeight==0,"No banner margin gap: "+theme);
    var cards=Logical<ItemsControl>(content).Single(c=>ReferenceEquals(c.ItemsSource,home.Cards));
-   var volumes=Logical<ItemsControl>(content).Single(c=>ReferenceEquals(c.ItemsSource,home.Disks));
+   var volumes=Logical<ItemsControl>(content).Single(c=>ReferenceEquals(c.ItemsSource,home.LocalDisks));
    Check(cards.Items.Count==6&&volumes.Items.Count==3,"All six cards and volumes present: "+theme);
    Check(cards.ItemsPanel.LoadContent() is UniformGrid&&((UniformGrid)cards.ItemsPanel.LoadContent()).Columns==3&&volumes.ItemsPanel.LoadContent() is WrapPanel,"Three-column Home grid, independent disk wrapping retained: "+theme);
    var cardBorders=Visual<Border>(cards).Where(b=>ReferenceEquals(b.Style,window.FindResource("ThreeColumnCard"))).ToList();

@@ -14,7 +14,7 @@ Las funciones implementadas y su validación son aspectos distintos: algunas cue
 
 | Módulo | Funcionalidad actual |
 |---|---|
-| Inicio | Información real de Windows, CPU, GPU integrada/dedicada cuando se identifican, RAM y detalles de módulos cuando Windows los expone, red principal, uptime y discos locales. Tarjetas principales en tres columnas y actualización manual. |
+| Inicio | Información real de Windows, CPU, GPU integrada/dedicada cuando se identifican, RAM y detalles de módulos cuando Windows los expone, red principal, uptime, discos locales y unidades removibles en secciones separadas. Tarjetas principales en tres columnas y actualización manual. |
 | Diagnóstico | Seis comprobaciones: espacio de almacenamiento, salud básica de almacenamiento, red local e Internet, servicios críticos, eventos de Windows e integridad de Windows. Las cinco primeras utilizan permisos normales; Integridad ejecuta DISM CheckHealth y SFC VerifyOnly con un único UAC. Ninguna realiza reparaciones. |
 | Reparación | DISM CheckHealth, ScanHealth y RestoreHealth; SFC /scannow; CHKDSK de solo lectura; StartComponentCleanup y Reparación completa condicional. |
 | Red | Tarjetas compactas de adaptadores físicos en tres columnas, estado de conectividad simplificado y detalles separados por adaptador y pruebas globales. Caché DNS, DHCP, reinicio de adaptador y restablecimientos Winsock/TCP/IP. |
