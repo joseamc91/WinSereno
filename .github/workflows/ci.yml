@@ -12,6 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    timeout-minutes: 30
 
     steps:
       - name: Check out repository
@@ -20,11 +21,103 @@ jobs:
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Build Release
+      - name: Clean and build Debug
         shell: pwsh
-        run: msbuild WinSereno.sln /m /nologo /p:Configuration=Release "/p:Platform=Any CPU"
+        run: |
+          New-Item -ItemType Directory -Path bin/CI -Force | Out-Null
+          msbuild WinSereno.sln /t:Clean,Build /m /nologo /warnaserror /p:TreatWarningsAsErrors=true /p:Configuration=Debug "/p:Platform=Any CPU" "/flp:logfile=bin/CI/Debug.log;verbosity=diagnostic"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Clean and build Release
+        shell: pwsh
+        run: |
+          msbuild WinSereno.sln /t:Clean,Build /m /nologo /warnaserror /p:TreatWarningsAsErrors=true /p:Configuration=Release "/p:Platform=Any CPU" "/flp:logfile=bin/CI/Release.log;verbosity=diagnostic"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Verify build outputs and WPF compilation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($configuration in @('Debug', 'Release')) {
+            if (-not (Test-Path -LiteralPath "bin/$configuration/WinSereno.exe" -PathType Leaf)) {
+              throw "Missing $configuration executable."
+            }
+            $log = Get-Content -LiteralPath "bin/CI/$configuration.log" -Raw
+            if ($log -notmatch '_RequireMCPass2ForMainAssembly=False' -or $log -match '_RequireMCPass2ForMainAssembly=True') {
+              throw "$configuration did not confirm _RequireMCPass2ForMainAssembly=False."
+            }
+          }
+          $temporaryProjects = @(Get-ChildItem -LiteralPath . -Recurse -File -Filter '*_wpftmp.csproj')
+          if ($temporaryProjects.Count -ne 0) {
+            throw "Unexpected WPF temporary projects: $($temporaryProjects.FullName -join ', ')"
+          }
+          Write-Host 'Debug and Release available; MCPass2=False; 0 wpftmp projects.'
+
+      - name: Run all PowerShell check suites
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Capture native failures explicitly so every suite can report before the job fails.
+          $PSNativeCommandUseErrorActionPreference = $false
+          $windowsPowerShell = Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
+          if (-not (Test-Path -LiteralPath $windowsPowerShell -PathType Leaf)) {
+            throw 'Windows PowerShell 5.1 is required for the .NET Framework/WPF harnesses.'
+          }
+          $suites = @(Get-ChildItem -LiteralPath Tests -File -Filter '*Checks.ps1' | Sort-Object Name)
+          if ($suites.Count -eq 0) { throw 'No check suites were discovered.' }
+          $results = @()
+          foreach ($suite in $suites) {
+            Write-Host "::group::$($suite.Name)"
+            Write-Host "START: $($suite.Name) at $([DateTimeOffset]::UtcNow.ToString('o'))"
+            $output = @()
+            $exitCode = -1
+            $logPath = Join-Path 'bin/CI' ($suite.BaseName + '.log')
+            try {
+              & $windowsPowerShell -NoLogo -NoProfile -NonInteractive -STA -File $suite.FullName 2>&1 |
+                Tee-Object -FilePath $logPath |
+                Tee-Object -Variable output |
+                ForEach-Object { Write-Host "$_" }
+              $exitCode = $LASTEXITCODE
+            } catch {
+              Write-Host "Suite launch/capture failed: $_"
+              Add-Content -LiteralPath $logPath -Value "Suite launch/capture failed: $_"
+            }
+            $checks = $null
+            if ($exitCode -eq 0) {
+              # Existing suites finish with '<count> comprobaciones ... correctas' or '<count> checks passed'.
+              $checkMatches = [regex]::Matches(($output -join "`n"), '(?m)^(?<count>\d+)\s+(?:comprobaciones\b[^\r\n]*\bcorrectas\b|checks\s+passed\b)[^\r\n]*\r?$')
+              if ($checkMatches.Count -eq 1) { $checks = [long]$checkMatches[0].Groups['count'].Value }
+            }
+            $results += [pscustomobject]@{ Suite = $suite.Name; ExitCode = $exitCode; Checks = $checks }
+            $state = if ($exitCode -eq 0) { 'PASS' } else { 'FAIL' }
+            Write-Host "RESULT: $($suite.Name) = $state; exit code = $exitCode; checks = $(if ($null -eq $checks) { 'not available' } else { $checks })"
+            Write-Host '::endgroup::'
+            if ($exitCode -ne 0) {
+              Write-Host "::error file=Tests/$($suite.Name)::Suite failed with exit code $exitCode. See its output above."
+            }
+          }
+          $passed = @($results | Where-Object ExitCode -eq 0)
+          $failed = @($results | Where-Object ExitCode -ne 0)
+          $withoutCounts = @($passed | Where-Object { $null -eq $_.Checks })
+          $checkTotal = ($passed | Where-Object { $null -ne $_.Checks } | Measure-Object -Property Checks -Sum).Sum
+          if ($null -eq $checkTotal) { $checkTotal = 0 }
+          $summary = @(
+            '## PowerShell check suites'
+            "Executed: $($results.Count); passed: $($passed.Count); failed: $($failed.Count)."
+            "Successful checks reported by passing suites: $checkTotal."
+          )
+          if ($withoutCounts.Count -gt 0) {
+            $summary += "Check count is partial; unavailable for: $($withoutCounts.Suite -join ', ')."
+          }
+          if ($failed.Count -gt 0) { $summary += "Failed suites: $($failed.Suite -join ', ')." }
+          $results | Format-Table -AutoSize | Out-String | Write-Host
+          $summary | ForEach-Object { Write-Host $_ }
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8
+          if ($failed.Count -gt 0) { exit 1 }
+          exit 0
 
       - name: Upload executable
+        if: ${{ success() }}
         uses: actions/upload-artifact@v4
         with:
           name: WinSereno-Release
