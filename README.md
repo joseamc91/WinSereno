@@ -1,170 +1,103 @@
-# WinSereno
+<p align="center">
+  <img src="Assets/Brand/Banner.png" alt="WinSereno" width="100%">
+</p>
 
-Aplicación portable para Windows centrada en diagnóstico, mantenimiento y reparación mediante herramientas nativas del sistema. Ofrece acciones explícitas y resultados visibles, sin filosofía de «PC optimizer».
+<p align="center">
+  <strong>Español</strong> · <a href="README.en.md">English</a>
+</p>
 
-## Estado
+<p align="center">
+  <a href="https://github.com/joseamc91/WinSereno/actions/workflows/ci.yml">
+    <img src="https://github.com/joseamc91/WinSereno/actions/workflows/ci.yml/badge.svg" alt="CI">
+  </a>
+  <a href="https://github.com/joseamc91/WinSereno/releases/latest">
+    <img src="https://img.shields.io/github/v/release/joseamc91/WinSereno?label=Stable&color=1F4E6B" alt="Última versión estable">
+  </a>
+  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4" alt="Windows 10 y 11">
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/Licencia-GPLv3-58B7B1" alt="Licencia GNU GPLv3">
+  </a>
+</p>
 
-**v1.0.0** es la primera versión estable pública de WinSereno.
+<p align="center">
+  WinSereno reúne herramientas de diagnóstico, mantenimiento y reparación de Windows en una interfaz clara y portable. Tú eliges las acciones y puedes consultar sus resultados.
+</p>
 
-La versión pública visible es `1.0.0` y sigue los tags de release. AssemblyVersion y FileVersion son `1.0.0.0`.
+<p align="center">
+  <a href="https://github.com/joseamc91/WinSereno/releases/latest">
+    <img src="https://img.shields.io/badge/DESCARGAR%20WINSERENO-1F4E6B?style=for-the-badge" alt="DESCARGAR WINSERENO">
+  </a>
+</p>
 
-Las funciones implementadas y su validación son aspectos distintos: algunas cuentan con pruebas manuales y otras requieren más validación en equipos reales.
+<p align="center">
+  <strong>Portable · Sin instalación · Herramientas nativas de Windows</strong>
+</p>
 
-## Características
+<p align="center">
+  <img src="docs/assets/Screenshot_Themes.png" alt="Inicio de WinSereno con temas Claro y Oscuro" width="100%">
+  <br>
+  <sub>Interfaz actual en español. Presentación de los temas con datos de ejemplo.</sub>
+</p>
 
-| Módulo | Funcionalidad actual |
-|---|---|
-| Inicio | Información real de Windows, CPU, GPU integrada/dedicada cuando se identifican, RAM y detalles de módulos cuando Windows los expone, red principal, uptime, discos locales y unidades removibles en secciones separadas. Tarjetas principales en tres columnas y actualización manual. |
-| Diagnóstico | Seis comprobaciones: espacio de almacenamiento, salud básica de almacenamiento, red local e Internet, servicios críticos, eventos de Windows e integridad de Windows. Las cinco primeras utilizan permisos normales; Integridad ejecuta DISM CheckHealth y SFC VerifyOnly con un único UAC. Ninguna realiza reparaciones. |
-| Reparación | DISM CheckHealth, ScanHealth y RestoreHealth; SFC /scannow; CHKDSK de solo lectura; StartComponentCleanup y Reparación completa condicional. |
-| Red | Tarjetas compactas de adaptadores físicos en tres columnas, estado de conectividad simplificado y detalles separados por adaptador y pruebas globales. Caché DNS, DHCP, reinicio de adaptador y restablecimientos Winsock/TCP/IP. |
-| Limpieza | Una única acción de análisis para temporales, miniaturas y Papelera, con Windows Temp integrado mediante UAC. Limpieza individual o de categorías marcadas únicamente tras un análisis válido, con resultados compactos. |
-| Ajustes | Tema Claro/Oscuro/Sistema persistente, Datos y registros y Preferencias en paralelo, acceso a las carpetas de logs y WinSereno, información de la aplicación, enlaces a GitHub/Releases y restablecimiento de preferencias visuales. La búsqueda de actualizaciones permanece deshabilitada. |
-| Actividad | Historial de acciones de la sesión con resumen, duración y detalles. No se conserva al cerrar; los TXT de Logs siguen siendo el registro persistente. |
+## Qué es WinSereno
 
-Al pulsar **Analizar este PC**, se realizan las comprobaciones generales y se solicita un único UAC para Integridad. El mismo worker elevado ejecuta DISM CheckHealth y SFC VerifyOnly, sin reparar. Si se cancelan los permisos, las demás comprobaciones continúan e Integridad queda **No comprobado**. Un dato no disponible no se interpreta como un problema detectado.
+WinSereno ofrece un lugar común para consultar el estado del equipo y utilizar herramientas de Windows como DISM, SFC y CHKDSK. Prioriza el diagnóstico y las acciones explícitas, con confirmación antes de realizar cambios y resultados que puedes revisar.
 
-Las operaciones que modifican el sistema requieren confirmación. La aplicación principal arranca con permisos normales; UAC se solicita únicamente cuando corresponde a la acción iniciada por el usuario. Solo puede existir una operación activa.
+Su enfoque es el mantenimiento con control, sin promesas de aceleración ni ajustes opacos de un «PC optimizer». No reinicia ni apaga Windows automáticamente.
 
-WinSereno nunca reinicia ni apaga Windows automáticamente. No incluye limpiador de registro, optimizador de RAM ni tweaks agresivos.
+## Funciones
 
-### Reparación
+| Área | Qué puedes hacer |
+| --- | --- |
+| Inicio | Consultar Windows, CPU, GPU, RAM, red y tiempo de actividad. Ver discos locales y unidades externas que Windows identifica como removibles, en secciones separadas. |
+| Diagnóstico | Comprobar espacio y salud básica del almacenamiento, red e Internet, servicios críticos, eventos e integridad de Windows mediante DISM CheckHealth y SFC VerifyOnly. **No aplica reparaciones.** |
+| Reparación | Ejecutar DISM CheckHealth, ScanHealth y RestoreHealth; SFC; limpieza de componentes y una secuencia de reparación completa condicional. Incluye CHKDSK de solo lectura, sin reparar ni programar reparaciones. |
+| Red | Consultar adaptadores, vaciar la caché DNS, renovar DHCP, reiniciar un adaptador y restablecer Winsock o TCP/IP. El reset TCP/IP comprueba IPv4 y exige una segunda confirmación si la configuración es manual o indeterminada. |
+| Limpieza | Analizar primero temporales del usuario y de Windows, caché de miniaturas y Papelera. Limpiar categorías con análisis válido mediante una política conservadora; la Papelera permanece desmarcada por defecto. |
+| Actividad | Revisar las acciones de la sesión, sus resultados y detalles. Los logs TXT mantienen el registro persistente. |
+| Configuración (Ajustes) | Elegir Claro, Oscuro o Sistema; abrir las carpetas de la aplicación y logs; consultar información y enlaces del proyecto, y restablecer preferencias visuales. |
 
-- **DISM CheckHealth:** comprobación rápida del estado registrado del almacén de componentes.
-- **DISM ScanHealth:** análisis profundo sin reparación.
-- **DISM RestoreHealth:** análisis y reparación del almacén de componentes.
-- **SFC /scannow:** comprobación y reparación de archivos protegidos del sistema.
-- **CHKDSK:** comprobación de solo lectura del volumen de la instalación actual de Windows, resuelto internamente. No repara ni programa reparaciones.
-- **Component Cleanup / StartComponentCleanup:** mantenimiento que elimina versiones reemplazadas de componentes. No es una reparación de corrupción.
-- **Reparación completa:** ejecuta ScanHealth; omite RestoreHealth si el almacén está sano, o lo ejecuta si la corrupción es reparable; continúa con SFC solo si los pasos anteriores lo permiten. Utiliza una confirmación y un único UAC. Los pasos omitidos y sus motivos quedan visibles.
+La disponibilidad de algunos datos depende del hardware, los controladores y los permisos. Las estimaciones de limpieza no garantizan el espacio finalmente liberado. El restablecimiento TCP/IP no guarda ni restaura automáticamente la configuración de red.
 
-Un toast flotante global muestra la operación activa, el tiempo, el progreso real cuando existe y el resumen final. **Ver detalles** permite consultar la salida completa y el resultado. Al finalizar puede cerrarse sin eliminar el resultado de la sesión, Actividad ni Logs. No se inventan porcentajes globales; CHKDSK conserva su progreso nativo en la salida.
+## Cómo usarlo
 
-### Red
+1. [Descarga la última versión estable](https://github.com/joseamc91/WinSereno/releases/latest).
+2. Coloca `WinSereno.exe` en una carpeta local con permisos de escritura.
+3. Ejecuta la aplicación y elige una sección.
+4. Revisa la información y las advertencias antes de confirmar una acción.
 
-Muestra adaptadores físicos relevantes en tarjetas compactas de tres columnas, con tipo Ethernet/Wi-Fi, nombre, estado, velocidad e IPv4. Gateway, DNS y datos adicionales de Wi-Fi quedan en **Detalles del adaptador**, cuando están disponibles. Inicio y Red comparten la misma disposición de tarjetas para aprovechar el ancho útil.
+Algunas operaciones solicitarán permisos de administrador mediante UAC. La aplicación arranca con permisos normales y no ejecuta limpiezas ni reparaciones automáticamente.
 
-La cabecera reúne **Estado de red**, un estado breve como **Internet disponible** o **Conexión con incidencias**, y **Actualizar**; la hora de la última consulta aparece debajo. **Detalles de conectividad** conserva las pruebas globales de gateway, ICMP público, DNS y HTTPS, sin repetir la configuración de cada adaptador. La falta de respuesta ICMP por sí sola no demuestra que Internet no funcione.
+## Portable
 
-Herramientas disponibles:
+WinSereno no necesita instalador. La configuración (`config.json`) y los registros (`Logs/`) se guardan junto al ejecutable, en su propia carpeta.
 
-- Vaciar caché DNS.
-- Renovar DHCP únicamente cuando existe una interfaz física activa apta y configurada por DHCP.
-- Reiniciar un adaptador físico activo seleccionado.
-- Restablecer Winsock.
-- Restablecer TCP/IP.
+Puedes mover la aplicación conservando toda la carpeta. Antes de compartir logs, revisa su contenido: pueden incluir información del equipo.
 
-Las acciones son independientes y requieren confirmación; UAC se solicita cuando corresponde. Entrar en Red solo consulta información: ninguna herramienta modificadora se ejecuta automáticamente. Las operaciones potencialmente disruptivas incorporan advertencias especiales cuando se detecta una sesión RDP. Si es necesario reiniciar Windows, se informa sin hacerlo automáticamente.
+## Compatibilidad
 
-**Restablecer TCP/IP** realiza un preflight de configuración IPv4. Cuando detecta configuración manual, muestra IP, máscara/prefijo, gateway y DNS y exige una segunda confirmación explícita antes de solicitar UAC. Una configuración indeterminada también requiere advertencia y segunda confirmación. WinSereno no guarda ni restaura automáticamente esos datos; el restablecimiento sigue siendo una acción administrativa explícita.
-
-Se han validado manualmente la lectura y actualización de Red, el reinicio de un adaptador Ethernet y el restablecimiento Winsock. DHCP se detiene de forma segura cuando no existen interfaces elegibles. También se ha validado manualmente el flujo preventivo de TCP/IP con una IPv4 estática real, sin ejecutar el restablecimiento. En Windows 10 se observó un restablecimiento TCP/IP parcialmente aplicado con acceso denegado; el resultado conserva el error y distingue los cambios parciales. Estas comprobaciones no equivalen a una validación exhaustiva en todos los equipos.
-
-### Limpieza
-
-Categorías disponibles:
-
-- Temporales del usuario.
-- Temporales de Windows.
-- Caché de miniaturas del usuario.
-- Papelera de reciclaje.
-
-El análisis previo muestra de forma compacta el espacio encontrado y recuperable estimado; no borra archivos ni inicia limpiezas automáticamente. La estimación no garantiza el espacio finalmente liberado. La política de borrado es conservadora: los archivos protegidos, en uso o no elegibles se omiten, y los resultados parciales se distinguen de una limpieza completa.
-
-Se puede limpiar cada categoría o usar **Limpiar categorías marcadas**. Las tres primeras están seleccionadas inicialmente; Papelera no. Vaciar la Papelera elimina la posibilidad de restaurar sus elementos desde ella y requiere una confirmación explícita.
-
-La acción **Analizar** consulta las cuatro categorías y solicita un único UAC para integrar Windows Temp. Si se cancela, las categorías normales conservan sus resultados y Windows Temp queda sin comprobar. Las acciones de borrado requieren un análisis válido de su categoría. Su último snapshot elevado conserva la hora del análisis durante la sesión. La limpieza de Windows Temp requiere elevación y reanaliza dentro del mismo worker. La limpieza seleccionada solicita un único UAC antes de borrar si incluye esta categoría. Al terminar se actualizan las categorías afectadas.
-
-## Portabilidad y logs
-
-La navegación lateral conserva icono y nombre para cada módulo; Ajustes se separa en la zona inferior junto a la versión pública y el enlace a GitHub. En **Apariencia**, el tema **Sistema** consulta la preferencia de Windows al iniciar o seleccionarlo; no sigue sus cambios en tiempo real. **Restablecer preferencias** requiere confirmación, aplica el tema Claro por defecto y guarda la configuración sin borrar logs ni modificar Windows.
-
-La configuración y los logs propios se guardan junto al ejecutable:
-
-```text
-WinSereno.exe
-config.json
-Logs/
-```
-
-La carpeta debe ser local y escribible. El inicio comprueba el almacenamiento; no hay fallback a AppData, LocalAppData, ProgramData, Temp ni al registro. No se eleva toda la aplicación para resolver permisos de escritura.
-
-Se crea un log por sesión con resultados y salida detallada de las herramientas. Los resultados funcionales de diagnóstico y reparación permanecen en memoria durante la sesión; los logs se conservan. Antes de compartirlos conviene revisar su contenido.
-
-## Requisitos
-
-- Windows 10 o Windows 11.
+- Windows 10 y Windows 11.
 - .NET Framework 4.8.
-- Aplicación WPF en C#, compilada como **Any CPU**, con **Prefer32Bit=false**.
-- Carpeta portable local con permisos de escritura.
+- Carpeta local escribible.
 
-No se afirma compatibilidad validada con ARM64. El proyecto no utiliza paquetes NuGet ni frameworks MVVM externos.
+La interfaz de WinSereno 1.0.0 está en español. Este proyecto dispone también de documentación en inglés.
 
-## Compilación
+## Seguridad
 
-Para desarrollar se necesitan MSBuild, herramientas de C#/WPF y el Developer Pack o targeting pack de .NET Framework 4.8.
+Las acciones que modifican el sistema requieren confirmación; algunas también requieren UAC. WinSereno no reinicia ni apaga el equipo automáticamente y no desactiva protecciones de Windows.
 
-Abrir `WinSereno.sln`, que referencia `WinSereno.csproj` en la misma carpeta. Desde una consola de desarrollo de Visual Studio:
+El ejecutable todavía no dispone de firma digital comercial ni firma Authenticode. En determinados equipos, Smart App Control / Control inteligente de aplicaciones puede bloquearlo al no poder verificar su publicador. No recomendamos desactivar protecciones ni añadir exclusiones para evitar ese bloqueo.
 
-```text
-MSBuild WinSereno.sln /t:Clean,Build /p:Configuration=Debug /p:Platform="Any CPU"
-```
+## Roadmap
 
-La salida Debug se genera en `bin/Debug/`. La aplicación principal conserva el manifest `asInvoker`; las tareas administrativas reutilizan ese mismo ejecutable en un modo worker interno.
+Planes futuros, sujetos al uso y al feedback:
 
-## Pruebas
+- Comprobación y actualización desde la propia aplicación.
+- Interfaz en inglés.
+- Mejoras basadas en la experiencia de los usuarios.
 
-Las suites automatizadas disponibles están en [Tests/](Tests/):
+## Documentación
 
-| Suite | Alcance |
-|---|---|
-| [HomeInformationChecks.ps1](Tests/HomeInformationChecks.ps1) | Datos y presentación de Inicio: CPU, GPU, RAM, red y discos. |
-| [NetworkOutputChecks.ps1](Tests/NetworkOutputChecks.ps1) | Bytes UTF-8/legacy, parsers Winsock y TCP/IP ES/EN, logs y regresiones de red simuladas. |
-| [NetworkPresentationChecks.ps1](Tests/NetworkPresentationChecks.ps1) | Cabecera de Red, tarjetas compartidas de tres columnas, 1–6 adaptadores y ambos temas. |
-| [NetworkStaticChecks.ps1](Tests/NetworkStaticChecks.ps1) | Estructura, bindings y captura de salida de Red, sin cargar el EXE. |
-| [DiagnosticIntegrityChecks.ps1](Tests/DiagnosticIntegrityChecks.ps1) | Integridad de solo lectura, VerifyOnly, combinación de resultados y UAC simulado. |
-| [ActivityHistoryChecks.ps1](Tests/ActivityHistoryChecks.ps1) | Historial de sesión, snapshots y cierre de resultados. |
-| [ToastRepairPresentationChecks.ps1](Tests/ToastRepairPresentationChecks.ps1) | Toast y herramientas de Reparación en ambos temas, con operaciones simuladas. |
-| [ToastRepairStaticChecks.ps1](Tests/ToastRepairStaticChecks.ps1) | Estructura XAML, recursos, foco y bindings del toast y Reparación, sin cargar el EXE. |
-| [IntegritySessionChecks.ps1](Tests/IntegritySessionChecks.ps1) | Selección temporal de integridad DISM, cancelaciones y separación de SFC. |
-| [SfcStreamingChecks.ps1](Tests/SfcStreamingChecks.ps1) | Reconstrucción de líneas, salida íntegra y progreso SFC español/inglés. |
-| [WindowsTempSnapshotChecks.ps1](Tests/WindowsTempSnapshotChecks.ps1) | Snapshot elevado, timestamp y reanálisis con proveedores controlados. |
-| [CleanupExperienceChecks.ps1](Tests/CleanupExperienceChecks.ps1) | Análisis unificado, habilitación de acciones, UAC simulado e historial único. |
-| [CleanupStaticChecks.ps1](Tests/CleanupStaticChecks.ps1) | Presentación, análisis de solo lectura y versión pública, sin cargar el EXE. |
-| [CleanupXamlPresentationChecks.ps1](Tests/CleanupXamlPresentationChecks.ps1) | XAML fuente con datos simulados en claro/oscuro, antes y después del análisis. |
-| [TcpIpResetSafetyChecks.ps1](Tests/TcpIpResetSafetyChecks.ps1) | Preflight, configuración manual/indeterminada y doble confirmación simulada. |
-| [TcpIpResetStaticChecks.ps1](Tests/TcpIpResetStaticChecks.ps1) | Protecciones, comando fijo y advertencia TCP/IP, sin ejecutar herramientas. |
-| [ThemePersistenceChecks.ps1](Tests/ThemePersistenceChecks.ps1) | Configuración portable y persistencia del tema. |
-| [Beta4ExperienceChecks.ps1](Tests/Beta4ExperienceChecks.ps1) | Navegación, iconos, botones, temas, preferencias y enlaces con datos simulados, incluidos anchos reducidos. |
-| [Beta4StaticChecks.ps1](Tests/Beta4StaticChecks.ps1) | Recursos vectoriales, cabeceras, enlaces fijos y configuración, sin cargar el EXE. |
-| [DiagnosticPresentationChecks.ps1](Tests/DiagnosticPresentationChecks.ps1) | Presentación inicial compacta y conservación de resultados reales en ambos temas. |
-| [ChkdskRegressionChecks.ps1](Tests/ChkdskRegressionChecks.ps1) | Parser ES/EN, decodificación, streaming, IPC y logs simulados de CHKDSK. |
-
-Los fixtures se conservan en [Tests/Fixtures/](Tests/Fixtures/). Las suites no lanzan herramientas de mantenimiento ni UAC reales; algunas crean y eliminan directorios controlados de prueba.
-
-Tras compilar Debug, pueden ejecutarse individualmente con Windows PowerShell 5.1 en modo STA, por ejemplo:
-
-```powershell
-powershell.exe -NoProfile -STA -File .\Tests\ThemePersistenceChecks.ps1
-```
-
-El CI compila Debug y Release y ejecuta automáticamente las 25 suites disponibles. Estas pruebas no equivalen a una validación exhaustiva en todos los equipos. En el cierre de Beta 4 se reprodujeron las comprobaciones estáticas, de presentación WPF y de regresión con datos simulados. Las suites relevantes para este bloque se ejecutaron sin bloqueos de Smart App Control. Beta 4 se publicó con la regresión histórica de CHKDSK en español («Acceso denegado»); Beta 5 incluye la corrección del reconocimiento de mensajes terminados en puntuación y sus regresiones ES/EN. Los bloqueos de harnesses registrados durante Beta 3 son evidencia histórica, no ejecuciones nuevas superadas.
-
-Existen validaciones manuales previas de Inicio, Diagnóstico y DISM CheckHealth/ScanHealth/RestoreHealth. SFC y CHKDSK también han aportado salidas reales para identificar correcciones. Esto no valida todas las acciones ni sustituye las pruebas pendientes de los cambios más recientes. Las operaciones disruptivas de red y varias limpiezas necesitan validación manual controlada adicional.
-
-## Limitaciones conocidas
-
-- WinSereno no dispone actualmente de firma digital comercial; el EXE no está firmado con Authenticode. En determinados equipos, Smart App Control / Control inteligente de aplicaciones puede bloquearlo al no poder verificar su publicador. WinSereno no modifica ni desactiva esta protección, Defender ni otras políticas de seguridad.
-- Se requiere .NET Framework 4.8 y una carpeta portable local escribible.
-- Algunas operaciones requieren permisos de administrador mediante UAC.
-- Algunas operaciones disruptivas de Red todavía requieren más validación manual controlada.
-- Determinadas tareas no son cancelables una vez iniciado el comando nativo; la ventana impide cerrar mientras están activas.
-- Una herramienta nativa que no termine puede mantener ocupado el coordinador de operaciones.
-- La disponibilidad de datos depende de Windows, hardware, controladores y permisos; un resultado desconocido no se interpreta como saludable.
-- No existe aún un sistema integrado de actualización.
-
-La arquitectura y sus límites se describen en [AUDIT_PRIVILEGED_EXECUTION.md](AUDIT_PRIVILEGED_EXECUTION.md). El historial de cambios está en [CHANGELOG.md](CHANGELOG.md) y [CHANGELOG.en.md](CHANGELOG.en.md).
-
-## Licencia
-
-WinSereno se publica bajo la GNU General Public License v3.0 (GPL-3.0). Consulta [LICENSE](LICENSE) para más detalles.
+- [Historial de cambios](CHANGELOG.md)
+- [Licencia GNU GPLv3](LICENSE)
+- [Notas técnicas sobre ejecución administrativa](AUDIT_PRIVILEGED_EXECUTION.md)
