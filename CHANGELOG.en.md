@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed recognition of localized CHKDSK errors when Windows appends punctuation to the message.
+- Fixed navigation between Settings and the main sidebar sections to keep a single page selected.
 
 ## 0.1.0-beta.4 — 2026-10-03
 

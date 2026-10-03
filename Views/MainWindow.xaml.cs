@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using WinSereno.Services;
 using WinSereno.ViewModels;
 
@@ -21,6 +22,15 @@ namespace WinSereno.Views
             Closing += OnClosing;
             Loaded += async (sender, args) => await viewModel.Home.RefreshAsync();
             Closed += (sender, args) => viewModel.Home.Stop();
+        }
+        private void OnNavigationKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter) return;
+            var item = Keyboard.FocusedElement as ListBoxItem;
+            var navigation = item?.DataContext as NavigationItem;
+            if (navigation == null || !((ListBox)sender).Items.Contains(navigation)) return;
+            viewModel.NavigateCommand.Execute(navigation.Section);
+            e.Handled = true;
         }
         private void OnDiagnosticHostLoaded(object sender, RoutedEventArgs e)
         {

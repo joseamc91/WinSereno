@@ -56,9 +56,9 @@
     <Border Background="{DynamicResource SidebarBrush}" Padding="20,28,20,20"><Grid x:Name="SidebarLayout">
       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
       <TextBlock Text="WinSereno" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,24"/>
-      <ListBox x:Name="MainNavigationList" Grid.Row="1" ItemsSource="{Binding MainNavigation}" SelectedItem="{Binding SelectedNavigation}" ItemContainerStyle="{StaticResource SidebarItem}" ItemTemplate="{StaticResource SidebarNavigationTemplate}" Background="Transparent" BorderThickness="0" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+      <ListBox x:Name="MainNavigationList" Grid.Row="1" ItemsSource="{Binding MainNavigation}" SelectedItem="{Binding SelectedMainNavigation, Mode=TwoWay}" ItemContainerStyle="{StaticResource SidebarItem}" ItemTemplate="{StaticResource SidebarNavigationTemplate}" Background="Transparent" BorderThickness="0" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Disabled" KeyDown="OnNavigationKeyDown"/>
       <StackPanel Grid.Row="2" Margin="0,20,0,0">
-        <ListBox x:Name="SettingsNavigationList" ItemsSource="{Binding SettingsNavigation}" SelectedItem="{Binding SelectedNavigation}" ItemContainerStyle="{StaticResource SidebarItem}" ItemTemplate="{StaticResource SidebarNavigationTemplate}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,14"/>
+        <ListBox x:Name="SettingsNavigationList" ItemsSource="{Binding SettingsNavigation}" SelectedItem="{Binding SelectedSettingsNavigation, Mode=TwoWay}" ItemContainerStyle="{StaticResource SidebarItem}" ItemTemplate="{StaticResource SidebarNavigationTemplate}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,14" KeyDown="OnNavigationKeyDown"/>
         <TextBlock Text="{Binding ProductVersion}" Style="{StaticResource Muted}" FontSize="12"/>
         <Button Content="GitHub ↗" Command="{Binding OpenGitHubCommand}" Style="{StaticResource LinkButton}" Margin="0,3,0,0"/>
       </StackPanel>

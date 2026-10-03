@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Corregido el reconocimiento de errores localizados de CHKDSK cuando Windows añade puntuación al mensaje.
+- Corregida la navegación entre Ajustes y las secciones principales de la barra lateral para mantener una única página seleccionada.
 
 ## 0.1.0-beta.4 — 2026-10-03
 

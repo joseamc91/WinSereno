@@ -39,6 +39,8 @@ public sealed class CleanupUiRoot{
  public string PageNotice{get{return "";}}public bool HasPageNotice{get{return false;}}public string ProductVersion{get;set;}
  public bool ShowTaskPanel{get{return false;}}public CleanupUiState Cleanup{get;set;}public object[] Navigation{get;set;}
  public object[] MainNavigation{get;set;}public object[] SettingsNavigation{get;set;}public object SelectedNavigation{get;set;}
+ public object SelectedMainNavigation{get{return MainNavigation.Contains(SelectedNavigation)?SelectedNavigation:null;}set{if(value!=null&&MainNavigation.Contains(value))SelectedNavigation=value;}}
+ public object SelectedSettingsNavigation{get{return SettingsNavigation.Contains(SelectedNavigation)?SelectedNavigation:null;}set{if(value!=null&&SettingsNavigation.Contains(value))SelectedNavigation=value;}}
  public ICommand CleanUserTempCommand{get;set;}public ICommand CleanWindowsTempCommand{get;set;}public ICommand CleanThumbnailsCommand{get;set;}
  public ICommand EmptyRecycleBinCommand{get;set;}public ICommand CleanSelectedCommand{get;set;}
 }
@@ -65,7 +67,7 @@ public static class CleanupXamlPresentationChecks{
  }
  public static string Run(string project){
   var app=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};app.Resources.MergedDictionaries.Add((ResourceDictionary)XamlReader.Parse(File.ReadAllText(Path.Combine(project,"Themes","Styles.xaml"))));
-  string xaml=File.ReadAllText(Path.Combine(project,"Views","MainWindow.xaml"));xaml=Regex.Replace(xaml," x:Class=\"[^\"]+\"","");xaml=Regex.Replace(xaml," (?:Loaded|SizeChanged)=\"[^\"]+\"","");
+  string xaml=File.ReadAllText(Path.Combine(project,"Views","MainWindow.xaml"));xaml=Regex.Replace(xaml," x:Class=\"[^\"]+\"","");xaml=Regex.Replace(xaml," (?:Loaded|SizeChanged|KeyDown)=\"[^\"]+\"","");
   string output=Path.Combine(project,"bin","Debug","VisualChecks");Directory.CreateDirectory(output);
   foreach(string theme in new[]{"Light","Dark"}){
    var colors=(ResourceDictionary)XamlReader.Parse(File.ReadAllText(Path.Combine(project,"Themes",theme+".xaml")));app.Resources.MergedDictionaries.Add(colors);

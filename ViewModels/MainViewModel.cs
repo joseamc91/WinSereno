@@ -82,9 +82,21 @@ namespace WinSereno.ViewModels
             set
             {
                 if (value == null || !Set(ref selectedNavigation, value)) return;
+                Raise(nameof(SelectedMainNavigation)); Raise(nameof(SelectedSettingsNavigation));
                 Raise(nameof(CurrentSection)); Raise(nameof(CurrentSectionCode)); Raise(nameof(PageTitle)); Raise(nameof(PageDescription)); Raise(nameof(PageNotice)); Raise(nameof(HasPageNotice));
                 if (value.Section == NavigationSection.Network) _ = Network.RefreshAsync();
             }
+        }
+        // Each selector sees only its own group; null deselections never replace the active page.
+        public NavigationItem SelectedMainNavigation
+        {
+            get => MainNavigation.Contains(SelectedNavigation) ? SelectedNavigation : null;
+            set { if (value != null && MainNavigation.Contains(value)) SelectedNavigation = value; }
+        }
+        public NavigationItem SelectedSettingsNavigation
+        {
+            get => SettingsNavigation.Contains(SelectedNavigation) ? SelectedNavigation : null;
+            set { if (value != null && SettingsNavigation.Contains(value)) SelectedNavigation = value; }
         }
         public NavigationSection CurrentSection => SelectedNavigation.Section;
         public string CurrentSectionCode => CurrentSection.ToString();

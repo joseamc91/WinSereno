@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 $project=Split-Path $PSScriptRoot -Parent
 $exe=Join-Path $project 'bin\Debug\WinSereno.exe'
 if(!$CompileOnly){[void][Reflection.Assembly]::LoadFrom($exe)}
-Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase,System.Xaml
+Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase,System.Xaml,UIAutomationProvider,UIAutomationTypes
 $source=@'
 using System;
 using System.IO;
@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -42,6 +44,33 @@ public static class Beta4ExperienceChecks{
  static void Save(FrameworkElement root,string path){var image=new RenderTargetBitmap((int)root.ActualWidth,(int)root.ActualHeight,96,96,PixelFormats.Pbgra32);image.Render(root);var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(image));using(var stream=File.Create(path))encoder.Save(stream);}
  static ThemeService Theme(Func<string> resolve){return (ThemeService)typeof(ThemeService).GetConstructor(BindingFlags.NonPublic|BindingFlags.Instance,null,new[]{typeof(Func<string>)},null).Invoke(new object[]{resolve});}
  static void Select(MainViewModel vm,NavigationSection section){vm.SelectedNavigation=vm.Navigation.Single(n=>n.Section==section);}
+ static void ActivateItem(ListBox list,int index){
+  var peer=new ListBoxItemAutomationPeer(list.Items[index],new ListBoxAutomationPeer(list));
+  ((ISelectionItemProvider)peer.GetPattern(PatternInterface.SelectionItem)).Select();
+ }
+ static void KeyPress(ListBox list,Key key){
+  var focused=Keyboard.FocusedElement as UIElement;Check(focused!=null&&focused.IsDescendantOf(list),"Keyboard event originates in the focused navigation item");
+  focused.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual(list),Environment.TickCount,key){RoutedEvent=Keyboard.KeyDownEvent});
+ }
+ static void CheckNavigation(MainWindow window,MainViewModel vm,NavigationSection section,double width){
+  var root=(FrameworkElement)window.Content;Layout(root,width);
+  var main=(ListBox)window.FindName("MainNavigationList");var settings=(ListBox)window.FindName("SettingsNavigationList");
+  Check(vm.SelectedNavigation.Section==section&&vm.CurrentSection==section&&vm.CurrentSectionCode==section.ToString(),"Control interaction changes the real active section: expected="+section+", actual="+vm.CurrentSectionCode+", focus="+Keyboard.FocusedElement);
+  Check(ReferenceEquals(main.SelectedItem,section==NavigationSection.Settings?null:vm.SelectedNavigation)&&ReferenceEquals(settings.SelectedItem,section==NavigationSection.Settings?vm.SelectedNavigation:null),"Only the active group has a selected item");
+  var items=Visual<ListBoxItem>(main).Concat(Visual<ListBoxItem>(settings)).ToArray();
+  Check(items.Count(i=>i.IsSelected)==1&&main.SelectedItems.Count+settings.SelectedItems.Count==1,"Exactly one global visual selection");
+  foreach(var item in items){var icon=Visual<System.Windows.Shapes.Path>(item).Single();
+   Check(Equals(icon.Stroke,Application.Current.Resources[item.IsSelected?"AccentBrush":"MutedBrush"]),"Icon follows real selection after control interaction");
+   var shell=(Border)item.Template.FindName("ItemShell",item);
+   Check(Equals(shell.Background,item.IsSelected?Application.Current.Resources["NavigationSelectedBrush"]:Brushes.Transparent),"Focus never creates a second selected background");
+  }
+  var pages=(Grid)((ScrollViewer)window.FindName("PageScroll")).Content;
+  var panels=pages.Children.OfType<StackPanel>().ToArray();
+  Check(panels.Count(p=>p.Visibility==Visibility.Visible)==1,"Exactly one central page visible");
+  foreach(var page in panels){bool active=page.Style.Triggers.OfType<DataTrigger>().Any(t=>Equals(t.Value,section.ToString()));Check(page.Visibility==(active?Visibility.Visible:Visibility.Collapsed),"Page visibility agrees with real navigation");}
+  var settingsPage=(FrameworkElement)window.FindName("SettingsPage");Check(settingsPage.Visibility==(section==NavigationSection.Settings?Visibility.Visible:Visibility.Collapsed),"Settings page changes with sidebar interaction");
+  foreach(string property in new[]{"PageTitle","PageDescription"}){var text=Visual<TextBlock>(root).Single(t=>{var binding=System.Windows.Data.BindingOperations.GetBinding(t,TextBlock.TextProperty);return binding!=null&&binding.Path.Path==property;});Check(text.Text==(property=="PageTitle"?vm.PageTitle:vm.PageDescription),"Header updated: "+property);}
+ }
  public static string Run(string project){
   var app=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};Application.ResourceAssembly=typeof(WinSereno.App).Assembly;
   app.Resources.MergedDictionaries.Add(new ResourceDictionary{Source=new Uri("/WinSereno;component/Themes/Styles.xaml",UriKind.Relative)});
@@ -85,6 +114,39 @@ public static class Beta4ExperienceChecks{
      Layout(content,1150);Save(content,Path.Combine(output,"Beta4-"+section+"-"+theme+".png"));Layout(content,900);Save(content,Path.Combine(output,"Beta4-"+section+"-"+theme+"-900.png"));window.Close();
     }
    }
+   // Exercise the actual two WPF selectors in the same loaded shell, rather than
+   // assigning the ViewModel before constructing a fresh window for each page.
+   home.Stop(); // The loaded shell must never start a hardware query in this fixture.
+   foreach(string theme in new[]{"Light","Dark"})foreach(double width in new[]{1150.0,900.0}){
+    vm.SelectedTheme=theme=="Dark"?"Oscuro":"Claro";themes.Apply(theme);var window=new MainWindow(vm,dialogs){Left=-30000,Top=-30000,ShowInTaskbar=false,Width=width};
+    try{
+     window.Show();var navigationRoot=(FrameworkElement)window.Content;Layout(navigationRoot,width);
+     var main=(ListBox)window.FindName("MainNavigationList");var settings=(ListBox)window.FindName("SettingsNavigationList");
+     ActivateItem(main,0);CheckNavigation(window,vm,NavigationSection.Home,width);
+     ActivateItem(settings,0);CheckNavigation(window,vm,NavigationSection.Settings,width);
+     ActivateItem(main,2);CheckNavigation(window,vm,NavigationSection.Repair,width);
+     if(width==1150)Save(navigationRoot,Path.Combine(output,"SidebarNavigation-Repair-"+theme+".png"));
+     ActivateItem(settings,0);CheckNavigation(window,vm,NavigationSection.Settings,width);
+     if(width==1150)Save(navigationRoot,Path.Combine(output,"SidebarNavigation-Settings-"+theme+".png"));
+     ActivateItem(main,5);CheckNavigation(window,vm,NavigationSection.Activity,width);
+     ActivateItem(settings,0);CheckNavigation(window,vm,NavigationSection.Settings,width);
+     ActivateItem(main,0);CheckNavigation(window,vm,NavigationSection.Home,width);
+     // Use WPF routed keyboard input without OS key injection or real tools.
+     window.Activate();Check(((ListBoxItem)main.ItemContainerGenerator.ContainerFromIndex(0)).Focus(),"Sidebar accepts keyboard focus");
+     KeyPress(main,Key.Down);CheckNavigation(window,vm,NavigationSection.Diagnosis,width);
+     KeyPress(main,Key.Down);CheckNavigation(window,vm,NavigationSection.Repair,width);
+     KeyPress(main,Key.Up);CheckNavigation(window,vm,NavigationSection.Diagnosis,width);
+     Check(((ListBoxItem)settings.ItemContainerGenerator.ContainerFromIndex(0)).Focus(),"Settings accepts keyboard focus");
+     CheckNavigation(window,vm,NavigationSection.Diagnosis,width);
+     KeyPress(settings,Key.Enter);CheckNavigation(window,vm,NavigationSection.Settings,width);
+     KeyPress(settings,Key.Space);CheckNavigation(window,vm,NavigationSection.Settings,width);
+     KeyPress(settings,Key.Enter);CheckNavigation(window,vm,NavigationSection.Settings,width);
+     vm.SelectedMainNavigation=null;vm.SelectedSettingsNavigation=null;CheckNavigation(window,vm,NavigationSection.Settings,width);
+     vm.SelectedMainNavigation=vm.SettingsNavigation[0];CheckNavigation(window,vm,NavigationSection.Settings,width);
+     ActivateItem(main,0);CheckNavigation(window,vm,NavigationSection.Home,width);
+     vm.SelectedSettingsNavigation=vm.MainNavigation[0];CheckNavigation(window,vm,NavigationSection.Home,width);
+    }finally{window.Close();}
+   }
    Check(!ops.IsActive&&launches.Count==4,"No real actions/UAC or automatic networking");
    // Cover the production constructor (no shell argument), then replace only its
    // resolved service with the safe launch recorder before executing UI commands.
@@ -102,7 +164,7 @@ public static class Beta4ExperienceChecks{
 }
 '@
 $provider=[Microsoft.CSharp.CSharpCodeProvider]::new();$parameters=[CodeDom.Compiler.CompilerParameters]::new();$parameters.GenerateInMemory=$true
-foreach($reference in @($exe,'System.dll','System.Core.dll','System.Xaml.dll','System.Runtime.Serialization.dll',[System.Windows.Application].Assembly.Location,[System.Windows.Media.Visual].Assembly.Location,[System.Windows.DependencyObject].Assembly.Location)){[void]$parameters.ReferencedAssemblies.Add($reference)}
+foreach($reference in @($exe,'System.dll','System.Core.dll','System.Xaml.dll','System.Runtime.Serialization.dll',[System.Windows.Automation.Provider.ISelectionItemProvider].Assembly.Location,[System.Windows.Automation.AutomationElementIdentifiers].Assembly.Location,[System.Windows.Application].Assembly.Location,[System.Windows.Media.Visual].Assembly.Location,[System.Windows.DependencyObject].Assembly.Location)){[void]$parameters.ReferencedAssemblies.Add($reference)}
 $compiled=$provider.CompileAssemblyFromSource($parameters,$source)
 if($compiled.Errors.HasErrors){throw ($compiled.Errors | Out-String)}
 if($CompileOnly){'Harness Beta4 compilado sin ejecutar.';return}
