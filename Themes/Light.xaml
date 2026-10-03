@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <SolidColorBrush x:Key="BackgroundBrush" Color="#F3F5F8"/>
   <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF"/>
   <SolidColorBrush x:Key="SidebarBrush" Color="#E9EEF5"/>
@@ -32,4 +32,6 @@
   <SolidColorBrush x:Key="ToastWarningBrush" Color="#F1C477"/>
   <SolidColorBrush x:Key="ToastErrorBrush" Color="#FF98A8"/>
   <DropShadowEffect x:Key="ToastShadowEffect" BlurRadius="12" ShadowDepth="2" Opacity="0.25"/>
+  <BitmapImage x:Key="BrandLogoImage" UriSource="/WinSereno;component/Assets/Brand/WinSereno-Logo-Horizontal-Dark.png"/>
+  <BitmapImage x:Key="BrandMarkImage" UriSource="/WinSereno;component/Assets/Brand/WinSereno-Mark-Color.png"/>
 </ResourceDictionary>

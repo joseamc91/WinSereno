@@ -60,9 +60,9 @@ public static class Beta4ExperienceChecks{
   var items=Visual<ListBoxItem>(main).Concat(Visual<ListBoxItem>(settings)).ToArray();
   Check(items.Count(i=>i.IsSelected)==1&&main.SelectedItems.Count+settings.SelectedItems.Count==1,"Exactly one global visual selection");
   foreach(var item in items){var icon=Visual<System.Windows.Shapes.Path>(item).Single();
-   Check(Equals(icon.Stroke,Application.Current.Resources[item.IsSelected?"AccentBrush":"MutedBrush"]),"Icon follows real selection after control interaction");
+   Check(Equals(icon.Stroke,Application.Current.Resources[item.IsSelected?"AccentBrush":item.IsMouseOver?"TextBrush":"MutedBrush"]),"Icon follows real selection after control interaction: label="+((NavigationItem)item.DataContext).Label+", selected="+item.IsSelected+", hover="+item.IsMouseOver+", stroke="+icon.Stroke);
    var shell=(Border)item.Template.FindName("ItemShell",item);
-   Check(Equals(shell.Background,item.IsSelected?Application.Current.Resources["NavigationSelectedBrush"]:Brushes.Transparent),"Focus never creates a second selected background");
+   Check(Equals(shell.Background,item.IsSelected?Application.Current.Resources["NavigationSelectedBrush"]:item.IsMouseOver?Application.Current.Resources["NavigationHoverBrush"]:Brushes.Transparent),"Focus never creates a second selected background");
   }
   var pages=(Grid)((ScrollViewer)window.FindName("PageScroll")).Content;
   var panels=pages.Children.OfType<StackPanel>().ToArray();

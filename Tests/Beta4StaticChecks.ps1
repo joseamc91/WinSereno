@@ -22,7 +22,8 @@ foreach ($name in @('Home','Diagnosis','Repair','Network','Cleanup','Activity','
     Check ($main.Contains('Resource Navigation'+$name+'Icon')) "Icon binding $name"
 }
 Check (([regex]::Matches($styles, '<Geometry x:Key="Navigation')).Count -eq 7) 'Exactly seven vector resources'
-Check (!$main.Contains('<Image') -and !$styles.Contains('<Image')) 'No external bitmap icons'
+$navigationTemplate = [regex]::Match($main, '(?s)<DataTemplate x:Key="SidebarNavigationTemplate">.*?</DataTemplate>').Value
+Check ($navigationTemplate.Length -gt 0 -and !$navigationTemplate.Contains('<Image') -and !$styles.Contains('<Image')) 'Navigation icons remain vector-only; branding images are separate'
 Check ($main.Contains('StrokeThickness="1.6"') -and $main.Contains('Width="18" Height="18"')) 'Consistent icon scale'
 Check ($main.Contains('Value="{DynamicResource AccentBrush}"') -and $main.Contains('Property="Stroke" Value="{DynamicResource MutedBrush}"')) 'Adaptive icon colors'
 Check ($main.Contains('ItemsSource="{Binding MainNavigation}"') -and $main.Contains('ItemsSource="{Binding SettingsNavigation}"')) 'Separate navigation groups'

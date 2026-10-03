@@ -11,6 +11,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\Brand\WinSereno.ico</ApplicationIcon>
     <LangVersion>7.3</LangVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
@@ -32,6 +33,8 @@
     <Page Include="Themes\*.xaml"><Generator>MSBuild:Compile</Generator><SubType>Designer</SubType></Page>
     <Compile Include="**\*.cs" Exclude="bin\**;obj\**"/>
     <None Include="app.manifest"/>
+    <Resource Include="Assets\Brand\WinSereno-Logo-Horizontal-Dark.png"/>
+    <Resource Include="Assets\Brand\WinSereno-Mark-Color.png"/>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>

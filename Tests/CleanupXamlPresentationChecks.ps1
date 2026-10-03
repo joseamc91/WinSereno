@@ -70,7 +70,7 @@ public static class CleanupXamlPresentationChecks{
   string xaml=File.ReadAllText(Path.Combine(project,"Views","MainWindow.xaml"));xaml=Regex.Replace(xaml," x:Class=\"[^\"]+\"","");xaml=Regex.Replace(xaml," (?:Loaded|SizeChanged|KeyDown)=\"[^\"]+\"","");
   string output=Path.Combine(project,"bin","Debug","VisualChecks");Directory.CreateDirectory(output);
   foreach(string theme in new[]{"Light","Dark"}){
-   var colors=(ResourceDictionary)XamlReader.Parse(File.ReadAllText(Path.Combine(project,"Themes",theme+".xaml")));app.Resources.MergedDictionaries.Add(colors);
+   var colors=(ResourceDictionary)XamlReader.Parse(File.ReadAllText(Path.Combine(project,"Themes",theme+".xaml")).Replace("/WinSereno;component/Assets/Brand/",new Uri(Path.Combine(project,"Assets","Brand")+Path.DirectorySeparatorChar).AbsoluteUri));app.Resources.MergedDictionaries.Add(colors);
    foreach(string state in new[]{"Before","After","Partial"}){
     var vm=Fixture(project,state);var window=(Window)XamlReader.Parse(xaml);window.DataContext=vm;var root=(FrameworkElement)window.Content;var page=(FrameworkElement)window.FindName("CleanupPage");
     foreach(double width in new[]{1150.0,900.0}){
