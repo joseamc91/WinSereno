@@ -54,7 +54,7 @@ Check ($vm.Contains('new AppSettings().Theme') -and $vm.Contains('ConfirmResetPr
 Check ($dialogs.Contains('Los logs y los datos del sistema no se modificarán.') -and $dialogs.Contains('Content = "Restablecer"')) 'Explicit reset confirmation'
 Check (!$shell.Contains('File.Delete') -and !$vm.Contains('Directory.Delete')) 'Preferences/folder links never delete data'
 Check ($assembly.Contains('AssemblyVersion("0.1.0.0")') -and $assembly.Contains('AssemblyFileVersion("0.1.0.0")')) 'Technical versions unchanged'
-Check ($assembly.Contains('AssemblyInformationalVersion("0.1.0-beta.4')) 'Central Beta4 public version'
+Check ($assembly.Contains('AssemblyInformationalVersion("0.1.0-beta.5')) 'Central Beta4 public version'
 Check (!$main.Contains('Portable · Acciones explícitas')) 'Obsolete sidebar tagline absent'
 Check (!(Read 'WinSereno.csproj').Contains('PackageReference')) 'No NuGet icon dependencies'
 Check (!$main.Contains('x:Static') -and !$main.Contains('xmlns:local')) 'No local XAML second-pass references'

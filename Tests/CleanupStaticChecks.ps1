@@ -54,7 +54,7 @@ Check ($vm.Contains('No se comprobaron los temporales de Windows porque se cance
 Check ($vm.Contains('recuperables estimados') -and -not $vm.Contains('Percentage =')) 'Brief structured estimate, no invented percentages'
 Check (-not $xml.OuterXml.Contains('Portable · Acciones explícitas')) 'Fixed sidebar tagline removed'
 Check ($main.Contains('ProductInformation.DisplayVersion')) 'UI consumes one public version source'
-$assembly=Source 'Properties/AssemblyInfo.cs';Check ($assembly.Contains('AssemblyInformationalVersion("0.1.0-beta.4")')) 'Current development version'
+$assembly=Source 'Properties/AssemblyInfo.cs';Check ($assembly.Contains('AssemblyInformationalVersion("0.1.0-beta.5")')) 'Current development version'
 foreach($name in @('AssemblyVersion','AssemblyFileVersion')){Check ($assembly.Contains($name+'("0.1.0.0")')) "Technical $name unchanged"}
 Check ((Source 'Infrastructure/ProductInformation.cs').Contains('GetCustomAttribute<AssemblyInformationalVersionAttribute>')) 'Standard informational version metadata'
 Check ((Source 'app.manifest').Contains('level="asInvoker"')) 'Main app remains asInvoker'

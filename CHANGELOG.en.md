@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.0-beta.5 — 2026-10-03
+
 - Fixed recognition of localized CHKDSK errors when Windows appends punctuation to the message.
 - Fixed navigation between Settings and the main sidebar sections to keep a single page selected.
 - Settings makes better use of the available space by placing Data and logs and Preferences side by side.

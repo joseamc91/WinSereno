@@ -4,7 +4,7 @@ Aplicación portable para Windows centrada en diagnóstico, mantenimiento y repa
 
 ## Estado
 
-WinSereno está en fase **Beta / pre-release**. **v0.1.0-beta.4** es la beta pública actual; no es una versión estable.
+WinSereno está en fase **Beta / pre-release**. **v0.1.0-beta.5** es la beta pública actual; no es una versión estable.
 
 La versión pública visible sigue los tags y pre-releases. AssemblyVersion y FileVersion permanecen actualmente en `0.1.0.0`.
 
@@ -19,7 +19,7 @@ Las funciones implementadas y su validación son aspectos distintos: algunas cue
 | Reparación | DISM CheckHealth, ScanHealth y RestoreHealth; SFC /scannow; CHKDSK de solo lectura; StartComponentCleanup y Reparación completa condicional. |
 | Red | Tarjetas compactas de adaptadores físicos en tres columnas, estado de conectividad simplificado y detalles separados por adaptador y pruebas globales. Caché DNS, DHCP, reinicio de adaptador y restablecimientos Winsock/TCP/IP. |
 | Limpieza | Una única acción de análisis para temporales, miniaturas y Papelera, con Windows Temp integrado mediante UAC. Limpieza individual o de categorías marcadas únicamente tras un análisis válido, con resultados compactos. |
-| Ajustes | Tema Claro/Oscuro/Sistema persistente, acceso a las carpetas de logs y WinSereno, información de la aplicación, enlaces a GitHub/Releases y restablecimiento de preferencias visuales. La búsqueda de actualizaciones permanece deshabilitada. |
+| Ajustes | Tema Claro/Oscuro/Sistema persistente, Datos y registros y Preferencias en paralelo, acceso a las carpetas de logs y WinSereno, información de la aplicación, enlaces a GitHub/Releases y restablecimiento de preferencias visuales. La búsqueda de actualizaciones permanece deshabilitada. |
 | Actividad | Historial de acciones de la sesión con resumen, duración y detalles. No se conserva al cerrar; los TXT de Logs siguen siendo el registro persistente. |
 
 Al pulsar **Analizar este PC**, se realizan las comprobaciones generales y se solicita un único UAC para Integridad. El mismo worker elevado ejecuta DISM CheckHealth y SFC VerifyOnly, sin reparar. Si se cancelan los permisos, las demás comprobaciones continúan e Integridad queda **No comprobado**. Un dato no disponible no se interpreta como un problema detectado.
@@ -148,7 +148,7 @@ Tras compilar Debug, pueden ejecutarse individualmente con Windows PowerShell 5.
 powershell.exe -NoProfile -STA -File .\Tests\ThemePersistenceChecks.ps1
 ```
 
-Las suites disponibles no equivalen a una validación completa de la beta. En el cierre de Beta 4 se reprodujeron las comprobaciones estáticas, de presentación WPF y de regresión con datos simulados. Las suites relevantes para este bloque se ejecutaron sin bloqueos de Smart App Control. Beta 4 se publicó con la regresión histórica de CHKDSK en español («Acceso denegado»); el desarrollo posterior ya corrige el reconocimiento de mensajes terminados en puntuación y contiene regresiones ES/EN. Esta corrección está bajo Unreleased y se incluirá en la próxima versión publicada; no forma parte del ejecutable de Beta 4. Los bloqueos de harnesses registrados durante Beta 3 son evidencia histórica, no ejecuciones nuevas superadas.
+Las suites disponibles no equivalen a una validación completa de la beta. En el cierre de Beta 4 se reprodujeron las comprobaciones estáticas, de presentación WPF y de regresión con datos simulados. Las suites relevantes para este bloque se ejecutaron sin bloqueos de Smart App Control. Beta 4 se publicó con la regresión histórica de CHKDSK en español («Acceso denegado»); Beta 5 incluye la corrección del reconocimiento de mensajes terminados en puntuación y sus regresiones ES/EN. Los bloqueos de harnesses registrados durante Beta 3 son evidencia histórica, no ejecuciones nuevas superadas.
 
 Existen validaciones manuales previas de Inicio, Diagnóstico y DISM CheckHealth/ScanHealth/RestoreHealth. SFC y CHKDSK también han aportado salidas reales para identificar correcciones. Esto no valida todas las acciones ni sustituye las pruebas pendientes de los cambios más recientes. Las operaciones disruptivas de red y varias limpiezas necesitan validación manual controlada adicional.
 

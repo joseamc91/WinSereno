@@ -90,7 +90,7 @@ public static class CleanupExperienceChecks{
   Check(ReferenceEquals(vm.ElevatedWindowsTempAnalysis,old)&&!vm.Categories[1].CanClean&&!vm.Categories[1].HasElevatedAnalysisTime,"Old snapshot retained internally but cannot masquerade as new cancelled analysis");
   var runner=new MaintenanceTaskRunner(log,ops);bool rejected=false;using(var lease=ops.Begin("Other operation",false))try{runner.RunCleanupAnalysisAsync(lease,p=>{}).GetAwaiter().GetResult();}catch(InvalidOperationException){rejected=true;}
   Check(rejected&&!ops.IsActive,"Runner rejects wrong lease before UAC");
-  var info=typeof(MainViewModel).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();Check(info.InformationalVersion=="0.1.0-beta.4"&&ProductInformation.DisplayVersion=="v0.1.0-beta.4","Single public version source");
+  var info=typeof(MainViewModel).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();Check(info.InformationalVersion=="0.1.0-beta.5"&&ProductInformation.DisplayVersion=="v0.1.0-beta.5","Single public version source");
   Check(typeof(MainViewModel).Assembly.GetName().Version.ToString()=="0.1.0.0"&&typeof(MainViewModel).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version=="0.1.0.0","Technical versions unchanged");
   Check(CleanupAnalysisService.ProtectedRecentHours==48,"48-hour policy unchanged");
   string root=Path.Combine(project,"bin","Debug","CleanupMetricsFixture-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(root);
