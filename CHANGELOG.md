@@ -2,11 +2,14 @@
 
 ## Unreleased
 
-- Limpieza de recursos y estructura interna del proyecto sin cambios funcionales.
+## 1.1.0 — 2026-10-04
 
+- Añadido soporte de interfaz Español/English con selector persistente en Ajustes, cambio inmediato sin reiniciar y recursos centralizados preparados para más idiomas.
+- Tema e idioma independientes; compatibilidad con configuraciones de 1.0.0 y fallback a Español cuando el idioma guardado no está soportado.
 - Corregido un fallo de arranque cuando English estaba guardado como idioma de la interfaz.
-
-- Añadido soporte de interfaz Español/English con selector persistente en Ajustes y recursos centralizados preparados para más idiomas.
+- Añadidas pruebas de paridad, cambio de idioma, persistencia y arranque directo en ambos idiomas.
+- Limpieza de recursos y estructura interna del proyecto sin cambios funcionales.
+- Actualizadas las GitHub Actions del CI para usar Node.js 24 de forma nativa.
 
 ## 1.0.0 — 2026-10-03
 

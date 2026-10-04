@@ -138,7 +138,7 @@ public static class LocalizationExperienceChecks {
      Check(Visual<TextBlock>((StackPanel)window.FindName("SettingsPage")).Any(t=>t.Text==(language=="en"?"Language":"Idioma")),"Language card refreshed");
      Check(Visual<TextBlock>((ComboBox)window.FindName("ThemeSelector")).Any(t=>t.Text==(language=="en"?(theme=="Dark"?"Dark":"Light"):(theme=="Dark"?"Oscuro":"Claro"))),"Displayed theme translated without changing stored selection");
      Check(choice.IsTabStop&&choice.IsEnabled&&choice.Items.Count==2,"Language ComboBox retains keyboard access and both choices");
-     Check(Visual<TextBlock>((StackPanel)window.FindName("SettingsPage")).Any(t=>t.Text=="1.0.0"),"Displayed version remains 1.0.0");
+     Check(Visual<TextBlock>((StackPanel)window.FindName("SettingsPage")).Any(t=>t.Text=="1.1.0"),"Displayed version is 1.1.0");
      foreach(double width in new[]{1180.0,900.0}) {
       window.Width=width;window.UpdateLayout();Pump();
       var row=(Grid)window.FindName("SettingsAppearanceLanguageRow");var appearance=(Border)window.FindName("SettingsAppearanceCard");var card=(Border)window.FindName("SettingsLanguageCard");

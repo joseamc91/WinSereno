@@ -36,7 +36,7 @@
 <p align="center">
   <img src="docs/assets/Screenshot_Themes.png" alt="Inicio de WinSereno con temas Claro y Oscuro" width="100%">
   <br>
-  <sub>Interfaz actual en español. Presentación de los temas con datos de ejemplo.</sub>
+  <sub>Vista de los temas con datos de ejemplo (captura de 1.0.0). La interfaz está disponible en Español y English.</sub>
 </p>
 
 ## Qué es WinSereno
@@ -55,7 +55,7 @@ Su enfoque es el mantenimiento con control, sin promesas de aceleración ni ajus
 | Red | Consultar adaptadores, vaciar la caché DNS, renovar DHCP, reiniciar un adaptador y restablecer Winsock o TCP/IP. El reset TCP/IP comprueba IPv4 y exige una segunda confirmación si la configuración es manual o indeterminada. |
 | Limpieza | Analizar primero temporales del usuario y de Windows, caché de miniaturas y Papelera. Limpiar categorías con análisis válido mediante una política conservadora; la Papelera permanece desmarcada por defecto. |
 | Actividad | Revisar las acciones de la sesión, sus resultados y detalles. Los logs TXT mantienen el registro persistente. |
-| Configuración (Ajustes) | Elegir Claro, Oscuro o Sistema; abrir las carpetas de la aplicación y logs; consultar información y enlaces del proyecto, y restablecer preferencias visuales. |
+| Configuración (Ajustes) | Elegir Claro, Oscuro o Sistema y el idioma Español o English; abrir las carpetas de la aplicación y logs; consultar información y enlaces del proyecto, y restablecer preferencias. Tema e idioma se guardan de forma independiente. |
 
 La disponibilidad de algunos datos depende del hardware, los controladores y los permisos. Las estimaciones de limpieza no garantizan el espacio finalmente liberado. El restablecimiento TCP/IP no guarda ni restaura automáticamente la configuración de red.
 
@@ -80,7 +80,7 @@ Puedes mover la aplicación conservando toda la carpeta. Antes de compartir logs
 - .NET Framework 4.8.
 - Carpeta local escribible.
 
-La interfaz de WinSereno 1.0.0 está en español. Este proyecto dispone también de documentación en inglés.
+La interfaz está disponible en Español y English. Puedes cambiar el idioma desde Ajustes sin reiniciar; la elección se conserva entre sesiones.
 
 ## Seguridad
 
@@ -93,7 +93,6 @@ El ejecutable todavía no dispone de firma digital comercial ni firma Authentico
 Planes futuros, sujetos al uso y al feedback:
 
 - Comprobación y actualización desde la propia aplicación.
-- Interfaz en inglés.
 - Mejoras basadas en la experiencia de los usuarios.
 
 ## Documentación

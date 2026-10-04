@@ -2,11 +2,14 @@
 
 ## Unreleased
 
-- Cleaned up project resources and internal structure without functional changes.
+## 1.1.0 — 2026-10-04
 
+- Added Spanish/English interface support with a persistent selector in Settings, immediate switching without restarting, and centralized resources ready for additional languages.
+- Theme and language are independent; settings from 1.0.0 remain compatible, with a safe Spanish fallback for unsupported saved languages.
 - Fixed a startup crash when English was saved as the interface language.
-
-- Added Spanish/English interface support with a persistent selector in Settings and centralized resources ready for additional languages.
+- Added checks for catalog parity, live language switching, persistence, and direct startup in both languages.
+- Cleaned up project resources and internal structure without functional changes.
+- Updated the CI GitHub Actions to run natively on Node.js 24.
 
 ## 1.0.0 — 2026-10-03
 

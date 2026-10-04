@@ -58,7 +58,7 @@ Check ($card.ParentNode -eq $row -and $card.GetAttribute('Grid.Column') -eq '1')
 Check ($combo.GetAttribute('ItemsSource') -eq '{Binding LanguageChoices}' -and $combo.GetAttribute('DisplayMemberPath') -eq 'Name') 'Expandable central ComboBox, no culture codes shown'
 Check ($combo.GetAttribute('SelectedItem').Contains('Mode=TwoWay') -and !$combo.HasAttribute('IsTabStop')) 'Immediate selection with normal keyboard access'
 [xml]$proj = Read 'WinSereno.csproj'
-Check ((Read 'Properties/AssemblyInfo.cs').Contains('AssemblyInformationalVersion("1.0.0")')) 'Public version deliberately unchanged'
+Check ((Read 'Properties/AssemblyInfo.cs').Contains('AssemblyInformationalVersion("1.1.0")')) 'Current stable public version'
 Check ((Read 'WinSereno.csproj').Contains('<ApplicationIcon>Assets\Brand\WinSereno.ico</ApplicationIcon>')) 'Application icon unchanged'
 Check ((Read 'WinSereno.csproj').Contains('Localization\Strings.*.xaml')) 'Both dictionaries included as native WPF resources'
 Check ((Read 'WinSereno.csproj') -notmatch 'PackageReference') 'No dependencies added'

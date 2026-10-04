@@ -36,7 +36,7 @@
 <p align="center">
   <img src="docs/assets/Screenshot_Themes.png" alt="WinSereno Home with Light and Dark themes" width="100%">
   <br>
-  <sub>The current interface is in Spanish. Theme preview uses sample data.</sub>
+  <sub>Theme preview with sample data (screenshot from 1.0.0). The interface is available in Español and English.</sub>
 </p>
 
 ## What is WinSereno?
@@ -55,7 +55,7 @@ The focus is maintenance under your control, without speed claims or opaque “P
 | Network | Inspect adapters, flush the DNS cache, renew DHCP, restart an adapter, and reset Winsock or TCP/IP. TCP/IP reset checks IPv4 and requires a second confirmation for manual or undetermined configurations. |
 | Cleanup | First analyze user and Windows temporary files, the thumbnail cache, and the Recycle Bin. Clean categories with valid analysis results using a conservative policy; the Recycle Bin is unchecked by default. |
 | Activity | Review actions, results, and details from the current session. TXT logs provide the persistent record. |
-| Settings | Choose Light, Dark, or System; open the application and log folders; view application information and project links; and reset visual preferences. |
+| Settings | Choose Light, Dark, or System and the Español or English interface; open the application and log folders; view application information and project links; and reset preferences. Theme and language are saved independently. |
 
 Some information depends on hardware, drivers, and permissions. Cleanup estimates do not guarantee how much space will be freed. TCP/IP reset does not automatically back up or restore network settings.
 
@@ -80,7 +80,7 @@ You can move the application by keeping the whole folder together. Review logs b
 - .NET Framework 4.8.
 - A writable local folder.
 
-WinSereno 1.0.0 currently has a Spanish interface. This English README provides international project documentation.
+The interface is available in Español and English. Switch languages in Settings without restarting; your choice is saved between sessions.
 
 ## Safety
 
@@ -93,7 +93,6 @@ The executable does not yet have a commercial code-signing certificate or an Aut
 Future plans, guided by usage and feedback:
 
 - In-app update checking and installation.
-- An English interface.
 - Improvements based on users' experience.
 
 ## Documentation

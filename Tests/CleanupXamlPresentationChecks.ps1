@@ -92,7 +92,7 @@ public static class CleanupXamlPresentationChecks{
      vm.Cleanup.CanChangeSelection=false;Layout(root,width);Check(boxes.All(b=>!b.IsEnabled),"Disabled selection state");
      Check(Visual<Grid>(boxes[0]).Any(g=>g.Name=="HitArea"&&g.Opacity==0.45),"Disabled appearance distinct");vm.Cleanup.CanChangeSelection=true;Layout(root,width);
      foreach(var text in Visual<TextBlock>(page).Where(t=>Shown(t))){var p=text.TransformToAncestor(page).Transform(new Point());Check(p.X>=-0.5&&p.X+text.ActualWidth<=page.ActualWidth+0.5,"No text overflow at "+width);Check(!text.Text.Contains("SHQuery")&&!text.Text.Contains("archivos accesibles")&&!text.Text.Contains("48 horas")&&!text.Text.Contains("Tamaño lógico"),"No technical counters/heuristics in normal view");}
-     Check(!Visual<TextBlock>(root).Any(t=>t.Text=="Portable · Acciones explícitas"),"Old sidebar tagline removed");Check(Visual<TextBlock>(root).Any(t=>t.Text=="1.0.0"),"Stable public version visible");
+     Check(!Visual<TextBlock>(root).Any(t=>t.Text=="Portable · Acciones explícitas"),"Old sidebar tagline removed");Check(Visual<TextBlock>(root).Any(t=>t.Text=="1.1.0"),"Stable public version visible");
      var details=Visual<Expander>(page).ToArray();Check(details.All(e=>!e.IsExpanded),"Details remain collapsed by default");
      if(state!="Before")foreach(var detail in details){detail.IsExpanded=true;Layout(root,width);Check(!Visual<TextBlock>(detail).Any(t=>t.Text.Contains("SHQuery")||t.Text.Contains("archivos accesibles")||t.Text.Contains("Tamaño lógico")),"Expanded details stay simple");detail.IsExpanded=false;}
     }
