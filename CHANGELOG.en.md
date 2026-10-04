@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed a startup crash when English was saved as the interface language.
+
 - Added Spanish/English interface support with a persistent selector in Settings and centralized resources ready for additional languages.
 
 ## 1.0.0 — 2026-10-03

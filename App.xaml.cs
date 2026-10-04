@@ -20,6 +20,7 @@ namespace WinSereno
                 return;
             }
             WinSereno.Localization.LocalizationPresentation.Initialize();
+            DispatcherUnhandledException += (sender, args) => LogStartupException("Excepción no controlada de UI", args.Exception);
             var storage = new PortableStorage(System.IO.Path.GetDirectoryName(typeof(App).Assembly.Location));
             if (!storage.CheckWritable(out var error)) { WinSereno.Localization.LocalizedMessageBox.Show(error, "Ubicación no escribible"); Shutdown(); return; }
             try
@@ -52,9 +53,17 @@ namespace WinSereno
             }
             catch (Exception ex)
             {
+                LogStartupException("Error de inicio", ex);
                 WinSereno.Localization.LocalizedMessageBox.Show("No se pudo iniciar la aplicación portable.\n" + ex.Message, "WinSereno");
                 Shutdown(1);
             }
+        }
+        private void LogStartupException(string context, Exception exception)
+        {
+            // Diagnostic logging must not replace the original failure. Dispatcher
+            // exceptions remain unhandled; this does not suppress or retry them.
+            try { logger?.Write(context + "\n" + exception); }
+            catch (Exception) { }
         }
         protected override void OnExit(ExitEventArgs e)
         {

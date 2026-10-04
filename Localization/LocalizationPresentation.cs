@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -43,14 +44,16 @@ namespace WinSereno.Localization
         {
             Localize(element);
             if (element is TextBlock)
-                foreach (Inline inline in ((TextBlock)element).Inlines) VisitInline(inline);
+                // Updating a Run binding mutates WPF's text container, including its
+                // collection version. Walk a snapshot, not the live InlineCollection.
+                foreach (Inline inline in ((TextBlock)element).Inlines.ToArray()) VisitInline(inline);
             int count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(element);
             for (int i = 0; i < count; i++) Visit(System.Windows.Media.VisualTreeHelper.GetChild(element, i));
         }
         private static void VisitInline(Inline inline)
         {
             Localize(inline);
-            if (inline is Span) foreach (Inline child in ((Span)inline).Inlines) VisitInline(child);
+            if (inline is Span) foreach (Inline child in ((Span)inline).Inlines.ToArray()) VisitInline(child);
         }
         private static void Localize(DependencyObject element)
         {

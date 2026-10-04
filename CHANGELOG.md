@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Corregido un fallo de arranque cuando English estaba guardado como idioma de la interfaz.
+
 - Añadido soporte de interfaz Español/English con selector persistente en Ajustes y recursos centralizados preparados para más idiomas.
 
 ## 1.0.0 — 2026-10-03
