@@ -8,7 +8,7 @@ namespace WinSereno.Views
     {
         public TcpIpResetWarningWindow(TcpIpResetSnapshot snapshot)
         {
-            InitializeComponent(); DataContext = new TcpIpResetWarningViewModel(snapshot);
+            WinSereno.Localization.LocalizationPresentation.Initialize(); InitializeComponent(); DataContext = new TcpIpResetWarningViewModel(snapshot);
         }
         private void OnContinue(object sender, RoutedEventArgs e)
         {

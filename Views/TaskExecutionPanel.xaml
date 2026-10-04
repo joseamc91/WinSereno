@@ -15,7 +15,7 @@
       <StackPanel>
         <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
           <TextBlock Text="{Binding TaskName}" Foreground="{DynamicResource ToastTextBrush}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,10,0"/>
-          <Button x:Name="ToastClose" Grid.Column="1" Content="X" ToolTip="Ocultar resultado" AutomationProperties.Name="Ocultar resultado terminado" Command="{Binding DismissTaskPanelCommand}" Style="{StaticResource ToastButton}" Background="{DynamicResource ToastCloseBrush}" Foreground="{DynamicResource ToastTextBrush}" Padding="7,3" FontWeight="SemiBold" Visibility="{Binding CanDismissTaskPanel, Converter={StaticResource BoolVisibility}}"/>
+          <Button x:Name="ToastClose" Grid.Column="1" Content="{DynamicResource Text.X}" ToolTip="{DynamicResource Text.HideResult}" AutomationProperties.Name="{DynamicResource Text.HideCompletedResult}" Command="{Binding DismissTaskPanelCommand}" Style="{StaticResource ToastButton}" Background="{DynamicResource ToastCloseBrush}" Foreground="{DynamicResource ToastTextBrush}" Padding="7,3" FontWeight="SemiBold" Visibility="{Binding CanDismissTaskPanel, Converter={StaticResource BoolVisibility}}"/>
         </Grid>
         <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource ToastTextBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
         <ItemsControl x:Name="ToastCounters" ItemsSource="{Binding DiagnosticToastCounts}" Visibility="{Binding ShowDiagnosticToastCounts, Converter={StaticResource BoolVisibility}}" Margin="0,6,0,0">
@@ -36,8 +36,8 @@
           <ProgressBar Minimum="0" Maximum="100" Value="{Binding ToastPercentage, Mode=OneWay}" IsIndeterminate="False" Foreground="{DynamicResource ToastGoodBrush}" Background="{DynamicResource ToastBorderBrush}" Height="6" Margin="0,6,0,0" Visibility="{Binding HasPercentage, Converter={StaticResource BoolVisibility}}"/>
         </StackPanel>
         <WrapPanel HorizontalAlignment="Right" Margin="0,10,0,0">
-          <Button Content="Ver detalles" Command="{Binding DetailsCommand}" Style="{StaticResource ToastButton}"/>
-          <Button Content="Cancelar" Command="{Binding CancelTaskCommand}" Style="{StaticResource ToastButton}" Margin="8,0,0,0" Visibility="{Binding CanCancelToast, Converter={StaticResource BoolVisibility}}"/>
+          <Button Content="{DynamicResource Text.ViewDetails}" Command="{Binding DetailsCommand}" Style="{StaticResource ToastButton}"/>
+          <Button Content="{DynamicResource Text.Cancel}" Command="{Binding CancelTaskCommand}" Style="{StaticResource ToastButton}" Margin="8,0,0,0" Visibility="{Binding CanCancelToast, Converter={StaticResource BoolVisibility}}"/>
         </WrapPanel>
       </StackPanel>
     </ScrollViewer>

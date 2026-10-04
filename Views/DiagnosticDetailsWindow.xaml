@@ -1,7 +1,7 @@
-﻿<Window Style="{StaticResource {x:Type Window}}" x:Class="WinSereno.Views.DiagnosticDetailsWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Detalles de diagnóstico" Width="850" Height="670" MinWidth="600" MinHeight="450" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+﻿<Window Style="{StaticResource {x:Type Window}}" x:Class="WinSereno.Views.DiagnosticDetailsWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="{DynamicResource Text.DiagnosticDetails}" Width="850" Height="670" MinWidth="600" MinHeight="450" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
   <Grid Margin="24"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,18"/>
     <TextBox Grid.Row="1" Text="{Binding Text, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Segoe UI"/>
-    <Button Grid.Row="2" Content="Cerrar" IsCancel="True" HorizontalAlignment="Right" Margin="0,16,0,0"/>
+    <Button Grid.Row="2" Content="{DynamicResource Text.Close}" IsCancel="True" HorizontalAlignment="Right" Margin="0,16,0,0"/>
   </Grid>
 </Window>

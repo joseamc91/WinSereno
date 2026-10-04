@@ -126,7 +126,7 @@ public static class HomeSettingsLayoutChecks {
      Check(Math.Abs(a.Y-b.Y)<0.1&&Math.Abs(data.ActualHeight-preferences.ActualHeight)<0.1,"Independent cards have equal top and height: "+theme+width);
      Check(Math.Abs(b.X-a.X-data.ActualWidth-12)<0.1,"Consistent 12 px gap without additional outer margin");
      Check(ReferenceEquals(data.Style,preferences.Style)&&data.CornerRadius==preferences.CornerRadius&&data.Padding==new Thickness(18),"Unchanged Card style and padding");
-     Check(page.Children.Count==3&&ReferenceEquals(page.Children[1],row)&&page.Children[0] is Border&&page.Children[2] is Border,"Full-width Appearance, parallel cards, full-width About");
+     Check(page.Children.Count==3&&ReferenceEquals(page.Children[1],row)&&page.Children[0] is Grid&&page.Children[2] is Border,"Parallel Appearance/Language, parallel data/preferences, full-width About");
      CheckButtons(data,theme+width);CheckButtons(preferences,theme+width);
      var scroll=(ScrollViewer)window.FindName("PageScroll");
      if(width==1180)Check(scroll.ScrollableHeight==0&&scroll.ComputedVerticalScrollBarVisibility==Visibility.Collapsed,"Actual default window: Settings fully visible without vertical scrollbar: "+theme);

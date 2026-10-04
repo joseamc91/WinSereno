@@ -1,8 +1,9 @@
 ﻿$ErrorActionPreference='Stop'
 $project=Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'LocalizationSource.ps1')
 $count=0
 function Check([bool]$value,[string]$name) { if(-not $value) {throw $name}; $script:count++ }
-function Source([string]$relative) { [IO.File]::ReadAllText((Join-Path $project $relative)) }
+function Source([string]$relative) { (Read-LocalizedSource $relative) }
 $xaml=Source 'Views\MainWindow.xaml'
 $toast=Source 'Views\TaskExecutionPanel.xaml'
 $main=Source 'ViewModels\MainViewModel.cs'

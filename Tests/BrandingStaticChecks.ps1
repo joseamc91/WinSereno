@@ -1,11 +1,12 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $project = Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'LocalizationSource.ps1')
 $count = 0
 function Check([bool]$condition, [string]$message) {
     if (-not $condition) { throw $message }
     $script:count++
 }
-function Read([string]$path) { [IO.File]::ReadAllText((Join-Path $project $path)) }
+function Read([string]$path) { (Read-LocalizedSource $path) }
 [xml]$csproj = Read 'WinSereno.csproj'
 $ns = [Xml.XmlNamespaceManager]::new($csproj.NameTable)
 $ns.AddNamespace('p', 'http://schemas.microsoft.com/developer/msbuild/2003')

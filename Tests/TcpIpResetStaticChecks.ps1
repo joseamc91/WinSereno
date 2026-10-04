@@ -1,8 +1,9 @@
 ﻿$ErrorActionPreference='Stop'
 $project=Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'LocalizationSource.ps1')
 $count=0
 function Check([bool]$ok,[string]$label){if(-not $ok){throw $label};$script:count++}
-function Source([string]$path){[IO.File]::ReadAllText((Join-Path $project $path))}
+function Source([string]$path){(Read-LocalizedSource $path)}
 $preflight=Source 'Services/TcpIpResetPreflightService.cs'
 Check ($preflight.Contains('DHCPEnabled') -and $preflight.Contains('GetIPv4Properties()?.IsDhcpEnabled')) 'Two structured Windows DHCP sources'
 Check ($preflight.Contains('PhysicalAdapter') -and $preflight.Contains('DhcpRenewalPolicy.IsEligible(true, true, true, true')) 'Existing physical policy reused, not a third exclusion list'

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added Spanish/English interface support with a persistent selector in Settings and centralized resources ready for additional languages.
+
 ## 1.0.0 — 2026-10-03
 
 First stable release: consolidates Home and system information, diagnostics, repair, networking, controlled cleanup, and activity history, with consistent navigation and Light/Dark/System themes developed during the betas.

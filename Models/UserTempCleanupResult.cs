@@ -18,9 +18,9 @@
             while (value >= 1024 && unit < units.Length - 1) { value /= 1024; unit++; }
             return value.ToString("0.#") + " " + units[unit];
         }
-        public string Summary => (Status == UserTempCleanupStatus.Completed ? "Completado" : Status == UserTempCleanupStatus.NothingToClean ? "Nada que limpiar" : Status == UserTempCleanupStatus.Partial ? "Completado parcialmente" : "Fallo de la operación") + " · " + DeletedFiles + " archivos eliminados · " +
+        public string Summary => (Status == UserTempCleanupStatus.Completed ? WinSereno.Localization.LocalizationService.Source("Text.Completed") : Status == UserTempCleanupStatus.NothingToClean ? WinSereno.Localization.LocalizationService.Source("Text.NothingToClean") : Status == UserTempCleanupStatus.Partial ? WinSereno.Localization.LocalizationService.Source("Text.PartiallyCompleted") : WinSereno.Localization.LocalizationService.Source("Text.OperationFailed")) + WinSereno.Localization.LocalizationService.Source("Text.Separator") + DeletedFiles + WinSereno.Localization.LocalizationService.Source("Text.FilesDeleted") +
             FormatBytes(RecoveredBytes) + " recuperados · " + DeletedDirectories +
-            " carpetas vacías eliminadas · " + ProtectedElements + " protegidos · " + ReparsePoints +
-            " enlaces omitidos · " + InaccessibleElements + " inaccesibles/bloqueados";
+            WinSereno.Localization.LocalizationService.Source("Text.EmptyFoldersDeleted") + ProtectedElements + " protegidos · " + ReparsePoints +
+            WinSereno.Localization.LocalizationService.Source("Text.LinksSkipped") + InaccessibleElements + " inaccesibles/bloqueados";
     }
 }

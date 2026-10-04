@@ -1,11 +1,12 @@
 ﻿$ErrorActionPreference = 'Stop'
 $project = Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'LocalizationSource.ps1')
 $script:count = 0
 function Check([bool]$condition, [string]$label) {
     if (!$condition) { throw $label }
     $script:count++
 }
-function Read([string]$path) { [IO.File]::ReadAllText((Join-Path $project $path)) }
+function Read([string]$path) { (Read-LocalizedSource $path) }
 $main = Read 'Views/MainWindow.xaml'
 $styles = Read 'Themes/Styles.xaml'
 $vm = Read 'ViewModels/MainViewModel.cs'

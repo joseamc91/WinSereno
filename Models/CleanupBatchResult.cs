@@ -13,7 +13,7 @@ namespace WinSereno.Models
             RemovedElements = value.DeletedFiles + value.DeletedDirectories, SkippedElements = value.ProtectedElements + value.InaccessibleElements + value.ReparsePoints };
         private static string FormatBytes(long bytes)
         { string[] units = { "B", "KB", "MB", "GB", "TB" }; double value = bytes; int unit = 0; while (value >= 1024 && unit < units.Length - 1) { value /= 1024; unit++; } return value.ToString("0.#") + " " + units[unit]; }
-        public string Summary => "Espacio recuperado: " + FormatBytes(ReleasedBytes) + " · Elementos eliminados: " + RemovedElements + " · Omitidos: " + SkippedElements;
+        public string Summary => WinSereno.Localization.LocalizationService.Source("Text.SpaceRecovered") + FormatBytes(ReleasedBytes) + WinSereno.Localization.LocalizationService.Source("Text.ItemsDeleted") + RemovedElements + " · Omitidos: " + SkippedElements;
     }
     public sealed class CleanupBatchStep
     {

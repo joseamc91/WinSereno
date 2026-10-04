@@ -39,13 +39,16 @@ namespace WinSereno.Services
                 a == DiagnosticStatus.Healthy && b == DiagnosticStatus.Healthy ? DiagnosticStatus.Healthy : DiagnosticStatus.NotChecked;
             bool cancelled = result.ExecutionStatus == ExecutionStatus.Cancelled && result.SequenceSteps.All(s => s.WasSkipped || s.Result?.CommandStarted != true);
             var details = new StringBuilder();
-            Describe(details, "Almacén de componentes", store, a);
-            Describe(details, "Archivos protegidos", files, b);
+            var nativeRanges = new List<NativeTextRange>();
+            Describe(details, "Almacén de componentes", store, a, nativeRanges);
+            Describe(details, "Archivos protegidos", files, b, nativeRanges);
             if (result.SequenceSteps.All(s => s.WasSkipped)) details.AppendLine(result.UserSummary);
             return new DiagnosticResult { Id = "integrity", Name = "Integridad de Windows", Status = status, Duration = result.Duration,
                 Summary = cancelled ? "No se comprobó la integridad porque se cancelaron los permisos de administrador." :
                     CombinedSummary(a, b),
                 DetailedDescription = details.ToString(),
+                NativeOutputSegments = result.SequenceSteps.Where(s => s.Result != null).SelectMany(s => new[] { s.Result.StdOut, s.Result.StdErr }).Where(s => !string.IsNullOrEmpty(s)).ToList(),
+                NativeOutputRanges = nativeRanges,
                 Recommendation = status == DiagnosticStatus.Attention || status == DiagnosticStatus.Error ? "Revisar las opciones de Reparación; ninguna se ha ejecutado automáticamente." : null,
                 NavigationTarget = status == DiagnosticStatus.Attention || status == DiagnosticStatus.Error ? (NavigationSection?)NavigationSection.Repair : null,
                 NavigationLabel = status == DiagnosticStatus.Attention || status == DiagnosticStatus.Error ? "Ir a Reparación" : null };
@@ -69,13 +72,17 @@ namespace WinSereno.Services
                 "no se pudieron comprobar completamente los archivos protegidos";
             return storeText + "; " + filesText + ". No se realizó ninguna reparación.";
         }
-        private static void Describe(StringBuilder text, string name, SequenceStepResult step, DiagnosticStatus status)
+        private static void Describe(StringBuilder text, string name, SequenceStepResult step, DiagnosticStatus status, IList<NativeTextRange> nativeRanges)
         {
             text.AppendLine(name + " · " + new DiagnosticResult { Status = status }.StatusLabel);
             if (step?.Result == null || step.WasSkipped) { text.AppendLine(step?.SkipReason ?? "No comprobado."); return; }
             var r = step.Result;
             text.AppendLine("Duración: " + r.Duration.TotalSeconds.ToString("0.0") + " s · ExitCode: " + (r.ExitCode?.ToString() ?? "no disponible"));
-            text.AppendLine(r.UserSummary); text.AppendLine(r.StdOut); text.AppendLine("STDERR:"); text.AppendLine(r.StdErr);
+            text.AppendLine(r.UserSummary);
+            if (!string.IsNullOrEmpty(r.StdOut)) nativeRanges.Add(new NativeTextRange(text.Length, r.StdOut.Length));
+            text.AppendLine(r.StdOut); text.AppendLine("STDERR:");
+            if (!string.IsNullOrEmpty(r.StdErr)) nativeRanges.Add(new NativeTextRange(text.Length, r.StdErr.Length));
+            text.AppendLine(r.StdErr);
         }
         public static void Summarize(MaintenanceTaskResult result)
         {

@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $project = Split-Path $PSScriptRoot -Parent
 $exe = Join-Path $project 'bin\Debug\WinSereno.exe'
 [void][Reflection.Assembly]::LoadFrom($exe)
@@ -200,7 +200,7 @@ public static class ActivityHistoryChecks {
   string main=File.ReadAllText(Path.Combine(project,"ViewModels","MainViewModel.cs"));
   Check(main.Contains("await Cleanup.AnalyzeAsync(false)"),"Post-cleanup reanalysis explicitly excluded");
   string ui=File.ReadAllText(Path.Combine(project,"Views","MainWindow.xaml"));
-  Check(ui.Contains("ItemsSource=\"{Binding ActionHistory}\"")&&ui.Contains("Todav\u00eda no se han realizado acciones"),"History empty and list presentation");
+  Check(ui.Contains("ItemsSource=\"{Binding ActionHistory}\"")&&ui.Contains("{DynamicResource Text.NoActionsHaveBeenPerformedInThisSession}"),"History empty and list presentation");
   Check(!ui.Contains("local:")&&!ui.Contains("x:Static m:"),"No local XAML type references reintroduced");
   return count+" checks passed; simulated results only, no maintenance, cleanup, network, UAC or settings writes.";
  }

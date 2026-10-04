@@ -58,7 +58,7 @@ public static class CleanupXamlPresentationChecks{
    DisplayPath=i==0?@"C:\Users\usuario\AppData\Local\Temp":i==1?@"C:\Windows\Temp":i==2?@"C:\Users\usuario\AppData\Local\Microsoft\Windows\Explorer":"Papelera del usuario actual.",
    HasAmounts=ready&&!(partial&&i==1),HasElevatedAnalysisTime=ready&&!(partial&&i==1)&&i==1,ElevatedAnalysisText="Último análisis con permisos: 02/10/2026 12:34",
    Result=new{WasAnalyzed=ready}});
-  string main=File.ReadAllText(Path.Combine(project,"ViewModels","MainViewModel.cs"));var description=Regex.Match(main,"case NavigationSection.Cleanup: return \"([^\"]+)\"").Groups[1].Value;
+  string main=File.ReadAllText(Path.Combine(project,"ViewModels","MainViewModel.cs"));var description=(string)Application.Current.Resources["Text.AnalyzeRecoverableSpaceAndChooseWhichCategoriesTo"];
   string info=File.ReadAllText(Path.Combine(project,"Properties","AssemblyInfo.cs"));var version=Regex.Match(info,"AssemblyInformationalVersion\\(\"([^\"]+)\"\\)").Groups[1].Value;
   var navigation=new[]{new{Label="Inicio",SectionCode="Home"},new{Label="Diagnóstico",SectionCode="Diagnosis"},new{Label="Reparación",SectionCode="Repair"},new{Label="Red",SectionCode="Network"},new{Label="Limpieza",SectionCode="Cleanup"},new{Label="Actividad",SectionCode="Activity"},new{Label="Ajustes",SectionCode="Settings"}};
   return new CleanupUiRoot{PageDescription=description,ProductVersion=version,Navigation=navigation.Cast<object>().ToArray(),MainNavigation=navigation.Take(6).Cast<object>().ToArray(),SettingsNavigation=navigation.Skip(6).Cast<object>().ToArray(),SelectedNavigation=navigation[4],
@@ -66,7 +66,7 @@ public static class CleanupXamlPresentationChecks{
    CleanUserTempCommand=new CleanupUiCommand{Enabled=ready},CleanWindowsTempCommand=new CleanupUiCommand{Enabled=ready&&!partial},CleanThumbnailsCommand=new CleanupUiCommand{Enabled=ready},EmptyRecycleBinCommand=new CleanupUiCommand{Enabled=ready},CleanSelectedCommand=new CleanupUiCommand{Enabled=ready&&!partial}};
  }
  public static string Run(string project){
-  var app=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};app.Resources.MergedDictionaries.Add((ResourceDictionary)XamlReader.Parse(File.ReadAllText(Path.Combine(project,"Themes","Styles.xaml"))));
+  var app=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};app.Resources.MergedDictionaries.Add((ResourceDictionary)XamlReader.Parse(File.ReadAllText(Path.Combine(project,"Themes","Styles.xaml")).Replace("/WinSereno;component/Localization/Strings.es.xaml",new Uri(Path.Combine(project,"Localization","Strings.es.xaml")).AbsoluteUri)));
   string xaml=File.ReadAllText(Path.Combine(project,"Views","MainWindow.xaml"));xaml=Regex.Replace(xaml," x:Class=\"[^\"]+\"","");xaml=Regex.Replace(xaml," (?:Loaded|SizeChanged|KeyDown)=\"[^\"]+\"","");
   string output=Path.Combine(project,"bin","Debug","VisualChecks");Directory.CreateDirectory(output);
   foreach(string theme in new[]{"Light","Dark"}){

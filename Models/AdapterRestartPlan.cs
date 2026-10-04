@@ -11,7 +11,7 @@ namespace WinSereno.Models
         public string Name { get; }
         public string Description { get; }
         public string Kind { get; }
-        public string DisplayName => Name + " · " + Kind + " · " + Description;
+        public string DisplayName => Name + WinSereno.Localization.LocalizationService.Source("Text.Separator") + Kind + WinSereno.Localization.LocalizationService.Source("Text.Separator") + Description;
     }
     public sealed class AdapterRestartSelection
     {

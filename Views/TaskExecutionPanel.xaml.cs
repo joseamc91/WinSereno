@@ -3,6 +3,6 @@ namespace WinSereno.Views
 {
     public partial class TaskExecutionPanel : UserControl
     {
-        public TaskExecutionPanel() { InitializeComponent(); }
+        public TaskExecutionPanel() { WinSereno.Localization.LocalizationPresentation.Initialize(); InitializeComponent(); }
     }
 }

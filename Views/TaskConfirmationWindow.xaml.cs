@@ -5,7 +5,7 @@ namespace WinSereno.Views
 {
     public partial class TaskConfirmationWindow : Window
     {
-        public TaskConfirmationWindow(MaintenanceTask task) { InitializeComponent(); DataContext = new TaskConfirmationViewModel(task); }
+        public TaskConfirmationWindow(MaintenanceTask task) { WinSereno.Localization.LocalizationPresentation.Initialize(); InitializeComponent(); DataContext = new TaskConfirmationViewModel(task); }
         private void OnExecute(object sender, RoutedEventArgs e) { DialogResult = true; }
     }
 }

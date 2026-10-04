@@ -17,7 +17,7 @@ namespace WinSereno.ViewModels
         public InformationBlock Block { get; }
         private string title;
         public string Title { get => title; set => Set(ref title, value); }
-        private string value = "Consultando...";
+        private string value = WinSereno.Localization.LocalizationService.Source("Text.Checking");
         public string Value { get => value; set => Set(ref this.value, value); }
         private string description = "";
         public string Description { get => description; set => Set(ref description, value); }
@@ -29,7 +29,7 @@ namespace WinSereno.ViewModels
         public string CapacityText { get; set; }
         public string FreeText { get; set; }
         public bool NeedsAttention { get; set; }
-        public string StatusText => NeedsAttention ? "Atención" : "Correcto";
+        public string StatusText => NeedsAttention ? WinSereno.Localization.LocalizationService.Source("Text.Attention") : WinSereno.Localization.LocalizationService.Source("Text.Healthy");
     }
     public sealed class HomeViewModel : ObservableObject
     {
@@ -45,7 +45,7 @@ namespace WinSereno.ViewModels
         public RelayCommand RefreshCommand { get; }
         private bool isRefreshing;
         public bool IsRefreshing { get => isRefreshing; private set { if (Set(ref isRefreshing, value)) RefreshCommand.Refresh(); } }
-        private string disksMessage = "Consultando...";
+        private string disksMessage = WinSereno.Localization.LocalizationService.Source("Text.Checking");
         public string DisksMessage { get => disksMessage; private set => Set(ref disksMessage, value); }
         public bool HasDisksMessage => !string.IsNullOrEmpty(DisksMessage);
         private string externalDisksMessage = "";
@@ -57,8 +57,8 @@ namespace WinSereno.ViewModels
         public HomeViewModel(ISystemInformationService service, ISessionLogger logger)
         {
             this.service = service; this.logger = logger;
-            foreach (var entry in new[] { Tuple.Create(InformationBlock.Windows, "Windows"), Tuple.Create(InformationBlock.Cpu, "CPU"), Tuple.Create(InformationBlock.Gpu, "GPU"),
-                Tuple.Create(InformationBlock.Memory, "RAM instalada"), Tuple.Create(InformationBlock.Network, "Red"), Tuple.Create(InformationBlock.Uptime, "Uptime") })
+            foreach (var entry in new[] { Tuple.Create(InformationBlock.Windows, WinSereno.Localization.LocalizationService.Source("Text.Windows")), Tuple.Create(InformationBlock.Cpu, "CPU"), Tuple.Create(InformationBlock.Gpu, "GPU"),
+                Tuple.Create(InformationBlock.Memory, WinSereno.Localization.LocalizationService.Source("Text.InstalledRam")), Tuple.Create(InformationBlock.Network, WinSereno.Localization.LocalizationService.Source("Text.Network")), Tuple.Create(InformationBlock.Uptime, WinSereno.Localization.LocalizationService.Source("Text.Uptime")) })
                 Cards.Add(new InformationCardViewModel(entry.Item1, entry.Item2));
             RefreshCommand = new RelayCommand(async p => await RefreshAsync(), p => !IsRefreshing && !stopped);
         }
@@ -69,23 +69,23 @@ namespace WinSereno.ViewModels
             IsRefreshing = true;
             currentCpu = null; currentGpu = null;
             Cards.First(c => c.Block == InformationBlock.Gpu).Title = "GPU";
-            foreach (var card in Cards) { card.Value = "Consultando..."; card.Description = ""; }
+            foreach (var card in Cards) { card.Value = WinSereno.Localization.LocalizationService.Source("Text.Checking"); card.Description = ""; }
             LocalDisks.Clear(); ExternalDisks.Clear(); ExternalDisksMessage = "";
             Raise(nameof(HasExternalDisks)); Raise(nameof(HasExternalDisksMessage));
-            DisksMessage = "Consultando..."; Raise(nameof(HasDisksMessage)); RefreshedText = "Consultando información del equipo...";
+            DisksMessage = WinSereno.Localization.LocalizationService.Source("Text.Checking"); Raise(nameof(HasDisksMessage)); RefreshedText = WinSereno.Localization.LocalizationService.Source("Text.CollectingSystemInformation");
             try
             {
                 await service.CollectAsync(new Progress<InformationUpdate>(ApplyUpdate), lifetime.Token);
-                if (!stopped) RefreshedText = "Última consulta: " + DateTime.Now.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
+                if (!stopped) RefreshedText = WinSereno.Localization.LocalizationService.Source("Text.LastChecked") + DateTime.Now.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
             }
             catch (Exception ex)
             {
                 SystemQuery.Log(logger, "Error de recopilación: " + ex);
                 if (!stopped)
                 {
-                    foreach (var card in Cards.Where(c => c.Value == "Consultando...")) card.Value = "No se pudo consultar";
-                    if (DisksMessage == "Consultando...") DisksMessage = "No se pudo consultar";
-                    Raise(nameof(HasDisksMessage)); RefreshedText = "Consulta incompleta";
+                    foreach (var card in Cards.Where(c => c.Value == WinSereno.Localization.LocalizationService.Source("Text.Checking"))) card.Value = WinSereno.Localization.LocalizationService.Source("Text.CouldNotRetrieveInformation");
+                    if (DisksMessage == WinSereno.Localization.LocalizationService.Source("Text.Checking")) DisksMessage = WinSereno.Localization.LocalizationService.Source("Text.CouldNotRetrieveInformation");
+                    Raise(nameof(HasDisksMessage)); RefreshedText = WinSereno.Localization.LocalizationService.Source("Text.IncompleteQuery");
                 }
             }
             finally { IsRefreshing = false; }
@@ -102,12 +102,12 @@ namespace WinSereno.ViewModels
                     {
                         if (disk.DriveType != System.IO.DriveType.Fixed && disk.DriveType != System.IO.DriveType.Removable) continue;
                         var target = disk.DriveType == System.IO.DriveType.Removable ? ExternalDisks : LocalDisks;
-                        target.Add(new DiskViewModel { Name = disk.Unit + (string.IsNullOrWhiteSpace(disk.Label) ? "" : " · " + disk.Label),
-                            CapacityText = FormatBytes((ulong)disk.FreeBytes) + " libres de " + FormatBytes((ulong)disk.TotalBytes),
-                            FreeText = disk.FreePercentage.ToString("0.#", CultureInfo.CurrentCulture) + " % libre", NeedsAttention = disk.NeedsAttention });
+                        target.Add(new DiskViewModel { Name = disk.Unit + (string.IsNullOrWhiteSpace(disk.Label) ? "" : WinSereno.Localization.LocalizationService.Source("Text.Separator") + disk.Label),
+                            CapacityText = FormatBytes((ulong)disk.FreeBytes) + WinSereno.Localization.LocalizationService.Source("Text.FreeOf") + FormatBytes((ulong)disk.TotalBytes),
+                            FreeText = disk.FreePercentage.ToString("0.#", CultureInfo.CurrentCulture) + WinSereno.Localization.LocalizationService.Source("Text.Free"), NeedsAttention = disk.NeedsAttention });
                     }
-                DisksMessage = collection == null ? "No se pudo consultar" : collection.HasErrors ? "Algunas unidades no se pudieron consultar" : LocalDisks.Count == 0 ? "No hay volúmenes locales listos" : "";
-                ExternalDisksMessage = HasExternalDisks && collection.HasErrors ? "Algunas unidades no se pudieron consultar" : "";
+                DisksMessage = collection == null ? WinSereno.Localization.LocalizationService.Source("Text.CouldNotRetrieveInformation") : collection.HasErrors ? WinSereno.Localization.LocalizationService.Source("Text.SomeDrivesCouldNotBeChecked726") : LocalDisks.Count == 0 ? WinSereno.Localization.LocalizationService.Source("Text.NoLocalVolumesAreReady") : "";
+                ExternalDisksMessage = HasExternalDisks && collection.HasErrors ? WinSereno.Localization.LocalizationService.Source("Text.SomeDrivesCouldNotBeChecked726") : "";
                 Raise(nameof(HasDisksMessage)); Raise(nameof(HasExternalDisks)); Raise(nameof(HasExternalDisksMessage)); return;
             }
             var card = Cards.First(c => c.Block == update.Block);
@@ -116,13 +116,13 @@ namespace WinSereno.ViewModels
             {
                 if (update.Block == InformationBlock.Cpu) currentCpu = null;
                 if (update.Block == InformationBlock.Gpu) { currentGpu = null; card.Title = "GPU"; UpdateCpuPresentation(); }
-                card.Value = update.Status == InformationStatus.Failed ? "No se pudo consultar" : "No disponible"; return;
+                card.Value = update.Status == InformationStatus.Failed ? WinSereno.Localization.LocalizationService.Source("Text.CouldNotRetrieveInformation") : WinSereno.Localization.LocalizationService.Source("Text.Unavailable"); return;
             }
             switch (update.Block)
             {
                 case InformationBlock.Windows:
                     var windows = (WindowsInformation)update.Data;
-                    card.Value = windows.ProductName ?? "Nombre no disponible";
+                    card.Value = windows.ProductName ?? WinSereno.Localization.LocalizationService.Source("Text.NameUnavailable");
                     card.Description = Join(windows.DisplayVersion, string.IsNullOrEmpty(windows.Build) ? null : "Build " + windows.Build + (windows.Revision.HasValue ? "." + windows.Revision : ""), windows.Architecture);
                     break;
                 case InformationBlock.Cpu:
@@ -132,9 +132,9 @@ namespace WinSereno.ViewModels
                 case InformationBlock.Gpu:
                     var gpu = (GpuInformation)update.Data;
                     currentGpu = gpu;
-                    card.Title = gpu.IsDedicated ? "GPU dedicada" : "GPU";
+                    card.Title = gpu.IsDedicated ? WinSereno.Localization.LocalizationService.Source("Text.DedicatedGpu") : "GPU";
                     card.Value = CleanGraphicsName(gpu.Name);
-                    card.Description = string.IsNullOrWhiteSpace(gpu.DriverVersion) ? "" : "Controlador " + gpu.DriverVersion;
+                    card.Description = string.IsNullOrWhiteSpace(gpu.DriverVersion) ? "" : WinSereno.Localization.LocalizationService.Source("Text.Driver") + gpu.DriverVersion;
                     UpdateCpuPresentation();
                     break;
                 case InformationBlock.Memory:
@@ -142,14 +142,14 @@ namespace WinSereno.ViewModels
                     card.Value = FormatBytes(memory.InstalledBytes); card.Description = FormatMemoryDescription(memory); break;
                 case InformationBlock.Uptime:
                     var uptime = ((UptimeInformation)update.Data).Uptime;
-                    card.Value = uptime.TotalDays >= 1 ? uptime.Days + (uptime.Days == 1 ? " día " : " días ") + uptime.Hours + " h" : (int)uptime.TotalHours + " h " + uptime.Minutes + " min";
-                    card.Description = "Desde el último arranque"; break;
+                    card.Value = uptime.TotalDays >= 1 ? uptime.Days + (uptime.Days == 1 ? WinSereno.Localization.LocalizationService.Source("Text.Day") : WinSereno.Localization.LocalizationService.Source("Text.Days")) + uptime.Hours + " h" : (int)uptime.TotalHours + " h " + uptime.Minutes + " min";
+                    card.Description = WinSereno.Localization.LocalizationService.Source("Text.SinceTheLastBoot"); break;
                 case InformationBlock.Network:
                     var network = (NetworkInformation)update.Data;
                     card.Value = network.NeutralMessage ?? network.Kind;
-                    card.Description = network.NeutralMessage != null ? "Sin pruebas de conectividad" : string.Join("\n", new[] { network.Description ?? network.Name,
+                    card.Description = network.NeutralMessage != null ? WinSereno.Localization.LocalizationService.Source("Text.NoConnectivityTestsPerformed") : string.Join("\n", new[] { network.Description ?? network.Name,
                         Join(network.SpeedBitsPerSecond.HasValue ? FormatSpeed(network.SpeedBitsPerSecond.Value) : null,
-                            network.IPv4 != null ? "IPv4 " + network.IPv4 : "IPv4 principal no determinada") }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                            network.IPv4 != null ? "IPv4 " + network.IPv4 : WinSereno.Localization.LocalizationService.Source("Text.PrimaryIpv4NotDetermined")) }.Where(s => !string.IsNullOrWhiteSpace(s)));
                     break;
             }
         }
@@ -160,10 +160,10 @@ namespace WinSereno.ViewModels
             string model = CleanCpuName(currentCpu.Model);
             string frequency = currentCpu.MaxClockSpeedMHz.HasValue && SystemInformationPolicy.IsReasonableCpuClockSpeed(currentCpu.MaxClockSpeedMHz.Value)
                 ? (currentCpu.MaxClockSpeedMHz.Value / 1000.0).ToString("0.0", CultureInfo.InvariantCulture) + " GHz" : null;
-            card.Value = string.IsNullOrWhiteSpace(model) ? "Modelo no disponible" : model;
+            card.Value = string.IsNullOrWhiteSpace(model) ? WinSereno.Localization.LocalizationService.Source("Text.ModelUnavailable") : model;
             card.Description = string.Join("\n", new[] {
-                Join(currentCpu.PhysicalCores.HasValue ? currentCpu.PhysicalCores + " núcleos" : null,
-                    currentCpu.LogicalProcessors.HasValue ? currentCpu.LogicalProcessors + " hilos" : null, frequency),
+                Join(currentCpu.PhysicalCores.HasValue ? currentCpu.PhysicalCores + WinSereno.Localization.LocalizationService.Source("Text.Cores") : null,
+                    currentCpu.LogicalProcessors.HasValue ? currentCpu.LogicalProcessors + WinSereno.Localization.LocalizationService.Source("Text.Threads") : null, frequency),
                 CleanGraphicsName(currentGpu?.IntegratedName) }.Where(s => !string.IsNullOrWhiteSpace(s)));
         }
         private static string CleanGraphicsName(string name)
@@ -197,7 +197,7 @@ namespace WinSereno.ViewModels
             if (modules.Any(m => MemoryType(m.SmbiosMemoryType) != type)) type = null;
             string layout = modules.All(m => m.CapacityBytes > 0 && m.CapacityBytes == modules[0].CapacityBytes)
                 ? modules.Count + " × " + FormatBytes(modules[0].CapacityBytes)
-                : modules.Count + (modules.Count == 1 ? " módulo" : " módulos");
+                : modules.Count + (modules.Count == 1 ? WinSereno.Localization.LocalizationService.Source("Text.Module") : WinSereno.Localization.LocalizationService.Source("Text.Modules"));
             uint speed = modules[0].ConfiguredSpeed;
             // SMBIOS Type 17 reports transfer rate. 0/FFFF denote an unknown/extended value.
             string configuredSpeed = speed > 0 && speed < ushort.MaxValue && modules.All(m => m.ConfiguredSpeed == speed)
@@ -208,7 +208,7 @@ namespace WinSereno.ViewModels
         {
             switch (value) { case 24: return "DDR3"; case 26: return "DDR4"; case 34: return "DDR5"; default: return null; }
         }
-        private static string Join(params string[] parts) => string.Join(" · ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+        private static string Join(params string[] parts) => string.Join(WinSereno.Localization.LocalizationService.Source("Text.Separator"), parts.Where(p => !string.IsNullOrWhiteSpace(p)));
         private static string FormatSpeed(long speed) => speed >= 1000000000 ? (speed / 1000000000.0).ToString("0.##", CultureInfo.CurrentCulture) + " Gbps" : (speed / 1000000.0).ToString("0.##", CultureInfo.CurrentCulture) + " Mbps";
         private static string FormatBytes(ulong bytes)
         {

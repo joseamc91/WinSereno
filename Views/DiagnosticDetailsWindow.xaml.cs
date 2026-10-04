@@ -6,6 +6,6 @@ namespace WinSereno.Views
 {
     public partial class DiagnosticDetailsWindow : Window
     {
-        public DiagnosticDetailsWindow(DiagnosticResult result) { InitializeComponent(); DataContext = new DiagnosticDetailsViewModel(result); }
+        public DiagnosticDetailsWindow(DiagnosticResult result) { WinSereno.Localization.LocalizationPresentation.Initialize(); InitializeComponent(); var model = new DiagnosticDetailsViewModel(result); DataContext = model; Closed += (s, e) => model.Dispose(); }
     }
 }

@@ -3,7 +3,7 @@ namespace WinSereno.Views
 {
     public partial class DiagnosticCard : UserControl
     {
-        public DiagnosticCard() { InitializeComponent(); }
+        public DiagnosticCard() { WinSereno.Localization.LocalizationPresentation.Initialize(); InitializeComponent(); }
         private void Header_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
         {
             // En anchos reducidos los botones pasan debajo del título; el estado conserva su borde derecho.

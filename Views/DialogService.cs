@@ -8,13 +8,13 @@ namespace WinSereno.Views
     {
         public bool ConfirmResetPreferences()
         {
-            var window = new Window { Title = "Restablecer preferencias", Width = 520, SizeToContent = SizeToContent.Height,
+            var window = new Window { Title = WinSereno.Localization.LocalizationService.Current.Get("Text.ResetPreferences"), Width = 520, SizeToContent = SizeToContent.Height,
                 ResizeMode = ResizeMode.NoResize, WindowStartupLocation = WindowStartupLocation.CenterOwner, Owner = Application.Current.MainWindow };
             var layout = new System.Windows.Controls.StackPanel { Margin = new Thickness(20) };
-            layout.Children.Add(new System.Windows.Controls.TextBlock { Text = "Se restaurarán las preferencias visuales de WinSereno. Los logs y los datos del sistema no se modificarán.", TextWrapping = TextWrapping.Wrap });
+            layout.Children.Add(new System.Windows.Controls.TextBlock { Text = WinSereno.Localization.LocalizationService.Current.Get("Text.WinserenoSVisualPreferencesWillBeRestoredLogs"), TextWrapping = TextWrapping.Wrap });
             var buttons = new System.Windows.Controls.StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 20, 0, 0) };
-            buttons.Children.Add(new System.Windows.Controls.Button { Content = "Cancelar", IsCancel = true });
-            var reset = new System.Windows.Controls.Button { Content = "Restablecer" };
+            buttons.Children.Add(new System.Windows.Controls.Button { Content = WinSereno.Localization.LocalizationService.Current.Get("Text.Cancel"), IsCancel = true });
+            var reset = new System.Windows.Controls.Button { Content = WinSereno.Localization.LocalizationService.Current.Get("Text.Reset") };
             reset.Click += (s, e) => window.DialogResult = true;
             buttons.Children.Add(reset); layout.Children.Add(buttons); window.Content = layout;
             return window.ShowDialog() == true;
@@ -22,15 +22,15 @@ namespace WinSereno.Views
         public bool ConfirmTcpIpReset(TcpIpResetSnapshot snapshot) => new TcpIpResetWarningWindow(snapshot) { Owner = Application.Current.MainWindow }.ShowDialog() == true;
         public RestartAdapter SelectRestartAdapter(System.Collections.Generic.IReadOnlyList<RestartAdapter> adapters)
         {
-            var window = new Window { Title = "Seleccionar adaptador", Width = 640, Height = 240, ResizeMode = ResizeMode.NoResize,
+            var window = new Window { Title = WinSereno.Localization.LocalizationService.Current.Get("Text.SelectAdapter"), Width = 640, Height = 240, ResizeMode = ResizeMode.NoResize,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner, Owner = Application.Current.MainWindow };
             var layout = new System.Windows.Controls.StackPanel { Margin = new Thickness(20) };
-            layout.Children.Add(new System.Windows.Controls.TextBlock { Text = "Selecciona el adaptador físico conectado que quieres reiniciar.", TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 16) });
+            layout.Children.Add(new System.Windows.Controls.TextBlock { Text = WinSereno.Localization.LocalizationService.Current.Get("Text.SelectTheConnectedPhysicalAdapterYouWantTo"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 16) });
             var choice = new System.Windows.Controls.ComboBox { ItemsSource = adapters, DisplayMemberPath = nameof(RestartAdapter.DisplayName), SelectedIndex = -1 };
             layout.Children.Add(choice);
             var buttons = new System.Windows.Controls.StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 20, 0, 0) };
-            var cancel = new System.Windows.Controls.Button { Content = "Cancelar", IsCancel = true };
-            var select = new System.Windows.Controls.Button { Content = "Continuar", IsEnabled = false };
+            var cancel = new System.Windows.Controls.Button { Content = WinSereno.Localization.LocalizationService.Current.Get("Text.Cancel"), IsCancel = true };
+            var select = new System.Windows.Controls.Button { Content = WinSereno.Localization.LocalizationService.Current.Get("Text.Continue"), IsEnabled = false };
             choice.SelectionChanged += (s, e) => select.IsEnabled = choice.SelectedItem is RestartAdapter;
             select.Click += (s, e) => window.DialogResult = true;
             buttons.Children.Add(cancel); buttons.Children.Add(select); layout.Children.Add(buttons); window.Content = layout;
@@ -46,9 +46,9 @@ namespace WinSereno.Views
                 new { TaskName = progress.CurrentTask?.Name, Progress = progress };
             new TaskOutputWindow(context) { Owner = Application.Current.MainWindow }.ShowDialog();
         }
-        public void ShowMessage(string message) => MessageBox.Show(Application.Current.MainWindow, message, "WinSereno", MessageBoxButton.OK, MessageBoxImage.Information);
-        public bool ConfirmCancelAndClose() => MessageBox.Show(Application.Current.MainWindow,
-            "Hay una operación cancelable en ejecución. ¿Quieres cancelarla y cerrar cuando termine la comprobación actual?", "Cerrar aplicación",
+        public void ShowMessage(string message) => WinSereno.Localization.LocalizedMessageBox.Show(Application.Current.MainWindow, message, WinSereno.Localization.LocalizationService.Current.Get("Text.Winsereno"), MessageBoxButton.OK, MessageBoxImage.Information);
+        public bool ConfirmCancelAndClose() => WinSereno.Localization.LocalizedMessageBox.Show(Application.Current.MainWindow,
+            WinSereno.Localization.LocalizationService.Current.Get("Text.ACancellableOperationIsRunningDoYouWant"), WinSereno.Localization.LocalizationService.Current.Get("Text.CloseApplication"),
             MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes;
     }
 }

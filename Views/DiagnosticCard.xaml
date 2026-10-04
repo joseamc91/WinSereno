@@ -8,7 +8,7 @@
       <TextBlock x:Name="ResultName" Text="{Binding Name}" TextWrapping="Wrap" FontWeight="SemiBold" FontSize="16" VerticalAlignment="Center" Margin="0,0,12,0"/>
       <WrapPanel x:Name="HeaderActions" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
         <Button Content="{Binding NavigationLabel}" Padding="8,4" Margin="0,0,6,0" Visibility="{Binding HasNavigation, Converter={StaticResource BoolVisibility}}" Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding NavigationTarget}"/>
-        <Button Content="Ver detalles" Padding="8,4" Margin="0" Visibility="{Binding HasDetails, Converter={StaticResource BoolVisibility}}" Command="{Binding DataContext.Diagnosis.DetailsCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+        <Button Content="{DynamicResource Text.ViewDetails}" Padding="8,4" Margin="0" Visibility="{Binding HasDetails, Converter={StaticResource BoolVisibility}}" Command="{Binding DataContext.Diagnosis.DetailsCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
       </WrapPanel>
         <TextBlock x:Name="ResultStatus" Grid.Column="2" Grid.RowSpan="2" HorizontalAlignment="Right" Text="{Binding CardStatusLabel}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0,0,0">
           <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/><Style.Triggers>

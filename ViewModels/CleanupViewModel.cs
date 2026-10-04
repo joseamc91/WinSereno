@@ -18,33 +18,33 @@ namespace WinSereno.ViewModels
         private bool isSelected;
         public bool IsSelected { get => isSelected; set => Set(ref isSelected, value); }
         public CleanupCategoryViewModel(CleanupCategoryResult result) { Result = result; isSelected = result.Category != CleanupCategory.RecycleBin; }
-        public string RecoverableEstimate => "Espacio recuperable estimado: " + (!Result.WasAnalyzed || !Result.IsAvailable ? "no disponible" :
-            Result.Category == CleanupCategory.RecycleBin ? FormatBytes(Result.TotalBytes) : Result.PotentiallyCleanableBytes.HasValue ? FormatBytes(Result.PotentiallyCleanableBytes.Value) : "no disponible");
+        public string RecoverableEstimate => WinSereno.Localization.LocalizationService.Source("Text.EstimatedRecoverableSpace") + (!Result.WasAnalyzed || !Result.IsAvailable ? WinSereno.Localization.LocalizationService.Source("Text.Unavailable753") :
+            Result.Category == CleanupCategory.RecycleBin ? FormatBytes(Result.TotalBytes) : Result.PotentiallyCleanableBytes.HasValue ? FormatBytes(Result.PotentiallyCleanableBytes.Value) : WinSereno.Localization.LocalizationService.Source("Text.Unavailable753"));
         public bool CanClean => Result.WasAnalyzed && Result.IsAvailable && !Result.WasCancelled && Result.TotalBytes >= 0 &&
             (IsRecycleBin || (!string.IsNullOrWhiteSpace(Result.Path) && Result.PotentiallyCleanableBytes.HasValue &&
                 Result.PotentiallyCleanableBytes >= 0 && Result.PotentiallyCleanableBytes <= Result.TotalBytes)) &&
             (!IsWindowsTemporary || Result.AnalysisFinishedAt.HasValue);
-        public string Status => !Result.WasAnalyzed ? "Aún no analizado" : !Result.IsAvailable || Result.WasCancelled ? "No comprobado" : Result.IsPartial ? "Resultado parcial" : "Analizado";
+        public string Status => !Result.WasAnalyzed ? WinSereno.Localization.LocalizationService.Source("Text.NotAnalyzedYet") : !Result.IsAvailable || Result.WasCancelled ? WinSereno.Localization.LocalizationService.Source("Text.NotChecked") : Result.IsPartial ? WinSereno.Localization.LocalizationService.Source("Text.PartialResult") : WinSereno.Localization.LocalizationService.Source("Text.Analyzed");
         public bool HasElevatedAnalysisTime => IsWindowsTemporary && Result.AnalysisFinishedAt.HasValue;
         public string ElevatedAnalysisText => HasElevatedAnalysisTime ? FormatAnalysisTime(Result.AnalysisFinishedAt.Value) : "";
         internal static string FormatAnalysisTime(DateTimeOffset finished)
-            => "Último análisis con permisos: " + finished.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.CurrentCulture);
+            => WinSereno.Localization.LocalizationService.Source("Text.LastElevatedAnalysis") + finished.ToLocalTime().ToString("dd/MM/yyyy HH:mm", CultureInfo.CurrentCulture);
         public bool IsWindowsTemporary => Result.Category == CleanupCategory.WindowsTemporary;
         public bool IsRecycleBin => Result.Category == CleanupCategory.RecycleBin;
         public bool IsThumbnailCache => Result.Category == CleanupCategory.ThumbnailCache;
         public bool IsUserTemporary => Result.Category == CleanupCategory.UserTemporary;
         public string Name => Result.Name;
         public string Path => Result.Path;
-        public string DisplayPath => IsRecycleBin ? "Papelera del usuario actual." : Path;
+        public string DisplayPath => IsRecycleBin ? WinSereno.Localization.LocalizationService.Source("Text.CurrentUserSRecycleBin") : Path;
         public bool HasAmounts => Result.WasAnalyzed && Result.IsAvailable && !Result.WasCancelled;
-        public string Summary => !Result.WasAnalyzed ? "Aún no analizado" : !Result.IsAvailable || Result.WasCancelled ? "No comprobado" :
-            IsRecycleBin ? FormatBytes(Result.TotalBytes) + " en la Papelera" :
-            FormatBytes(Result.TotalBytes) + " encontrados" + (Result.PotentiallyCleanableBytes.HasValue ? " · " + FormatBytes(Result.PotentiallyCleanableBytes.Value) + " potencialmente limpiables" : " · Estimación no disponible");
-        public string Details => !Result.WasAnalyzed ? "Pulsa Analizar para consultar esta categoría." :
-            Result.FileCount.ToString("N0") + (Result.Category == CleanupCategory.RecycleBin ? " elementos" : " archivos accesibles") +
-            (Result.IsAvailable && Result.PotentiallyCleanableFileCount.HasValue ? " · " + Result.PotentiallyCleanableFileCount.Value.ToString("N0") + " potencialmente limpiables" : "") +
-            (Result.IsPartial ? " · Resultado parcial: " + Result.InaccessibleCount + " elementos/consultas inaccesibles (" + Result.AccessDeniedCount + " accesos denegados, " + Result.LockedCount + " bloqueados, " + Result.OtherErrorsCount + " otros errores)" : "") +
-            (Result.ReparsePointCount > 0 ? " · " + Result.ReparsePointCount + " enlaces/puntos de análisis omitidos" : "") + "\n" + Result.Information;
+        public string Summary => !Result.WasAnalyzed ? WinSereno.Localization.LocalizationService.Source("Text.NotAnalyzedYet") : !Result.IsAvailable || Result.WasCancelled ? WinSereno.Localization.LocalizationService.Source("Text.NotChecked") :
+            IsRecycleBin ? FormatBytes(Result.TotalBytes) + WinSereno.Localization.LocalizationService.Source("Text.InTheRecycleBin") :
+            FormatBytes(Result.TotalBytes) + WinSereno.Localization.LocalizationService.Source("Text.Found711") + (Result.PotentiallyCleanableBytes.HasValue ? WinSereno.Localization.LocalizationService.Source("Text.Separator") + FormatBytes(Result.PotentiallyCleanableBytes.Value) + WinSereno.Localization.LocalizationService.Source("Text.PotentiallyCleanable") : WinSereno.Localization.LocalizationService.Source("Text.EstimateUnavailable"));
+        public string Details => !Result.WasAnalyzed ? WinSereno.Localization.LocalizationService.Source("Text.ClickAnalyzeToCheckThisCategory") :
+            Result.FileCount.ToString("N0") + (Result.Category == CleanupCategory.RecycleBin ? WinSereno.Localization.LocalizationService.Source("Text.Items") : WinSereno.Localization.LocalizationService.Source("Text.AccessibleFiles")) +
+            (Result.IsAvailable && Result.PotentiallyCleanableFileCount.HasValue ? WinSereno.Localization.LocalizationService.Source("Text.Separator") + Result.PotentiallyCleanableFileCount.Value.ToString("N0") + WinSereno.Localization.LocalizationService.Source("Text.PotentiallyCleanable") : "") +
+            (Result.IsPartial ? WinSereno.Localization.LocalizationService.Source("Text.PartialResult44") + Result.InaccessibleCount + WinSereno.Localization.LocalizationService.Source("Text.InaccessibleItemsQueries") + Result.AccessDeniedCount + WinSereno.Localization.LocalizationService.Source("Text.PermissionDenials") + Result.LockedCount + WinSereno.Localization.LocalizationService.Source("Text.Locked") + Result.OtherErrorsCount + WinSereno.Localization.LocalizationService.Source("Text.OtherErrors") : "") +
+            (Result.ReparsePointCount > 0 ? WinSereno.Localization.LocalizationService.Source("Text.Separator") + Result.ReparsePointCount + WinSereno.Localization.LocalizationService.Source("Text.LinksReparsePointsSkipped") : "") + "\n" + Result.Information;
         public static string FormatBytes(long bytes)
         {
             var units = new[] { "B", "KB", "MB", "GB", "TB" }; double size = bytes; int unit = 0;
@@ -75,12 +75,12 @@ namespace WinSereno.ViewModels
                     count++; var value = row.Result; long? estimate = !row.CanClean ? null : value.Category == CleanupCategory.RecycleBin ? value.TotalBytes : value.PotentiallyCleanableBytes;
                     if (estimate.HasValue) bytes += estimate.Value; else unknown++;
                 }
-                var selected = count + (count == 1 ? " categoría marcada" : " categorías marcadas");
+                var selected = count + (count == 1 ? WinSereno.Localization.LocalizationService.Source("Text.CategorySelected") : WinSereno.Localization.LocalizationService.Source("Text.CategoriesSelected"));
                 if (!hasRun) return selected;
                 if (count == 0) return selected;
-                if (unknown == count) return selected + " · Estimación no disponible";
+                if (unknown == count) return selected + WinSereno.Localization.LocalizationService.Source("Text.EstimateUnavailable");
                 bool partial = unknown > 0 || Categories.Any(c => c.IsSelected && c.Result.IsPartial);
-                return selected + (partial ? " · Estimación parcial: " : " · Espacio recuperable estimado: ") + CleanupCategoryViewModel.FormatBytes(bytes);
+                return selected + (partial ? WinSereno.Localization.LocalizationService.Source("Text.PartialEstimate") : WinSereno.Localization.LocalizationService.Source("Text.EstimatedRecoverableSpace49")) + CleanupCategoryViewModel.FormatBytes(bytes);
             }
         }
         private void SelectionChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -97,8 +97,8 @@ namespace WinSereno.ViewModels
             elevatedWindowsTemp = result; Apply(result);
         }
         private bool hasRun;
-        public string AnalyzeLabel => hasRun ? "Analizar de nuevo" : "Analizar";
-        private string summary = "Aún no se ha realizado un análisis.";
+        public string AnalyzeLabel => hasRun ? WinSereno.Localization.LocalizationService.Source("Text.AnalyzeAgain") : WinSereno.Localization.LocalizationService.Source("Text.Analyze");
+        private string summary = WinSereno.Localization.LocalizationService.Source("Text.NoAnalysisHasBeenPerformedYet");
         public string Summary { get => summary; private set => Set(ref summary, value); }
         public CleanupCategoryResult ThumbnailAnalysis
         {
@@ -122,12 +122,12 @@ namespace WinSereno.ViewModels
         public async Task AnalyzeAsync(bool recordHistory = true)
         {
             if (operations.IsActive || IsRunning) return;
-            using (var operation = operations.Begin("Análisis de Limpieza", true))
+            using (var operation = operations.Begin(WinSereno.Localization.LocalizationService.Source("Text.CleanupAnalysis"), true))
             {
                 var outcome = new MaintenanceTaskResult { StartedAt = DateTimeOffset.Now, ExecutionStatus = ExecutionStatus.Success };
                 var watch = Stopwatch.StartNew();
                 var previousWindows = Categories.Single(c => c.IsWindowsTemporary).Result;
-                IsRunning = true; Summary = "Analizando archivos..."; LastResult = null;
+                IsRunning = true; Summary = WinSereno.Localization.LocalizationService.Source("Text.AnalyzingFiles"); LastResult = null;
                 foreach (var result in CleanupAnalysisService.CreatePendingResults()) Apply(result);
                 try
                 {
@@ -138,27 +138,27 @@ namespace WinSereno.ViewModels
                     operation.Token.ThrowIfCancellationRequested();
                     if (recordHistory)
                     {
-                        Summary = "Analizando Temporales de Windows...";
+                        Summary = WinSereno.Localization.LocalizationService.Source("Text.AnalyzingWindowsTemporaryFiles");
                         operation.SetCancelable(false);
                         MaintenanceTaskResult administrative = elevatedAnalysis == null ? new MaintenanceTaskResult {
-                            ExecutionStatus = ExecutionStatus.Failed, UserSummary = "No está disponible el análisis administrativo." }
-                            : await elevatedAnalysis(operation, p => { if (p.State == RunnerState.Running) Summary = "Analizando Temporales de Windows..."; });
+                            ExecutionStatus = ExecutionStatus.Failed, UserSummary = WinSereno.Localization.LocalizationService.Source("Text.ElevatedAnalysisIsUnavailable") }
+                            : await elevatedAnalysis(operation, p => { if (p.State == RunnerState.Running) Summary = WinSereno.Localization.LocalizationService.Source("Text.AnalyzingWindowsTemporaryFiles"); });
                         outcome.SequenceSteps.Add(new SequenceStepResult { TaskId = ElevatedTaskCatalog.WindowsTempAnalyzeId, Result = administrative });
                         var windows = administrative.WindowsTempAnalysis;
                         if (administrative.ExecutionStatus == ExecutionStatus.Success && windows != null && windows.IsAvailable && !windows.WasCancelled && windows.AnalysisFinishedAt.HasValue)
                             SetWindowsTempAnalysis(windows);
-                        else Apply(new CleanupCategoryResult { Category = CleanupCategory.WindowsTemporary, Name = "Temporales de Windows", WasAnalyzed = true,
+                        else Apply(new CleanupCategoryResult { Category = CleanupCategory.WindowsTemporary, Name = WinSereno.Localization.LocalizationService.Source("Text.WindowsTemporaryFiles"), WasAnalyzed = true,
                             Path = CleanupAnalysisService.WindowsTemporaryPath, WasCancelled = administrative.ExecutionStatus == ExecutionStatus.Cancelled,
-                            Information = administrative.ExecutionStatus == ExecutionStatus.Cancelled ? "No se comprobaron los temporales de Windows porque se cancelaron los permisos de administrador." : administrative.UserSummary });
+                            Information = administrative.ExecutionStatus == ExecutionStatus.Cancelled ? WinSereno.Localization.LocalizationService.Source("Text.WindowsTemporaryFilesWereNotCheckedBecauseThe") : administrative.UserSummary });
                     }
                     else Apply(previousWindows); // Automatic post-clean refresh never prompts for a second UAC or dates an old snapshot anew.
                     outcome.FindingStatus = Categories.Any(c => !c.CanClean || c.Result.IsPartial) ? FindingStatus.PartiallyCompleted : FindingStatus.Completed;
                     long total = Categories.Where(c => c.CanClean).Sum(c => c.IsRecycleBin ? c.Result.TotalBytes : c.Result.PotentiallyCleanableBytes.Value);
-                    Summary = "Análisis finalizado · " + (outcome.FindingStatus == FindingStatus.PartiallyCompleted ? "Estimación parcial: " : "") +
-                        CleanupCategoryViewModel.FormatBytes(total) + " recuperables estimados";
+                    Summary = WinSereno.Localization.LocalizationService.Source("Text.AnalysisCompleted") + (outcome.FindingStatus == FindingStatus.PartiallyCompleted ? WinSereno.Localization.LocalizationService.Source("Text.PartialEstimate60") : "") +
+                        CleanupCategoryViewModel.FormatBytes(total) + WinSereno.Localization.LocalizationService.Source("Text.EstimatedRecoverable");
                 }
-                catch (OperationCanceledException) { outcome.ExecutionStatus = ExecutionStatus.Cancelled; outcome.FindingStatus = FindingStatus.PartiallyCompleted; Summary = "Análisis cancelado; se conservan los resultados obtenidos."; }
-                catch (Exception ex) { outcome.ExecutionStatus = ExecutionStatus.Failed; outcome.FindingStatus = FindingStatus.Unknown; Summary = "No se pudo completar el análisis. No se borró ningún archivo."; if (logger != null) SystemQuery.Log(logger, "Error análisis Limpieza: " + ex); }
+                catch (OperationCanceledException) { outcome.ExecutionStatus = ExecutionStatus.Cancelled; outcome.FindingStatus = FindingStatus.PartiallyCompleted; Summary = WinSereno.Localization.LocalizationService.Source("Text.AnalysisCancelledResultsObtainedSoFarHaveBeen"); }
+                catch (Exception ex) { outcome.ExecutionStatus = ExecutionStatus.Failed; outcome.FindingStatus = FindingStatus.Unknown; Summary = WinSereno.Localization.LocalizationService.Source("Text.TheAnalysisCouldNotBeCompletedNoFiles"); if (logger != null) SystemQuery.Log(logger, "Error análisis Limpieza: " + ex); }
                 finally
                 {
                     watch.Stop(); IsRunning = false; hasRun = true; Raise(nameof(AnalyzeLabel)); Raise(nameof(SelectionSummary));
@@ -174,7 +174,7 @@ namespace WinSereno.ViewModels
                         outcome.StdOut = text.ToString();
                         if (logger != null) SystemQuery.Log(logger, "Análisis de Limpieza | " + outcome.UserSummary + "\n" + outcome.StdOut);
                         Completed?.Invoke(this, new TaskProgress { State = RunnerState.Completed,
-                            CurrentTask = new MaintenanceTask { Id = "cleanup.analyze", Name = "Análisis de Limpieza" }, Result = outcome,
+                            CurrentTask = new MaintenanceTask { Id = "cleanup.analyze", Name = WinSereno.Localization.LocalizationService.Source("Text.CleanupAnalysis") }, Result = outcome,
                             StartedAt = outcome.StartedAt, Elapsed = outcome.Duration, StdOut = outcome.StdOut, LastRelevantLine = outcome.UserSummary });
                     }
                 }

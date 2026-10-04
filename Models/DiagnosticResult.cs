@@ -11,6 +11,9 @@ namespace WinSereno.Models
         public DiagnosticStatus Status { get; set; }
         public string StatusCode => Status.ToString();
         public string DetailedDescription { get; set; }
+        // Presentation metadata only: these native blocks must remain opaque to localization.
+        public IList<string> NativeOutputSegments { get; set; } = new List<string>();
+        public IList<NativeTextRange> NativeOutputRanges { get; set; } = new List<NativeTextRange>();
         public string Recommendation { get; set; }
         public string TechnicalDetails { get; set; }
         public TimeSpan Duration { get; set; }
@@ -26,13 +29,19 @@ namespace WinSereno.Models
             {
                 switch (Status)
                 {
-                    case DiagnosticStatus.Healthy: return "Correcto";
-                    case DiagnosticStatus.Attention: return "Atención";
-                    case DiagnosticStatus.Error: return "Error";
-                    default: return "No comprobado";
+                    case DiagnosticStatus.Healthy: return WinSereno.Localization.LocalizationService.Source("Text.Healthy");
+                    case DiagnosticStatus.Attention: return WinSereno.Localization.LocalizationService.Source("Text.Attention");
+                    case DiagnosticStatus.Error: return WinSereno.Localization.LocalizationService.Source("Text.Error");
+                    default: return WinSereno.Localization.LocalizationService.Source("Text.NotChecked");
                 }
             }
         }
+    }
+    public sealed class NativeTextRange
+    {
+        public int Offset { get; }
+        public int Length { get; }
+        public NativeTextRange(int offset, int length) { Offset = offset; Length = length; }
     }
     public sealed class DiagnosticEvent
     {

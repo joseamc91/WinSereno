@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Añadido soporte de interfaz Español/English con selector persistente en Ajustes y recursos centralizados preparados para más idiomas.
+
 ## 1.0.0 — 2026-10-03
 
 Primera versión estable: consolida Inicio e información del sistema, diagnóstico, reparación, red, limpieza controlada e historial de actividad, con navegación coherente y temas Claro/Oscuro/Sistema desarrollados durante las betas.

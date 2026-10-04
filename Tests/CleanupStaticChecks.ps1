@@ -1,8 +1,9 @@
 ﻿$ErrorActionPreference='Stop'
 $project=Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'LocalizationSource.ps1')
 $count=0
 function Check([bool]$ok,[string]$label){if(-not $ok){throw $label};$script:count++}
-function Source([string]$file){[IO.File]::ReadAllText((Join-Path $project $file))}
+function Source([string]$file){(Read-LocalizedSource $file)}
 $vm=Source 'ViewModels/CleanupViewModel.cs';$main=Source 'ViewModels/MainViewModel.cs';$runner=Source 'Services/MaintenanceTaskRunner.cs';$analysis=Source 'Services/CleanupAnalysisService.cs'
 [xml]$xml=Source 'Views/MainWindow.xaml';$ns=[Xml.XmlNamespaceManager]::new($xml.NameTable);$ns.AddNamespace('p','http://schemas.microsoft.com/winfx/2006/xaml/presentation');$ns.AddNamespace('x','http://schemas.microsoft.com/winfx/2006/xaml')
 $page=$xml.SelectSingleNode('//p:StackPanel[@x:Name="CleanupPage"]',$ns)

@@ -9,6 +9,7 @@ namespace WinSereno.Services
     public sealed class AppSettings
     {
         [DataMember] public string Theme { get; set; } = "Light";
+        [DataMember] public string Language { get; set; } = "es";
     }
 
     public sealed class PortableStorage
@@ -76,6 +77,7 @@ namespace WinSereno.Services
             {
                 var settings = (AppSettings)new DataContractJsonSerializer(typeof(AppSettings)).ReadObject(stream) ?? new AppSettings();
                 if (settings.Theme != "Light" && settings.Theme != "Dark" && settings.Theme != "System") settings.Theme = "Light";
+                settings.Language = WinSereno.Localization.LocalizationService.Normalize(settings.Language);
                 return settings;
             }
         }

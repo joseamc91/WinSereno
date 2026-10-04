@@ -1,0 +1,953 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <sys:String x:Key="Text.DiagnosticDetails" xml:space="preserve">Diagnostic details</sys:String>
+  <sys:String x:Key="Text.LocalDisks" xml:space="preserve">Local disks</sys:String>
+  <sys:String x:Key="Text.CancelDiagnostics" xml:space="preserve">Cancel diagnostics</sys:String>
+  <sys:String x:Key="Text.ChecksWindowsIntegrityAndRepairsDetectedProblemsWhen" xml:space="preserve">Checks Windows integrity and repairs detected problems when necessary.</sys:String>
+  <sys:String x:Key="Text.ScanhealthRestorehealthIfNeededSfc" xml:space="preserve">ScanHealth → RestoreHealth if needed → SFC</sys:String>
+  <sys:String x:Key="Text.NetworkStatus" xml:space="preserve">Network status</sys:String>
+  <sys:String x:Key="Text.AdapterDetails" xml:space="preserve">Adapter details</sys:String>
+  <sys:String x:Key="Text.AdditionalInformationUnavailable" xml:space="preserve">Additional information unavailable.</sys:String>
+  <sys:String x:Key="Text.ConnectivityDetails" xml:space="preserve">Connectivity details</sys:String>
+  <sys:String x:Key="Text.FlushDnsCache" xml:space="preserve">Flush DNS cache</sys:String>
+  <sys:String x:Key="Text.RenewDhcpAddress" xml:space="preserve">Renew DHCP address</sys:String>
+  <sys:String x:Key="Text.RestartNetworkAdapter" xml:space="preserve">Restart network adapter</sys:String>
+  <sys:String x:Key="Text.WindowsMayNeedToBeRestartedItNever" xml:space="preserve">Windows may need to be restarted; it never restarts automatically.</sys:String>
+  <sys:String x:Key="Text.MayInterruptConnectivityWindowsWillUsuallyNeedTo" xml:space="preserve">May interrupt connectivity. Windows will usually need to be restarted; it never restarts automatically.</sys:String>
+  <sys:String x:Key="Text.ResetTcpIp" xml:space="preserve">Reset TCP/IP</sys:String>
+  <sys:String x:Key="Text.CleanSelectedCategories" xml:space="preserve">Clean selected categories</sys:String>
+  <sys:String x:Key="Text.Details" xml:space="preserve">Details</sys:String>
+  <sys:String x:Key="Text.NoActionsHaveBeenPerformedInThisSession" xml:space="preserve">No actions have been performed in this session yet.</sys:String>
+  <sys:String x:Key="Text.SystemFollowsTheWindowsPreferenceAtStartupOr" xml:space="preserve">System follows the Windows preference at startup or when selected.</sys:String>
+  <sys:String x:Key="Text.ConfigurationAndLogsAreStoredAlongsideTheApplication" xml:space="preserve">Configuration and logs are stored alongside the application.</sys:String>
+  <sys:String x:Key="Text.RestoresTheDefaultAppearanceWithoutDeletingLogsOr" xml:space="preserve">Restores the default appearance and language without deleting logs or changing Windows.</sys:String>
+  <sys:String x:Key="Text.PortableNetFramework48NotDigitallySigned" xml:space="preserve">Portable · .NET Framework 4.8 · Not digitally signed · GNU GPLv3</sys:String>
+  <sys:String x:Key="Text.BuiltInUpdateCheckingWillBeAvailableIn" xml:space="preserve">Built-in update checking will be available in the future.</sys:String>
+  <sys:String x:Key="Text.Cancel" xml:space="preserve">Cancel</sys:String>
+  <sys:String x:Key="Text.Run" xml:space="preserve">Run</sys:String>
+  <sys:String x:Key="Text.WarningBeforeResettingTcpIp" xml:space="preserve">Warning before resetting TCP/IP</sys:String>
+  <sys:String x:Key="Text.MakeSureYouKnowYourIpAddressSubnet" xml:space="preserve">Make sure you know your IP address, subnet mask or prefix, gateway and DNS servers before continuing.</sys:String>
+  <sys:String x:Key="Text.SubnetMaskPrefix" xml:space="preserve">Subnet mask/prefix</sys:String>
+  <sys:String x:Key="Text.Gateway" xml:space="preserve">Gateway</sys:String>
+  <sys:String x:Key="Text.Dns" xml:space="preserve">DNS</sys:String>
+  <sys:String x:Key="Text.WinserenoDoesNotAutomaticallySaveOrRestoreThis" xml:space="preserve">WinSereno does not automatically save or restore this configuration and never restarts the computer.</sys:String>
+  <sys:String x:Key="Text.IHaveReviewedMyNetworkConfigurationAndUnderstand" xml:space="preserve">I have reviewed my network configuration and understand that I may need to restore it manually.</sys:String>
+  <sys:String x:Key="Text.WinserenoSVisualPreferencesWillBeRestoredLogs" xml:space="preserve">WinSereno's appearance and language preferences will be restored. Logs and system data will not be changed.</sys:String>
+  <sys:String x:Key="Text.SelectTheConnectedPhysicalAdapterYouWantTo" xml:space="preserve">Select the connected physical adapter you want to restart.</sys:String>
+  <sys:String x:Key="Text.ACancellableOperationIsRunningDoYouWant" xml:space="preserve">A cancellable operation is running. Do you want to cancel it and close after the current check finishes?</sys:String>
+  <sys:String x:Key="Text.CloseApplication" xml:space="preserve">Close application</sys:String>
+  <sys:String x:Key="Text.AnOperationThatCannotBeCancelledIsRunning" xml:space="preserve">An operation that cannot be cancelled is running. Wait for it to finish before closing the application.</sys:String>
+  <sys:String x:Key="Text.EstimatedRecoverableSpace" xml:space="preserve">Estimated recoverable space: </sys:String>
+  <sys:String x:Key="Text.NotAnalyzedYet" xml:space="preserve">Not analyzed yet</sys:String>
+  <sys:String x:Key="Text.NotChecked" xml:space="preserve">Not checked</sys:String>
+  <sys:String x:Key="Text.PartialResult" xml:space="preserve">Partial result</sys:String>
+  <sys:String x:Key="Text.LastElevatedAnalysis" xml:space="preserve">Last elevated analysis: </sys:String>
+  <sys:String x:Key="Text.EstimateUnavailable" xml:space="preserve"> · Estimate unavailable</sys:String>
+  <sys:String x:Key="Text.ClickAnalyzeToCheckThisCategory" xml:space="preserve">Click Analyze to check this category.</sys:String>
+  <sys:String x:Key="Text.PartialResult44" xml:space="preserve"> · Partial result: </sys:String>
+  <sys:String x:Key="Text.LinksReparsePointsSkipped" xml:space="preserve"> links/reparse points skipped</sys:String>
+  <sys:String x:Key="Text.CategorySelected" xml:space="preserve"> category selected</sys:String>
+  <sys:String x:Key="Text.CategoriesSelected" xml:space="preserve"> categories selected</sys:String>
+  <sys:String x:Key="Text.PartialEstimate" xml:space="preserve"> · Partial estimate: </sys:String>
+  <sys:String x:Key="Text.EstimatedRecoverableSpace49" xml:space="preserve"> · Estimated recoverable space: </sys:String>
+  <sys:String x:Key="Text.AnalyzeAgain" xml:space="preserve">Analyze again</sys:String>
+  <sys:String x:Key="Text.Analyze" xml:space="preserve">Analyze</sys:String>
+  <sys:String x:Key="Text.NoAnalysisHasBeenPerformedYet" xml:space="preserve">No analysis has been performed yet.</sys:String>
+  <sys:String x:Key="Text.CleanupAnalysis" xml:space="preserve">Cleanup analysis</sys:String>
+  <sys:String x:Key="Text.AnalyzingFiles" xml:space="preserve">Analyzing files...</sys:String>
+  <sys:String x:Key="Text.AnalyzingWindowsTemporaryFiles" xml:space="preserve">Analyzing Windows temporary files...</sys:String>
+  <sys:String x:Key="Text.ElevatedAnalysisIsUnavailable" xml:space="preserve">Elevated analysis is unavailable.</sys:String>
+  <sys:String x:Key="Text.WindowsTemporaryFiles" xml:space="preserve">Windows temporary files</sys:String>
+  <sys:String x:Key="Text.WindowsTemporaryFilesWereNotCheckedBecauseThe" xml:space="preserve">Windows temporary files were not checked because the administrator permission request was cancelled.</sys:String>
+  <sys:String x:Key="Text.AnalysisCompleted" xml:space="preserve">Analysis completed · </sys:String>
+  <sys:String x:Key="Text.PartialEstimate60" xml:space="preserve">Partial estimate: </sys:String>
+  <sys:String x:Key="Text.AnalysisCancelledResultsObtainedSoFarHaveBeen" xml:space="preserve">Analysis cancelled; results obtained so far have been kept.</sys:String>
+  <sys:String x:Key="Text.TheAnalysisCouldNotBeCompletedNoFiles" xml:space="preserve">The analysis could not be completed. No files were deleted.</sys:String>
+  <sys:String x:Key="Text.Recommendation" xml:space="preserve">Recommendation: </sys:String>
+  <sys:String x:Key="Text.Interpretation" xml:space="preserve">Interpretation: </sys:String>
+  <sys:String x:Key="Text.OriginalWindowsDescription" xml:space="preserve">Original Windows description:
+</sys:String>
+  <sys:String x:Key="Text.CheckDuration" xml:space="preserve">
+Check duration: </sys:String>
+  <sys:String x:Key="Text.AnalyzeThisPc" xml:space="preserve">Analyze this PC</sys:String>
+  <sys:String x:Key="Text.ThisPcHasNotBeenAnalyzedInThis" xml:space="preserve">This PC has not been analyzed in this session yet.</sys:String>
+  <sys:String x:Key="Text.CancellingDiagnosticsTheCurrentCheckMayTakeSome" xml:space="preserve">Cancelling diagnostics... The current check may take some time to finish.</sys:String>
+  <sys:String x:Key="Text.Analyzing" xml:space="preserve">Analyzing...</sys:String>
+  <sys:String x:Key="Text.Checking" xml:space="preserve">Checking...</sys:String>
+  <sys:String x:Key="Text.Attention" xml:space="preserve">Attention</sys:String>
+  <sys:String x:Key="Text.Healthy" xml:space="preserve">Healthy</sys:String>
+  <sys:String x:Key="Text.Windows" xml:space="preserve">Windows</sys:String>
+  <sys:String x:Key="Text.Network" xml:space="preserve">Network</sys:String>
+  <sys:String x:Key="Text.CollectingSystemInformation" xml:space="preserve">Collecting system information...</sys:String>
+  <sys:String x:Key="Text.CouldNotRetrieveInformation" xml:space="preserve">Could not retrieve information</sys:String>
+  <sys:String x:Key="Text.NoLocalVolumesAreReady" xml:space="preserve">No local volumes are ready</sys:String>
+  <sys:String x:Key="Text.Unavailable" xml:space="preserve">Unavailable</sys:String>
+  <sys:String x:Key="Text.Day" xml:space="preserve"> day </sys:String>
+  <sys:String x:Key="Text.Days" xml:space="preserve"> days </sys:String>
+  <sys:String x:Key="Text.SinceTheLastBoot" xml:space="preserve">Since the last boot</sys:String>
+  <sys:String x:Key="Text.NoConnectivityTestsPerformed" xml:space="preserve">No connectivity tests performed</sys:String>
+  <sys:String x:Key="Text.Cores" xml:space="preserve"> cores</sys:String>
+  <sys:String x:Key="Text.ViewActionsPerformedDuringThisSessionTxtLogs" xml:space="preserve">View actions performed during this session; TXT logs retain the persistent record.</sys:String>
+  <sys:String x:Key="Text.AnalyzesTheGeneralConditionOfYourPcWithout" xml:space="preserve">Analyzes the general condition of your PC without performing repairs. Windows integrity checks require administrator privileges.</sys:String>
+  <sys:String x:Key="Text.ChecksAndRepairsWindowsComponentsThroughExplicitActions" xml:space="preserve">Checks and repairs Windows components through explicit actions; administrative tools request confirmation and administrator privileges before running.</sys:String>
+  <sys:String x:Key="Text.ViewAndRefreshNetworkStatusToolsRequestConfirmation" xml:space="preserve">View and refresh network status; tools request confirmation and administrator privileges when needed.</sys:String>
+  <sys:String x:Key="Text.AnalyzeRecoverableSpaceAndChooseWhichCategoriesTo" xml:space="preserve">Analyze recoverable space and choose which categories to clean.</sys:String>
+  <sys:String x:Key="Text.CustomizeTheAppearanceAndViewWinserenoSettings" xml:space="preserve">Customize the appearance and view WinSereno settings.</sys:String>
+  <sys:String x:Key="Text.SystemInformationRetrievedDirectlyFromWindows" xml:space="preserve">System information retrieved directly from Windows.</sys:String>
+  <sys:String x:Key="Text.TheThemeHasBeenAppliedButCouldNot" xml:space="preserve">The theme has been applied, but could not be saved in the application folder.
+</sys:String>
+  <sys:String x:Key="Text.NoResultsInThisSession" xml:space="preserve">No results in this session.</sys:String>
+  <sys:String x:Key="Text.Duration" xml:space="preserve"> · Duration: </sys:String>
+  <sys:String x:Key="Text.NotCheckedYet" xml:space="preserve">Not checked yet.</sys:String>
+  <sys:String x:Key="Text.ConnectivityIssues" xml:space="preserve">Connectivity issues</sys:String>
+  <sys:String x:Key="Text.Error" xml:space="preserve">Error</sys:String>
+  <sys:String x:Key="Text.NoInternetConnection" xml:space="preserve">No Internet connection</sys:String>
+  <sys:String x:Key="Text.ConnectionNotChecked" xml:space="preserve">Connection not checked</sys:String>
+  <sys:String x:Key="Text.LastRefreshed" xml:space="preserve">Last refreshed: </sys:String>
+  <sys:String x:Key="Text.NotRefreshedYet" xml:space="preserve">Not refreshed yet.</sys:String>
+  <sys:String x:Key="Text.AnotherOperationIsRunningClickRefreshWhenIt" xml:space="preserve">Another operation is running. Click Refresh when it finishes.</sys:String>
+  <sys:String x:Key="Text.NetworkInformation" xml:space="preserve">Network information</sys:String>
+  <sys:String x:Key="Text.CheckingAdaptersAndConnectivity" xml:space="preserve">Checking adapters and connectivity...</sys:String>
+  <sys:String x:Key="Text.TheListOfPhysicalAdaptersCouldNotBe" xml:space="preserve">The list of physical adapters could not be retrieved.</sys:String>
+  <sys:String x:Key="Text.NoPhysicalAdaptersAvailableToDisplay" xml:space="preserve"> · No physical adapters available to display.</sys:String>
+  <sys:String x:Key="Text.TheNetworkCheckCouldNotBeCompleted" xml:space="preserve">The network check could not be completed.</sys:String>
+  <sys:String x:Key="Text.NotChecked108" xml:space="preserve">Not checked</sys:String>
+  <sys:String x:Key="Text.DismCheckhealth" xml:space="preserve">DISM /CheckHealth</sys:String>
+  <sys:String x:Key="Text.DismScanhealth" xml:space="preserve">DISM /ScanHealth</sys:String>
+  <sys:String x:Key="Text.DismRestorehealth" xml:space="preserve">DISM /RestoreHealth</sys:String>
+  <sys:String x:Key="Text.SfcScannow" xml:space="preserve">SFC /scannow</sys:String>
+  <sys:String x:Key="Text.DismStartcomponentcleanup" xml:space="preserve">DISM /StartComponentCleanup</sys:String>
+  <sys:String x:Key="Text.Chkdsk" xml:space="preserve">CHKDSK</sys:String>
+  <sys:String x:Key="Text.QuicklyChecksWhetherWindowsHasRecordedComponentStore" xml:space="preserve">Quickly checks whether Windows has recorded component store corruption.</sys:String>
+  <sys:String x:Key="Text.PerformsAnInDepthCorruptionScanWithoutMaking" xml:space="preserve">Performs an in-depth corruption scan without making repairs.</sys:String>
+  <sys:String x:Key="Text.ScansAndRepairsCorruptionInTheWindowsComponent" xml:space="preserve">Scans and repairs corruption in the Windows component store.</sys:String>
+  <sys:String x:Key="Text.ChecksProtectedWindowsFilesAndRepairsDamagedFiles" xml:space="preserve">Checks protected Windows files and repairs damaged files when possible.</sys:String>
+  <sys:String x:Key="Text.RemovesSupersededComponentVersionsThatWindowsNoLonger" xml:space="preserve">Removes superseded component versions that Windows no longer needs.</sys:String>
+  <sys:String x:Key="Text.ChecksTheFileSystemOnTheWindowsDrive" xml:space="preserve">Checks the file system on the Windows drive without making repairs.</sys:String>
+  <sys:String x:Key="Text.StartFullRepair" xml:space="preserve">Start full repair</sys:String>
+  <sys:String x:Key="Text.CheckDiskChkdsk" xml:space="preserve">Check disk (CHKDSK)</sys:String>
+  <sys:String x:Key="Text.TheWindowsDriveCouldNotBeSafelyDetermined" xml:space="preserve">The Windows drive could not be safely determined. CHKDSK will not run.</sys:String>
+  <sys:String x:Key="Text.Completed" xml:space="preserve">Completed</sys:String>
+  <sys:String x:Key="Text.CompletedRestartRequired" xml:space="preserve">Completed · Restart required</sys:String>
+  <sys:String x:Key="Text.Configuration" xml:space="preserve">Configuration</sys:String>
+  <sys:String x:Key="Text.Repair" xml:space="preserve">Repair</sys:String>
+  <sys:String x:Key="Text.Information" xml:space="preserve">Information</sys:String>
+  <sys:String x:Key="Text.OnlyIfWindowsDeniesPermissionFirstAttemptedWithout" xml:space="preserve">Only if Windows denies permission; first attempted without elevation</sys:String>
+  <sys:String x:Key="Text.Yes" xml:space="preserve">Yes</sys:String>
+  <sys:String x:Key="Text.No" xml:space="preserve">No</sys:String>
+  <sys:String x:Key="Text.MayBeNeededNeverRestartsAutomatically" xml:space="preserve">May be needed; never restarts automatically</sys:String>
+  <sys:String x:Key="Text.PermissionWillBeRequestedBeforeAnyFilesAre" xml:space="preserve">Permission will be requested before any files are deleted. Files in use or protected files will be skipped.</sys:String>
+  <sys:String x:Key="Text.FilesInUseOrProtectedFilesWillBe" xml:space="preserve">Files in use or protected files will be skipped. No administrator privileges are requested.</sys:String>
+  <sys:String x:Key="Text.RunEmptiesTheCurrentUserSEntireRecycle" xml:space="preserve">Run empties the current user's entire Recycle Bin. No UAC or second Shell confirmation. Files can no longer be restored from the Recycle Bin.</sys:String>
+  <sys:String x:Key="Text.RunDeletesOnlyEligibleThumbcacheDbFilesNo" xml:space="preserve">Run deletes only eligible thumbcache_*.db files. No UAC, and Explorer is not closed or restarted. Windows recreates thumbnails as needed.</sys:String>
+  <sys:String x:Key="Text.RunDeletesOnlyEligibleUserTemporaryFilesNo" xml:space="preserve">Run deletes only eligible user temporary files. No UAC or permission changes. Files in use or inaccessible items are skipped.</sys:String>
+  <sys:String x:Key="Text.RunStartsAnInternalSimulationOnly" xml:space="preserve">Run starts an internal simulation only.</sys:String>
+  <sys:String x:Key="Text.RunReleasesAndRenewsDhcpOnTheListed" xml:space="preserve">Run releases and renews DHCP on the listed adapters only. You may temporarily lose connectivity. UAC is requested only if Windows denies permission.</sys:String>
+  <sys:String x:Key="Text.RunFlushesTheDnsCacheUacIsRequested" xml:space="preserve">Run flushes the DNS cache. UAC is requested only if Windows requires additional permissions. The main window remains unelevated.</sys:String>
+  <sys:String x:Key="Text.RunRequestsUacForThisTaskTheMain" xml:space="preserve">Run requests UAC for this task. The main window remains unelevated. Review the explanation and command before continuing.</sys:String>
+  <sys:String x:Key="Text.Cancelled" xml:space="preserve">Cancelled</sys:String>
+  <sys:String x:Key="Text.Started" xml:space="preserve">Started: </sys:String>
+  <sys:String x:Key="Text.Finished" xml:space="preserve">Finished: </sys:String>
+  <sys:String x:Key="Text.Duration145" xml:space="preserve">Duration: </sys:String>
+  <sys:String x:Key="Text.Status" xml:space="preserve">Status: </sys:String>
+  <sys:String x:Key="Text.SpaceRecovered" xml:space="preserve">Space recovered: </sys:String>
+  <sys:String x:Key="Text.Gateway148" xml:space="preserve"> · Gateway: </sys:String>
+  <sys:String x:Key="Text.Dns149" xml:space="preserve"> · DNS: </sys:String>
+  <sys:String x:Key="Text.DhcpDisabledManualConfiguration" xml:space="preserve">DHCP disabled · Manual configuration</sys:String>
+  <sys:String x:Key="Text.DhcpEnabled" xml:space="preserve">DHCP enabled</sys:String>
+  <sys:String x:Key="Text.ConfigurationUnavailable" xml:space="preserve">Configuration unavailable</sys:String>
+  <sys:String x:Key="Text.Ipv4ConfigurationNotFullyChecked" xml:space="preserve">IPv4 configuration not fully checked</sys:String>
+  <sys:String x:Key="Text.ManualIpv4ConfigurationDetected" xml:space="preserve">Manual IPv4 configuration detected</sys:String>
+  <sys:String x:Key="Text.ThisComputerSIpv4ConfigurationCouldNotBe" xml:space="preserve">This computer's IPv4 configuration could not be fully checked. Resetting TCP/IP may change the existing configuration and leave the computer disconnected.</sys:String>
+  <sys:String x:Key="Text.ThisInterfaceUsesAManualIpv4ConfigurationResetting" xml:space="preserve">This interface uses a manual IPv4 configuration. Resetting TCP/IP may change it and leave the computer disconnected.</sys:String>
+  <sys:String x:Key="Text.InterfacesWithManualIpv4ConfigurationWereDetectedResetting" xml:space="preserve">Interfaces with manual IPv4 configuration were detected. Resetting TCP/IP may change them and leave the computer disconnected.</sys:String>
+  <sys:String x:Key="Text.ConfigurationUnavailableOrIncompleteInterfacesAreNotAssumed" xml:space="preserve">Configuration unavailable or incomplete; interfaces are not assumed to use DHCP.</sys:String>
+  <sys:String x:Key="Text.PartiallyCompleted" xml:space="preserve">Partially completed</sys:String>
+  <sys:String x:Key="Text.OperationFailed" xml:space="preserve">Operation failed</sys:String>
+  <sys:String x:Key="Text.EmptyFoldersDeleted" xml:space="preserve"> empty folders deleted · </sys:String>
+  <sys:String x:Key="Text.AdapterOutsideTheInternalSelection" xml:space="preserve">Adapter outside the internal selection.</sys:String>
+  <sys:String x:Key="Text.VerifiedStatus" xml:space="preserve"> · Verified status: </sys:String>
+  <sys:String x:Key="Text.DisableFailedBeforeReturningAResult" xml:space="preserve">Disable failed before returning a result: </sys:String>
+  <sys:String x:Key="Text.CouldNotDisable" xml:space="preserve">Could not disable «</sys:String>
+  <sys:String x:Key="Text.TheRestartWasStoppedEnablingWasSkipped" xml:space="preserve">». The restart was stopped; enabling was skipped.</sys:String>
+  <sys:String x:Key="Text.DisableFailedTheAdapterIsNotConfirmedDisabled" xml:space="preserve">Disable failed; the adapter is not confirmed disabled.</sys:String>
+  <sys:String x:Key="Text.TheDisabledStateWasNotConfirmedRestartingStops" xml:space="preserve">The disabled state was not confirmed; restarting stops and only re-enabling is attempted.</sys:String>
+  <sys:String x:Key="Text.CouldNotRunVerifyEnable" xml:space="preserve">Could not run/verify enable.</sys:String>
+  <sys:String x:Key="Text.CouldNotConfirmThat" xml:space="preserve">Could not confirm that «</sys:String>
+  <sys:String x:Key="Text.AttemptsItMayStillBeDisabledOpenWindows" xml:space="preserve"> attempts. It may still be disabled. Open Windows Settings &gt; Network &amp; Internet &gt; Advanced network settings, or Control Panel &gt; Network Connections, and enable «</sys:String>
+  <sys:String x:Key="Text.ManuallyFromALocalSession" xml:space="preserve">» manually from a local session.</sys:String>
+  <sys:String x:Key="Text.Restarting" xml:space="preserve">Restarting «</sys:String>
+  <sys:String x:Key="Text.CouldNotBeVerifiedButEnablingWasConfirmed" xml:space="preserve">» could not be verified, but enabling was confirmed during recovery.</sys:String>
+  <sys:String x:Key="Text.WasDisabledEnabledAgainAndIsActiveThis" xml:space="preserve">» was disabled, enabled again and is active. This does not confirm Internet connectivity.</sys:String>
+  <sys:String x:Key="Text.WasEnabledButDidNotReconnectWithinThe" xml:space="preserve">» was enabled, but did not reconnect within the timeout.</sys:String>
+  <sys:String x:Key="Text.InvalidSelectionIdentity" xml:space="preserve">Invalid selection identity.</sys:String>
+  <sys:String x:Key="Text.TheSelectedAdapterIsNoLongerPhysicalActive" xml:space="preserve">The selected adapter is no longer physical, active or has a different identity. Nothing will run.</sys:String>
+  <sys:String x:Key="Text.InternalSelectionConfirmedDisableThenEnableUpTo" xml:space="preserve">Internal selection confirmed; disable then enable. Up to three attempts to enable if recovery fails.</sys:String>
+  <sys:String x:Key="Text.InvalidSelectionOrAttempt" xml:space="preserve">Invalid selection or attempt.</sys:String>
+  <sys:String x:Key="Text.ThePhysicalAdapterIdentityChangedADifferentInterface" xml:space="preserve">The physical adapter identity changed. A different interface with the same name will not be enabled.</sys:String>
+  <sys:String x:Key="Text.ThePortableFolderIsUnavailableOrRedirected" xml:space="preserve">The portable folder is unavailable or redirected.</sys:String>
+  <sys:String x:Key="Text.WindowsEventLog" xml:space="preserve">Windows event log</sys:String>
+  <sys:String x:Key="Text.StorageSpace" xml:space="preserve">Storage space</sys:String>
+  <sys:String x:Key="Text.SomeDrivesCouldNotBeChecked" xml:space="preserve">Some drives could not be checked.</sys:String>
+  <sys:String x:Key="Text.NoLocalVolumesAreReady186" xml:space="preserve">No local volumes are ready.</sys:String>
+  <sys:String x:Key="Text.ADriveQueryWasIncomplete" xml:space="preserve">
+A drive query was incomplete.</sys:String>
+  <sys:String x:Key="Text.ReviewWhichFilesOccupySpaceNoCleanupHas" xml:space="preserve">Review which files occupy space; no cleanup has been performed.</sys:String>
+  <sys:String x:Key="Text.ViewVolumesOnHome" xml:space="preserve">View volumes on Home.</sys:String>
+  <sys:String x:Key="Text.GoToHome" xml:space="preserve">Go to Home</sys:String>
+  <sys:String x:Key="Text.UserThumbnailCache" xml:space="preserve">User thumbnail cache</sys:String>
+  <sys:String x:Key="Text.ThisCategoryCouldNotBeChecked" xml:space="preserve">This category could not be checked.</sys:String>
+  <sys:String x:Key="Text.ElevatedAnalysisCouldNotBeCompleted" xml:space="preserve">Elevated analysis could not be completed.</sys:String>
+  <sys:String x:Key="Text.TheAnalysisCouldNotBeCompleted" xml:space="preserve">The analysis could not be completed.</sys:String>
+  <sys:String x:Key="Text.TheThumbnailAnalysisCouldNotBeCompleted" xml:space="preserve">The thumbnail analysis could not be completed.</sys:String>
+  <sys:String x:Key="Text.TheUserSTempEnvironmentVariableIsNot" xml:space="preserve">The user's TEMP environment variable is not defined.</sys:String>
+  <sys:String x:Key="Text.TheUserSLocalFolderCouldNotBe" xml:space="preserve">The user's local folder could not be resolved.</sys:String>
+  <sys:String x:Key="Text.PathSkippedBecauseItContainsALinkOr" xml:space="preserve">Path skipped because it contains a link or reparse point.</sys:String>
+  <sys:String x:Key="Text.TheFileDisappearedDuringTheQuery" xml:space="preserve">The file disappeared during the query.</sys:String>
+  <sys:String x:Key="Text.TheFolderCouldNotBeEnumeratedItsTotal" xml:space="preserve">The folder could not be enumerated; its total size is unknown. It is not considered empty.</sys:String>
+  <sys:String x:Key="Text.OnlyThumbcacheDbFilesTheIconCacheIs" xml:space="preserve">Only thumbcache_*.db files; the icon cache is not included.</sys:String>
+  <sys:String x:Key="Text.LogicalSizeOfAccessibleFilesFileContentsAre" xml:space="preserve">Logical size of accessible files; file contents are not read.</sys:String>
+  <sys:String x:Key="Text.TheRecycleBinCouldNotBeChecked" xml:space="preserve">The Recycle Bin could not be checked.</sys:String>
+  <sys:String x:Key="Text.TheRecycleBinQueryDidNotConfirmSuccess" xml:space="preserve">The Recycle Bin query did not confirm success: HRESULT=0x</sys:String>
+  <sys:String x:Key="Text.TheRecycleBinQueryReturnedInvalidValues" xml:space="preserve">The Recycle Bin query returned invalid values.</sys:String>
+  <sys:String x:Key="Text.AggregatedWindowsQueryItemsMayIncludeFoldersThe" xml:space="preserve">Aggregated Windows query: items may include folders. The queried size estimates the space recoverable by emptying the bin.</sys:String>
+  <sys:String x:Key="Text.CategoryNotAllowedWithoutAWorker" xml:space="preserve">Category not allowed without a worker.</sys:String>
+  <sys:String x:Key="Text.CleanupSelectionNotAllowed" xml:space="preserve">Cleanup selection not allowed.</sys:String>
+  <sys:String x:Key="Text.ThumbnailCache" xml:space="preserve">Thumbnail cache</sys:String>
+  <sys:String x:Key="Text.NoCategoriesSelected" xml:space="preserve">No categories selected.</sys:String>
+  <sys:String x:Key="Text.TemporaryFilesThatAreNoLongerNeededWill" xml:space="preserve">Temporary files that are no longer needed will be deleted.</sys:String>
+  <sys:String x:Key="Text.SelectedCategories" xml:space="preserve">Selected categories:
+</sys:String>
+  <sys:String x:Key="Text.TotalEstimatedRecoverableSpace" xml:space="preserve">
+Total estimated recoverable space: </sys:String>
+  <sys:String x:Key="Text.CategoriesWithoutAnAvailableEstimate" xml:space="preserve"> categories without an available estimate.</sys:String>
+  <sys:String x:Key="Text.EstimateNotAGuarantee" xml:space="preserve"> (estimate, not a guarantee).</sys:String>
+  <sys:String x:Key="Text.FilesInUseProtectedFilesAndFilesThat" xml:space="preserve">
+Files in use, protected files and files that cannot be deleted will be skipped. Categories run sequentially and their figures are refreshed when finished.</sys:String>
+  <sys:String x:Key="Text.AdministratorPrivilegesWillBeRequestedBeforeStartingThe" xml:space="preserve"> Administrator privileges will be requested before starting; the main application remains unelevated.</sys:String>
+  <sys:String x:Key="Text.NoAdministratorPrivilegesAreRequested" xml:space="preserve"> No administrator privileges are requested.</sys:String>
+  <sys:String x:Key="Text.TheCurrentUserSEntireRecycleBinWill" xml:space="preserve">The current user's entire Recycle Bin will be emptied. Its items will no longer be recoverable from the bin.</sys:String>
+  <sys:String x:Key="Text.InternalCleanupOfSelectedCategories" xml:space="preserve">Internal cleanup of selected categories</sys:String>
+  <sys:String x:Key="Text.ThisCategoryCouldNotBeCompleted" xml:space="preserve">This category could not be completed.</sys:String>
+  <sys:String x:Key="Text.ThisCategoryCouldNotBeRefreshed" xml:space="preserve">This category could not be refreshed.</sys:String>
+  <sys:String x:Key="Text.Failed" xml:space="preserve">failed</sys:String>
+  <sys:String x:Key="Text.ElevationCancelledNoFilesInTheSelectionWere" xml:space="preserve">Elevation cancelled; no files in the selection were deleted.</sys:String>
+  <sys:String x:Key="Text.ElevationCancelledBeforeStarting" xml:space="preserve">Elevation cancelled before starting.</sys:String>
+  <sys:String x:Key="Text.TheAdministrativeSessionCouldNotBeStartedSafely" xml:space="preserve">The administrative session could not be started safely.</sys:String>
+  <sys:String x:Key="Text.CleanupCancelledNoFilesWereDeleted" xml:space="preserve">Cleanup cancelled; no files were deleted.</sys:String>
+  <sys:String x:Key="Text.PartialCleanupReviewResultsByCategory" xml:space="preserve">Partial cleanup; review results by category.</sys:String>
+  <sys:String x:Key="Text.CleanupCouldNotBeCompleted" xml:space="preserve">Cleanup could not be completed.</sys:String>
+  <sys:String x:Key="Text.TheWorkerCouldNotBeStarted" xml:space="preserve">The worker could not be started.</sys:String>
+  <sys:String x:Key="Text.InvalidHandshake" xml:space="preserve">Invalid handshake.</sys:String>
+  <sys:String x:Key="Text.WorkerAuthenticatedAndReadyForWindowsTempNo" xml:space="preserve">Worker authenticated and ready for Windows Temp. No files have been deleted yet.</sys:String>
+  <sys:String x:Key="Text.WindowsTempHasAlreadyRunInThisSession" xml:space="preserve">Windows Temp has already run in this session.</sys:String>
+  <sys:String x:Key="Text.AdministrativeSessionMessageNotAllowed" xml:space="preserve">Administrative session message not allowed.</sys:String>
+  <sys:String x:Key="Text.WindowsTempWasNotStarted" xml:space="preserve">Windows Temp was not started.</sys:String>
+  <sys:String x:Key="Text.InvalidReanalysis" xml:space="preserve">Invalid reanalysis.</sys:String>
+  <sys:String x:Key="Text.NoConfirmedInternalDhcpSelectionExists" xml:space="preserve">No confirmed internal DHCP selection exists.</sys:String>
+  <sys:String x:Key="Text.RevalidatingConfirmedDhcpInterfaces" xml:space="preserve">Revalidating confirmed DHCP interfaces...</sys:String>
+  <sys:String x:Key="Text.TheDhcpSelectionChangedAfterConfirmationNoCommands" xml:space="preserve">The DHCP selection changed after confirmation. No commands will run.</sys:String>
+  <sys:String x:Key="Text.WindowsDeniedPermissionRequestingElevationToContinue" xml:space="preserve">Windows denied permission; requesting elevation to continue...</sys:String>
+  <sys:String x:Key="Text.TheWorkerDidNotStart" xml:space="preserve">The worker did not start.</sys:String>
+  <sys:String x:Key="Text.InvalidIpcHandshake" xml:space="preserve">Invalid IPC handshake.</sys:String>
+  <sys:String x:Key="Text.IncompleteDhcpCompletion" xml:space="preserve">Incomplete DHCP completion.</sys:String>
+  <sys:String x:Key="Text.DhcpStepOutsideTheSelection" xml:space="preserve">DHCP step outside the selection.</sys:String>
+  <sys:String x:Key="Text.DhcpResultOutsideTheSelection" xml:space="preserve">DHCP result outside the selection.</sys:String>
+  <sys:String x:Key="Text.UnknownDhcpVerification" xml:space="preserve">Unknown DHCP verification.</sys:String>
+  <sys:String x:Key="Text.DhcpOmissionOutsideTheSelection" xml:space="preserve">DHCP omission outside the selection.</sys:String>
+  <sys:String x:Key="Text.UnexpectedDhcpMessage" xml:space="preserve">Unexpected DHCP message.</sys:String>
+  <sys:String x:Key="Text.DhcpElevationCancelledByTheUser" xml:space="preserve">DHCP elevation cancelled by the user.</sys:String>
+  <sys:String x:Key="Text.WaitingForTheNonCancellableDhcpWorker" xml:space="preserve">Waiting for the non-cancellable DHCP worker...</sys:String>
+  <sys:String x:Key="Text.TheOperationDidNotReachThisCommandSelection" xml:space="preserve">The operation did not reach this command; selection changed, cancellation or technical failure.</sys:String>
+  <sys:String x:Key="Text.DhcpRenewalWasInterruptedByASelectionChange" xml:space="preserve">DHCP renewal was interrupted by a selection change or technical failure. Review the steps executed and skipped.</sys:String>
+  <sys:String x:Key="Text.PhysicalAdapterNotConfirmed" xml:space="preserve">physical adapter not confirmed</sys:String>
+  <sys:String x:Key="Text.Ipv4DhcpNotConfirmed" xml:space="preserve">IPv4 DHCP not confirmed</sys:String>
+  <sys:String x:Key="Text.NoSafeDhcpSelection" xml:space="preserve">No safe DHCP selection.</sys:String>
+  <sys:String x:Key="Text.AdaptersToRenew" xml:space="preserve">Adapters to renew:
+</sys:String>
+  <sys:String x:Key="Text.DhcpIpv4" xml:space="preserve"> · DHCP IPv4: </sys:String>
+  <sys:String x:Key="Text.InternalSelectionConfirmedReleaseThenRenewForEach" xml:space="preserve">Internal selection confirmed; release then renew for each interface.</sys:String>
+  <sys:String x:Key="Text.ReleaseDhcp" xml:space="preserve">Release DHCP</sys:String>
+  <sys:String x:Key="Text.RenewDhcp" xml:space="preserve">Renew DHCP</sys:String>
+  <sys:String x:Key="Text.TheConfirmedInterfaceNoLongerMeetsDhcpCriteria" xml:space="preserve">The confirmed interface no longer meets DHCP criteria; the command will not run.</sys:String>
+  <sys:String x:Key="Text.PermissionRequestCancelledTheCheckDidNotStart" xml:space="preserve">Permission request cancelled; the check did not start.</sys:String>
+  <sys:String x:Key="Text.TheStepCouldNotBeConfirmedAsExecuted" xml:space="preserve">The step could not be confirmed as executed.</sys:String>
+  <sys:String x:Key="Text.ComponentStore" xml:space="preserve">Component store</sys:String>
+  <sys:String x:Key="Text.WindowsIntegrity" xml:space="preserve">Windows integrity</sys:String>
+  <sys:String x:Key="Text.IntegrityWasNotCheckedBecauseAdministratorPermissionsWere" xml:space="preserve">Integrity was not checked because administrator permissions were cancelled.</sys:String>
+  <sys:String x:Key="Text.ReviewRepairOptionsNoneHaveRunAutomatically" xml:space="preserve">Review Repair options; none have run automatically.</sys:String>
+  <sys:String x:Key="Text.GoToRepair" xml:space="preserve">Go to Repair</sys:String>
+  <sys:String x:Key="Text.NoWindowsIntegrityIssuesWereDetected" xml:space="preserve">No Windows integrity issues were detected.</sys:String>
+  <sys:String x:Key="Text.TheComponentStoreAndProtectedFilesCouldNot" xml:space="preserve">The component store and protected files could not be fully checked. No repairs were performed.</sys:String>
+  <sys:String x:Key="Text.IssuesWereDetectedInBothTheComponentStore" xml:space="preserve">Issues were detected in both the component store and protected files. No repairs were performed.</sys:String>
+  <sys:String x:Key="Text.TheComponentStoreHasNoCorruption" xml:space="preserve">The component store has no corruption</sys:String>
+  <sys:String x:Key="Text.TheComponentStoreNeedsRepair" xml:space="preserve">The component store needs repair</sys:String>
+  <sys:String x:Key="Text.TheComponentStoreHasUnrepairableCorruption" xml:space="preserve">The component store has unrepairable corruption</sys:String>
+  <sys:String x:Key="Text.TheComponentStoreCouldNotBeFullyChecked" xml:space="preserve">The component store could not be fully checked</sys:String>
+  <sys:String x:Key="Text.NoRepairsWerePerformed" xml:space="preserve">. No repairs were performed.</sys:String>
+  <sys:String x:Key="Text.NotChecked277" xml:space="preserve">Not checked.</sys:String>
+  <sys:String x:Key="Text.BasicStorageHealth" xml:space="preserve">Basic storage health</sys:String>
+  <sys:String x:Key="Text.ChecksTheBasicHealthStatusReportedByWindows" xml:space="preserve">Checks the basic health status reported by Windows for physical disks.</sys:String>
+  <sys:String x:Key="Text.LocalNetworkAndInternet" xml:space="preserve">Local network and Internet</sys:String>
+  <sys:String x:Key="Text.CriticalServices" xml:space="preserve">Critical services</sys:String>
+  <sys:String x:Key="Text.ChecksThatEssentialWindowsServicesAreRunning" xml:space="preserve">Checks that essential Windows services are running.</sys:String>
+  <sys:String x:Key="Text.WindowsEvents" xml:space="preserve">Windows events</sys:String>
+  <sys:String x:Key="Text.LooksForRecentRelevantErrorsOrWarningsIn" xml:space="preserve">Looks for recent relevant errors or warnings in Windows logs.</sys:String>
+  <sys:String x:Key="Text.ChecksTheComponentStoreAndProtectedWindowsFiles" xml:space="preserve">Checks the component store and protected Windows files without repairing them.</sys:String>
+  <sys:String x:Key="Text.ReliableInformationCouldNotBeObtainedForThis" xml:space="preserve">Reliable information could not be obtained for this check.</sys:String>
+  <sys:String x:Key="Text.TheElevatedIntegrityTransportIsUnavailable" xml:space="preserve">The elevated integrity transport is unavailable.</sys:String>
+  <sys:String x:Key="Text.IntegrityRunsWithinGeneralDiagnosticsUsingItsFixed" xml:space="preserve">Integrity runs within general diagnostics using its fixed read-only sequence.</sys:String>
+  <sys:String x:Key="Text.UnknownCheck" xml:space="preserve">Unknown check</sys:String>
+  <sys:String x:Key="Text.TheDriverOrWindowsDoesNotExposeHealth" xml:space="preserve">The driver or Windows does not expose health information accessible to a standard user.</sys:String>
+  <sys:String x:Key="Text.ElevationHasNotBeenRequestedOtherChecksCan" xml:space="preserve">Elevation has not been requested. Other checks can continue.</sys:String>
+  <sys:String x:Key="Text.GoToNetwork" xml:space="preserve">Go to Network</sys:String>
+  <sys:String x:Key="Text.OperationCancelledByTheUser" xml:space="preserve">Operation cancelled by the user.</sys:String>
+  <sys:String x:Key="Text.TheCheckCouldNotBeCompletedViewThe" xml:space="preserve">The check could not be completed. View the output for context.</sys:String>
+  <sys:String x:Key="Text.NoKnownComponentStoreCorruptionWasDetected" xml:space="preserve">No known component store corruption was detected.</sys:String>
+  <sys:String x:Key="Text.WindowsDetectedRepairableComponentStoreCorruptionDismRestorehealth" xml:space="preserve">Windows detected repairable component store corruption. DISM RestoreHealth is recommended; it will not run automatically.</sys:String>
+  <sys:String x:Key="Text.WindowsReportsCorruptionThatCannotBeRepairedNormally" xml:space="preserve">Windows reports corruption that cannot be repaired normally using DISM.</sys:String>
+  <sys:String x:Key="Text.TheResultCouldNotBeInterpretedAutomatically" xml:space="preserve">The result could not be interpreted automatically.</sys:String>
+  <sys:String x:Key="Text.CheckWindowsIntegrity" xml:space="preserve">Check Windows integrity</sys:String>
+  <sys:String x:Key="Text.CleanUpComponentStore" xml:space="preserve">Clean up component store</sys:String>
+  <sys:String x:Key="Text.RemovesSupersededVersionsOfWindowsComponents" xml:space="preserve">Removes superseded versions of Windows components.</sys:String>
+  <sys:String x:Key="Text.WindowsWillRemoveSupersededComponentVersionsItNo" xml:space="preserve">Windows will remove superseded component versions it no longer needs. This is maintenance, not a repair of damaged files. It may take several minutes; no specific amount of recovered space is promised. Requires administrator privileges. The computer will not restart automatically. This version does not use /ResetBase or any additional cleanup options. Once started, it is allowed to finish without forced cancellation.</sys:String>
+  <sys:String x:Key="Text.ReadOnlyFileSystemCheckOf" xml:space="preserve">Read-only file system check of </sys:String>
+  <sys:String x:Key="Text.TheDriveContainingTheCurrentWindowsInstallationThis" xml:space="preserve">, the drive containing the current Windows installation. This read-only check may take some time. It does not repair, schedule boot-time checks, change the dirty bit, restart or shut down the computer. Checking an active partition without locking it may report inconsistencies requiring later verification; a warning alone does not establish permanent damage. Requires administrator privileges. Once started, it is allowed to finish without forced cancellation.</sys:String>
+  <sys:String x:Key="Text.InternalCleanupOfKnownCategories" xml:space="preserve">Internal cleanup of known categories</sys:String>
+  <sys:String x:Key="Text.NoArbitraryPathsCommandsOrPatterns" xml:space="preserve">No arbitrary paths, commands or patterns</sys:String>
+  <sys:String x:Key="Text.CleanWindowsTemporaryFiles" xml:space="preserve">Clean Windows temporary files</sys:String>
+  <sys:String x:Key="Text.TheRootFolderIsRetainedDatesAndAttributes" xml:space="preserve">
+The root folder is retained. Dates and attributes are revalidated immediately before deletion. Junctions, symbolic links and reparse points are not followed. Files in use, locked or inaccessible are skipped; permissions are not changed and processes are not terminated. Only eligible empty folders are deleted. The same folder is then reanalyzed within the same worker, without a second UAC request. Requires administrator privileges; cancellation is not forced.</sys:String>
+  <sys:String x:Key="Text.InternalNetCleanupOfWindowsTemporaryFiles" xml:space="preserve">Internal .NET cleanup of Windows temporary files</sys:String>
+  <sys:String x:Key="Text.InternallyResolvedPathFilesInUseOrProtected" xml:space="preserve">Internally resolved path; files in use or protected files are skipped; followed by read-only reanalysis</sys:String>
+  <sys:String x:Key="Text.AnalyzeWindowsTemporaryFiles" xml:space="preserve">Analyze Windows temporary files</sys:String>
+  <sys:String x:Key="Text.ReadOnlyAnalysisWithAdministratorPrivileges" xml:space="preserve">Read-only analysis with administrator privileges.</sys:String>
+  <sys:String x:Key="Text.CalculatesAccessibleSizeFileCountAndPotentiallyCleanable" xml:space="preserve">
+Calculates accessible size, file count and potentially cleanable size for eligible files. No files or folders are deleted, permissions are not changed and reparse points are not followed. Inaccessible items are skipped and a partial result is reported. The estimate does not guarantee recoverable space. Requests a single UAC elevation for the same executable; the main application remains unelevated.</sys:String>
+  <sys:String x:Key="Text.InternalNetAnalysisOfWindowsTemporaryFilesRead" xml:space="preserve">Internal .NET analysis of Windows temporary files (read-only)</sys:String>
+  <sys:String x:Key="Text.NoExternalProcessesOrPathsSuppliedByThe" xml:space="preserve">No external processes or paths supplied by the interface</sys:String>
+  <sys:String x:Key="Text.ResetsTcpIpStackParametersAndMayChange" xml:space="preserve">Resets TCP/IP stack parameters and may change network configuration.</sys:String>
+  <sys:String x:Key="Text.MakesRealChangesToWindowsTcpIpAnd" xml:space="preserve">Makes real changes to Windows TCP/IP and DHCP parameters and may change network configuration, including existing IP addresses and other settings. May interrupt connectivity, including RDP sessions. Windows will usually need to be restarted to complete the reset. The application never restarts automatically. Requires administrator privileges and requests one UAC elevation after confirmation. Not combined with Winsock or another tool. Partial failures are retained and explained; they are not corrected automatically. Cancellation is not forced, and the operation must finish before the application closes.</sys:String>
+  <sys:String x:Key="Text.ResetsTheWinsockCatalogUsedByApplicationsTo" xml:space="preserve">Resets the Winsock catalog used by applications to communicate over the network.</sys:String>
+  <sys:String x:Key="Text.MakesRealChangesResetsTheWinsockCatalogTo" xml:space="preserve">Makes real changes: resets the Winsock catalog to a clean state and may remove custom LSP providers. May temporarily affect applications and connectivity, including remote sessions. Does not reset TCP/IP or manually change IP or DNS servers. Windows may need to be restarted to complete the change. The application never restarts automatically. Requires administrator privileges; requests one UAC elevation after confirmation. The operation is not forcibly cancelled and must finish before the application closes.</sys:String>
+  <sys:String x:Key="Text.DisablesAndReEnablesAnActivePhysicalEthernet" xml:space="preserve">Disables and re-enables an active physical Ethernet or Wi-Fi adapter.</sys:String>
+  <sys:String x:Key="Text.ConnectivityOnTheSelectedAdapterWillBeTemporarily" xml:space="preserve">Connectivity on the selected adapter will be temporarily lost, including RDP sessions. Requires administrator privileges. Does not manually change IP or DNS; does not reset Winsock or TCP/IP. Reconnection may renegotiate the link and DHCP. Restarting continues only if Windows confirms the disabled state. If enable fails, it is attempted up to three times and manual recovery instructions are provided. Does not restart the computer; the application cannot be closed and cancellation is not forced during the operation.</sys:String>
+  <sys:String x:Key="Text.RequiresAnInternalSelectionOfAnActivePhysical" xml:space="preserve">(requires an internal selection of an active physical adapter)</sys:String>
+  <sys:String x:Key="Text.NoCommandWithoutSelectionAndConfirmation" xml:space="preserve">(no command without selection and confirmation)</sys:String>
+  <sys:String x:Key="Text.ReleasesAndRenewsIpv4AddressesOnActivePhysical" xml:space="preserve">Releases and renews IPv4 addresses on active physical interfaces configured through DHCP.</sys:String>
+  <sys:String x:Key="Text.ConnectivityMayBeTemporarilyLostIncludingRemoteSessions" xml:space="preserve">Connectivity may be temporarily lost, including remote sessions. Does not flush the DNS cache or manually change DNS; does not reset Winsock or TCP/IP configuration. DHCP may assign different addresses, gateways or DNS servers. First attempted without elevation; only an explicit permission denial requests UAC for the same confirmed selection. If release fails or cannot be confirmed, renew is skipped for that interface. The computer is not restarted and cancellation is not forced.</sys:String>
+  <sys:String x:Key="Text.RequiresAnInternalSelectionOfDhcpInterfaces" xml:space="preserve">(requires an internal selection of DHCP interfaces)</sys:String>
+  <sys:String x:Key="Text.RemovesDnsResponsesTemporarilyCachedByWindows" xml:space="preserve">Removes DNS responses temporarily cached by Windows.</sys:String>
+  <sys:String x:Key="Text.FlushesTheLocalDnsResolutionCacheIncludingNegative" xml:space="preserve">Flushes the local DNS resolution cache, including negative responses. Subsequent queries can retrieve fresh responses. Does not change DNS servers, IP, gateway or DHCP; does not restart adapters, clear browser caches or guarantee an Internet fix. First runs with normal privileges. Only an explicit Windows permission denial requests UAC for this same fixed action, after confirmation. No restart required. This brief operation is allowed to finish without forced cancellation.</sys:String>
+  <sys:String x:Key="Text.FullRepair" xml:space="preserve">Full repair</sys:String>
+  <sys:String x:Key="Text.ScanhealthRestorehealthOnlyForRepairableCorruptionSfc" xml:space="preserve">ScanHealth → RestoreHealth only for repairable corruption → SFC.</sys:String>
+  <sys:String x:Key="Text.1AnalyzeWindowsImageScanhealth2RepairImage" xml:space="preserve">1. Analyze Windows image — ScanHealth.
+2. Repair image if corruption is detected — RestoreHealth (conditional).
+3. Check system files — SFC.
+If ScanHealth returns Healthy, RestoreHealth is skipped. If it returns RepairRequired, repair runs and SFC continues only if RestoreHealth returns Repaired or Healthy. Failure, an unknown result or cancellation stops the sequence and explains skipped steps. RestoreHealth and SFC make real changes. May take several minutes. Requests a single UAC elevation; does not restart automatically and cancellation is not forced.</sys:String>
+  <sys:String x:Key="Text.OnlyIfScanhealthRepairrequired" xml:space="preserve">[Only if ScanHealth = RepairRequired]
+</sys:String>
+  <sys:String x:Key="Text.AnalyzeWindowsImage" xml:space="preserve">Analyze Windows image</sys:String>
+  <sys:String x:Key="Text.RepairWindowsImage" xml:space="preserve">Repair Windows image</sys:String>
+  <sys:String x:Key="Text.InDepthComponentStoreAnalysisWithoutRepair" xml:space="preserve">In-depth component store analysis without repair.</sys:String>
+  <sys:String x:Key="Text.ChecksAndRepairsProtectedSystemFiles" xml:space="preserve">Checks and repairs protected system files.</sys:String>
+  <sys:String x:Key="Text.AnalyzesAndRepairsTheComponentStore" xml:space="preserve">Analyzes and repairs the component store.</sys:String>
+  <sys:String x:Key="Text.DismScanhealthDoesNotAttemptRepairItIs" xml:space="preserve">DISM ScanHealth does not attempt repair. It is more thorough than CheckHealth and may detect corruption not yet recorded.</sys:String>
+  <sys:String x:Key="Text.SfcChecksAllProtectedFilesAndAutomaticallyAttempts" xml:space="preserve">SFC checks all protected files and automatically attempts to repair damaged files. Makes real changes. Microsoft recommends DISM RestoreHealth before SFC when addressing corruption.</sys:String>
+  <sys:String x:Key="Text.DismRestorehealthAnalyzesAndAutomaticallyRepairsCorrectableCorruption" xml:space="preserve">DISM RestoreHealth analyzes and automatically repairs correctable corruption. Makes real changes and normally uses Windows Update to obtain required components. /Source and /LimitAccess are not supplied. Does not restart automatically.</sys:String>
+  <sys:String x:Key="Text.RequiresAdministratorPrivilegesAndMayTakeSeveralMinutes" xml:space="preserve"> Requires administrator privileges and may take several minutes. Once started, it is allowed to finish without forced cancellation.</sys:String>
+  <sys:String x:Key="Text.QuicklyChecksWhetherWindowsHasAlreadyRecordedComponent" xml:space="preserve">Quickly checks whether Windows has already recorded component store corruption.</sys:String>
+  <sys:String x:Key="Text.DismCheckhealthQueriesTheRecordedStateOfThe" xml:space="preserve">DISM CheckHealth queries the recorded state of the component store; it does not attempt repair or perform an exhaustive scan. Requires administrator privileges and is normally quick. Depending on the result, ScanHealth or RestoreHealth may be recommended; neither runs automatically. /English only makes output consistent; it does not change the Windows language. Once started, it is allowed to finish without forced cancellation.</sys:String>
+  <sys:String x:Key="Text.TheConfirmedDhcpSelectionChangedNoCommandsWill" xml:space="preserve">The confirmed DHCP selection changed; no commands will run.</sys:String>
+  <sys:String x:Key="Text.ReleaseCouldNotBeConfirmedBeforeResumingRenew" xml:space="preserve">Release could not be confirmed before resuming renew; it will not run.</sys:String>
+  <sys:String x:Key="Text.VerifyingTheDisabledStateInWindows" xml:space="preserve">Verifying the disabled state in Windows...</sys:String>
+  <sys:String x:Key="Text.WaitingForEnablingAndReconnection" xml:space="preserve">Waiting for enabling and reconnection...</sys:String>
+  <sys:String x:Key="Text.IpcConnectionInterrupted" xml:space="preserve">IPC connection interrupted.</sys:String>
+  <sys:String x:Key="Text.WindowsRecordedABootAfterAnUncleanShutdown" xml:space="preserve">Windows recorded a boot after an unclean shutdown. This event alone does not identify the cause.</sys:String>
+  <sys:String x:Key="Text.AnUnexpectedShutdownWasRecordedItMayRefer" xml:space="preserve">An unexpected shutdown was recorded. It may refer to the same incident as Kernel-Power 41.</sys:String>
+  <sys:String x:Key="Text.TheProviderRecordedABadBlockReviewThe" xml:space="preserve">The provider recorded a bad block. Review the device; this event does not establish its current condition.</sys:String>
+  <sys:String x:Key="Text.AnInputOutputErrorWasRecordedDuringA" xml:space="preserve">An input/output error was recorded during a paging operation; it does not establish a permanent failure by itself.</sys:String>
+  <sys:String x:Key="Text.AnInputOutputOperationWasRetriedThisMay" xml:space="preserve">An input/output operation was retried. This may indicate a temporary storage issue.</sys:String>
+  <sys:String x:Key="Text.WindowsRecordedAnUnexpectedDiskRemovalAPhysical" xml:space="preserve">Windows recorded an unexpected disk removal; a physical disconnection can also explain it.</sys:String>
+  <sys:String x:Key="Text.NtfsRecordedAFileSystemStructureProblemReview" xml:space="preserve">NTFS recorded a file system structure problem. Review the context and backups.</sys:String>
+  <sys:String x:Key="Text.NtfsRecordedThatAVolumeNeedsCheckingChkdsk" xml:space="preserve">NTFS recorded that a volume needs checking. CHKDSK is not run.</sys:String>
+  <sys:String x:Key="Text.AStoragePathControllerResetWasRecordedIt" xml:space="preserve">A storage path/controller reset was recorded; it may be temporary.</sys:String>
+  <sys:String x:Key="Text.WheaRecordedACorrectedHardwareErrorThisDoes" xml:space="preserve">WHEA recorded a corrected hardware error. This does not imply a permanent failure.</sys:String>
+  <sys:String x:Key="Text.WheaRecordedACorrectedHardwareErrorCheckWhether" xml:space="preserve">WHEA recorded a corrected hardware error. Check whether it recurs.</sys:String>
+  <sys:String x:Key="Text.WheaRecordedAnUncorrectedSeriousHardwareErrorReview" xml:space="preserve">WHEA recorded an uncorrected/serious hardware error. Review the context; it is not automatically attributed to a component.</sys:String>
+  <sys:String x:Key="Text.OriginalDescriptionUnavailable" xml:space="preserve">Original description unavailable.</sys:String>
+  <sys:String x:Key="Text.DescriptionTruncated" xml:space="preserve">
+[Description truncated]</sys:String>
+  <sys:String x:Key="Text.Found" xml:space="preserve">Found </sys:String>
+  <sys:String x:Key="Text.RelevantEventsInTheLast7Days" xml:space="preserve"> relevant events in the last 7 days.</sys:String>
+  <sys:String x:Key="Text.TheQueryWasIncompleteDueToItsTime" xml:space="preserve">The query was incomplete due to its time limit.</sys:String>
+  <sys:String x:Key="Text.NoRecentRelevantEventsWereFoundUnderThe" xml:space="preserve">No recent relevant events were found under the known rules.</sys:String>
+  <sys:String x:Key="Text.SystemLogOnlyLast7DaysUpTo" xml:space="preserve">System log only; last 7 days. Up to 100 matching records and 20 details, with a 4-second read limit. </sys:String>
+  <sys:String x:Key="Text.InformationalEventsIncludingNtfs98ForHealthyVolumes" xml:space="preserve">Informational events (including NTFS 98 for healthy volumes) and events without known rules are ignored. Historical events trigger Attention, not an automatic diagnosis of a current fault.</sys:String>
+  <sys:String x:Key="Text.TheQueryReachedALimitTheCountIs" xml:space="preserve"> The query reached a limit; the count is partial.</sys:String>
+  <sys:String x:Key="Text.ReviewDatesRecurrenceAndDescriptionsBeforeDecidingOn" xml:space="preserve">Review dates, recurrence and descriptions before deciding on an action.</sys:String>
+  <sys:String x:Key="Text.AbsenceOfTheseEventsDoesNotGuaranteeAll" xml:space="preserve">Absence of these events does not guarantee all components are healthy.</sys:String>
+  <sys:String x:Key="Text.Critical" xml:space="preserve">Critical</sys:String>
+  <sys:String x:Key="Text.TheTaskIsNotAnIndividualCommand" xml:space="preserve">The task is not an individual command.</sys:String>
+  <sys:String x:Key="Text.TheToolDoesNotExistInTheSystem" xml:space="preserve">The tool does not exist in the system directory.</sys:String>
+  <sys:String x:Key="Text.TheToolCouldNotBeStarted" xml:space="preserve">The tool could not be started.</sys:String>
+  <sys:String x:Key="Text.ComponentStoreNotChecked" xml:space="preserve">Component store: not checked.</sys:String>
+  <sys:String x:Key="Text.ComponentStore377" xml:space="preserve">Component store · </sys:String>
+  <sys:String x:Key="Text.ProtectedFilesSfcNotChecked" xml:space="preserve">
+Protected files (SFC): not checked.</sys:String>
+  <sys:String x:Key="Text.ProtectedFilesSfcIndependentResult" xml:space="preserve">
+Protected files (SFC), independent result: </sys:String>
+  <sys:String x:Key="Text.TheIntegrityCheckRequiresAnExplicitAdministrativeAction" xml:space="preserve">The integrity check requires an explicit administrative action.</sys:String>
+  <sys:String x:Key="Text.DismReportsOnTheComponentStoreSfcReports" xml:space="preserve">DISM reports on the component store; SFC reports on protected files. View their separate details. General diagnostics do not run these tools.</sys:String>
+  <sys:String x:Key="Text.CleanupCouldNotBeCompleted382" xml:space="preserve">Cleanup could not be completed</sys:String>
+  <sys:String x:Key="Text.CleanupCouldNotBeCompletedViewTheLog" xml:space="preserve">Cleanup could not be completed. View the log.</sys:String>
+  <sys:String x:Key="Text.ThumbnailCacheCleanup" xml:space="preserve">Thumbnail cache cleanup</sys:String>
+  <sys:String x:Key="Text.ThumbnailCleanupCouldNotBeCompletedViewThe" xml:space="preserve">Thumbnail cleanup could not be completed. View the log.</sys:String>
+  <sys:String x:Key="Text.CheckingRecycleBin" xml:space="preserve">Checking Recycle Bin...</sys:String>
+  <sys:String x:Key="Text.TheRecycleBinCouldNotBeEmptiedView" xml:space="preserve">The Recycle Bin could not be emptied. View the log.</sys:String>
+  <sys:String x:Key="Text.DiagnosticIntegrityRequiresItsGlobalOperationAndDoes" xml:space="preserve">Diagnostic integrity requires its global operation and does not run as an independent action.</sys:String>
+  <sys:String x:Key="Text.TcpIpRequiresPreflightAndItsConfirmationsBefore" xml:space="preserve">TCP/IP requires preflight and its confirmations before requesting UAC.</sys:String>
+  <sys:String x:Key="Text.ElevatedAnalysisRequiresTheGlobalCleanupOperationTo" xml:space="preserve">Elevated analysis requires the global Cleanup operation to be active.</sys:String>
+  <sys:String x:Key="Text.Diagnostics" xml:space="preserve">Diagnostics</sys:String>
+  <sys:String x:Key="Text.TheGlobalDiagnosticsOperationMustBeActive" xml:space="preserve">The global Diagnostics operation must be active.</sys:String>
+  <sys:String x:Key="Text.DiagnosticsRequireTheirInternalCallbacks" xml:space="preserve">Diagnostics require their internal callbacks.</sys:String>
+  <sys:String x:Key="Text.WindowsDeniedPermissionElevationIsRequiredFor" xml:space="preserve">Windows denied permission; elevation is required for </sys:String>
+  <sys:String x:Key="Text.WindowsRequiresPermissionRequestingElevation" xml:space="preserve">Windows requires permission; requesting elevation...</sys:String>
+  <sys:String x:Key="Text.TheWorkerCouldNotBeStarted396" xml:space="preserve">The worker could not be started.</sys:String>
+  <sys:String x:Key="Text.UnexpectedRestartResult" xml:space="preserve">Unexpected restart result.</sys:String>
+  <sys:String x:Key="Text.InvalidAdapterState" xml:space="preserve">Invalid adapter state.</sys:String>
+  <sys:String x:Key="Text.DisableFailedRestartingStoppedWithoutEnabling" xml:space="preserve">Disable failed; restarting stopped without enabling.</sys:String>
+  <sys:String x:Key="Text.WindowsTemporaryFileCleanup" xml:space="preserve">Windows temporary file cleanup</sys:String>
+  <sys:String x:Key="Text.ReanalyzingWindowsTemporaryFiles" xml:space="preserve">Reanalyzing Windows temporary files</sys:String>
+  <sys:String x:Key="Text.UnexpectedAdministrativeResult" xml:space="preserve">Unexpected administrative result.</sys:String>
+  <sys:String x:Key="Text.DuplicateStart" xml:space="preserve">Duplicate start.</sys:String>
+  <sys:String x:Key="Text.StartedWithoutAStep" xml:space="preserve">Started without a step.</sys:String>
+  <sys:String x:Key="Text.FinishedWithoutStarting" xml:space="preserve">Finished without starting.</sys:String>
+  <sys:String x:Key="Text.UnexpectedIpcCompletion" xml:space="preserve">Unexpected IPC completion.</sys:String>
+  <sys:String x:Key="Text.TheCheckCouldNotBeRunOrConfirmed" xml:space="preserve">The check could not be run or confirmed.</sys:String>
+  <sys:String x:Key="Text.UnexpectedIpcOmission" xml:space="preserve">Unexpected IPC omission.</sys:String>
+  <sys:String x:Key="Text.OmissionOutsideTheSequence" xml:space="preserve">Omission outside the sequence.</sys:String>
+  <sys:String x:Key="Text.DiagnosticsCancelledBeforeStartingIntegrityChecks" xml:space="preserve">Diagnostics cancelled before starting integrity checks.</sys:String>
+  <sys:String x:Key="Text.CommunicationCouldNotBeCompletedOrTheCheck" xml:space="preserve">Communication could not be completed or the check could not be started.</sys:String>
+  <sys:String x:Key="Text.TheStepResultCouldNotBeConfirmedDue" xml:space="preserve">The step result could not be confirmed due to worker or IPC failure.</sys:String>
+  <sys:String x:Key="Text.ElevationCancelledByTheUserTheSequenceDid" xml:space="preserve">Elevation cancelled by the user; the sequence did not start.</sys:String>
+  <sys:String x:Key="Text.TheSequenceWasInterruptedByATechnicalFailure" xml:space="preserve">The sequence was interrupted by a technical failure.</sys:String>
+  <sys:String x:Key="Text.SequenceCompletionCouldNotBeConfirmedDueTo" xml:space="preserve">Sequence completion could not be confirmed due to worker or IPC failure.</sys:String>
+  <sys:String x:Key="Text.ElevationCancelledByTheUserTheAdapterWas" xml:space="preserve">Elevation cancelled by the user; the adapter was not restarted.</sys:String>
+  <sys:String x:Key="Text.RestartingWasNotStartedFor" xml:space="preserve">Restarting was not started for «</sys:String>
+  <sys:String x:Key="Text.NoCommandsRanTheSelectionChangedOrElevation" xml:space="preserve">». No commands ran; the selection changed or elevation could not start. View the log.</sys:String>
+  <sys:String x:Key="Text.RestartingCouldNotBeConfirmedFor" xml:space="preserve">Restarting could not be confirmed for «</sys:String>
+  <sys:String x:Key="Text.IfTheWorkerDisabledItItAttemptsRecovery" xml:space="preserve">». If the worker disabled it, it attempts recovery even if IPC is lost. Check its state locally and enable it in Settings &gt; Network &amp; Internet &gt; Advanced network settings if needed.</sys:String>
+  <sys:String x:Key="Text.TheWorkerDidNotStartCancellationSelectionChange" xml:space="preserve">The worker did not start: cancellation, selection change or elevation failure.</sys:String>
+  <sys:String x:Key="Text.ResultNotConfirmedDueToIpcFailure" xml:space="preserve">Result not confirmed due to IPC failure.</sys:String>
+  <sys:String x:Key="Text.InternalSimulation" xml:space="preserve">(internal simulation)</sys:String>
+  <sys:String x:Key="Text.ThisEngineSupportsInternalSimulationsOnlyItDoes" xml:space="preserve">This engine supports internal simulations only. It does not run commands.</sys:String>
+  <sys:String x:Key="Text.ATaskIsAlreadyActiveInTheApplication" xml:space="preserve">A task is already active in the application.</sys:String>
+  <sys:String x:Key="Text.RunningSimulation" xml:space="preserve">Running simulation...</sys:String>
+  <sys:String x:Key="Text.SimulationCompletedSuccessfulExecutionAndAFictitiousRepair" xml:space="preserve">Simulation completed: successful execution and a fictitious repair required. Windows has not changed.</sys:String>
+  <sys:String x:Key="Text.SimulationCancelledWindowsHasNotChanged" xml:space="preserve">Simulation cancelled. Windows has not changed.</sys:String>
+  <sys:String x:Key="Text.TheSimulationFailed" xml:space="preserve">The simulation failed: </sys:String>
+  <sys:String x:Key="Text.Ipv4Gateway" xml:space="preserve">IPv4 gateway: </sys:String>
+  <sys:String x:Key="Text.ConfiguredDns" xml:space="preserve">Configured DNS: </sys:String>
+  <sys:String x:Key="Text.PublishedMaximumCapacity" xml:space="preserve">Published maximum capacity: </sys:String>
+  <sys:String x:Key="Text.TheAdapterSupportsHigherSpeedsButNegotiatesAt" xml:space="preserve">The adapter supports higher speeds but negotiates at 100 Mbps. This may relate to the cable, router/switch port, negotiation, configuration or driver; the cause has not been determined.</sys:String>
+  <sys:String x:Key="Text.SsidAndSignalUnavailable" xml:space="preserve">SSID and signal: unavailable</sys:String>
+  <sys:String x:Key="Text.UnavailableLocationPermissionIsNotRequested" xml:space="preserve">unavailable; location permission is not requested</sys:String>
+  <sys:String x:Key="Text.Signal" xml:space="preserve">
+Signal: </sys:String>
+  <sys:String x:Key="Text.WiFiReceiveTransmitLink" xml:space="preserve">
+Wi-Fi receive/transmit link: </sys:String>
+  <sys:String x:Key="Text.SsidAndSignalUnavailableWindowsOrTheDriver" xml:space="preserve">SSID and signal: unavailable (Windows or the driver limits the query)</sys:String>
+  <sys:String x:Key="Text.PublicIp" xml:space="preserve">Public IP</sys:String>
+  <sys:String x:Key="Text.TheEthernetLinkNegotiatesAt100MbpsDespite" xml:space="preserve">The Ethernet link negotiates at 100 Mbps despite supporting a higher speed. The cause has not been determined.</sys:String>
+  <sys:String x:Key="Text.NoIcmpResponseDoesNotEstablishAFault" xml:space="preserve">
+No ICMP response does not establish a fault. One endpoint does not represent the entire Internet.</sys:String>
+  <sys:String x:Key="Text.InternetAvailableBasedOnGatewayPublicIpAnd" xml:space="preserve">Internet available based on gateway, public IP and DNS. The specific HTTPS check did not respond within the expected time.</sys:String>
+  <sys:String x:Key="Text.HttpsCouldNotBeConfirmedWithTheMicrosoft" xml:space="preserve">HTTPS could not be confirmed with the Microsoft endpoint. Review the other connectivity tests.</sys:String>
+  <sys:String x:Key="Text.TheSpecificHttpsCheckDidNotRespondWithin" xml:space="preserve"> The specific HTTPS check did not respond within the expected time.</sys:String>
+  <sys:String x:Key="Text.NoIcmpResponseDoesNotEstablishAFault445" xml:space="preserve">
+No ICMP response does not establish a fault. A single endpoint does not represent the entire Internet either.</sys:String>
+  <sys:String x:Key="Text.NoAutomaticRepairIcmpTestsMayBeBlocked" xml:space="preserve">No automatic repair. ICMP tests may be blocked by the network.</sys:String>
+  <sys:String x:Key="Text.ReviewDnsHttpsAndGatewayResultsBeforeAttributing" xml:space="preserve">Review DNS, HTTPS and gateway results before attributing a cause. The network has not been changed.</sys:String>
+  <sys:String x:Key="Text.InsufficientInformationWasObtainedToAssessConnectivity" xml:space="preserve">Insufficient information was obtained to assess connectivity.</sys:String>
+  <sys:String x:Key="Text.NoValidIcmpResponse" xml:space="preserve">no valid ICMP response (</sys:String>
+  <sys:String x:Key="Text.ResolutionTimeout3SNotChecked" xml:space="preserve">resolution timeout (3 s); not checked</sys:String>
+  <sys:String x:Key="Text.ConnectionTimeout5SNotChecked" xml:space="preserve">connection timeout (5 s); not checked</sys:String>
+  <sys:String x:Key="Text.TheEndpointRejectsTheHeadRequest" xml:space="preserve"> (the endpoint rejects the HEAD request)</sys:String>
+  <sys:String x:Key="Text.Ambiguous" xml:space="preserve">ambiguous</sys:String>
+  <sys:String x:Key="Text.APrimaryPhysicalAdapterCouldNotBeIdentified" xml:space="preserve">A primary physical adapter could not be identified</sys:String>
+  <sys:String x:Key="Text.NoPrimaryPhysicalAdapterIdentified" xml:space="preserve">No primary physical adapter identified</sys:String>
+  <sys:String x:Key="Text.Network456" xml:space="preserve">Network: </sys:String>
+  <sys:String x:Key="Text.Disconnected" xml:space="preserve">Disconnected (</sys:String>
+  <sys:String x:Key="Text.Signal458" xml:space="preserve"> · Signal: </sys:String>
+  <sys:String x:Key="Text.ReceiveTransmit" xml:space="preserve"> · Receive/transmit: </sys:String>
+  <sys:String x:Key="Text.SsidAndSignalUnavailable460" xml:space="preserve">SSID and signal unavailable.</sys:String>
+  <sys:String x:Key="Text.AnotherOperationIsAlreadyActive" xml:space="preserve">Another operation is already active.</sys:String>
+  <sys:String x:Key="Text.TheOperationIsNoLongerActive" xml:space="preserve">The operation is no longer active.</sys:String>
+  <sys:String x:Key="Text.OutputHasAlreadyFinished" xml:space="preserve">Output has already finished.</sys:String>
+  <sys:String x:Key="Text.TheApplicationFolder" xml:space="preserve">the application folder</sys:String>
+  <sys:String x:Key="Text.TheConfiguration" xml:space="preserve">the configuration</sys:String>
+  <sys:String x:Key="Text.CannotUse" xml:space="preserve">Cannot use </sys:String>
+  <sys:String x:Key="Text.ThisPortableApplicationNeedsWritePermissionInIts" xml:space="preserve">. This portable application needs write permission in its own folder to save configuration and logs. </sys:String>
+  <sys:String x:Key="Text.MoveTheApplicationToAWritableLocalFolder" xml:space="preserve">Move the application to a writable local folder and reopen it. No other location will be used and administrator permissions will not be requested.</sys:String>
+  <sys:String x:Key="Text.TheTestFileCouldNotBeDeleted" xml:space="preserve">The test file could not be deleted.</sys:String>
+  <sys:String x:Key="Text.TheRecycleBinCouldNotBeCheckedBefore" xml:space="preserve">The Recycle Bin could not be checked before confirmation.</sys:String>
+  <sys:String x:Key="Text.EmptiesTheCurrentUserSEntireRecycleBin" xml:space="preserve">Empties the current user's entire Recycle Bin on all drives.</sys:String>
+  <sys:String x:Key="Text.TotalSize" xml:space="preserve">
+Total size: </sys:String>
+  <sys:String x:Key="Text.TheCurrentUserSEntireRecycleBinWill473" xml:space="preserve">
+The current user's entire Recycle Bin will be emptied. </sys:String>
+  <sys:String x:Key="Text.FilesCanNoLongerBeRestoredFromThe" xml:space="preserve">Files can no longer be restored from the Recycle Bin. No UAC, permission changes or second Shell confirmation. </sys:String>
+  <sys:String x:Key="Text.TheBinIsQueriedBeforeAndAfterEmptying" xml:space="preserve">The bin is queried before and after emptying and remaining items are reported. Figures may change if other applications modify the bin.</sys:String>
+  <sys:String x:Key="Text.FilesCanNoLongerBeRestoredFromThe476" xml:space="preserve">Files can no longer be restored from the Recycle Bin.</sys:String>
+  <sys:String x:Key="Text.InvalidRecycleBinQuery" xml:space="preserve">Invalid Recycle Bin query.</sys:String>
+  <sys:String x:Key="Text.TheRecycleBinCouldNotBeCheckedEmptying" xml:space="preserve">The Recycle Bin could not be checked; emptying did not start.</sys:String>
+  <sys:String x:Key="Text.CheckingRemainingRecycleBinItems" xml:space="preserve">Checking remaining Recycle Bin items...</sys:String>
+  <sys:String x:Key="Text.WindowsCancelledEmptyingTheRecycleBin" xml:space="preserve">Windows cancelled emptying the Recycle Bin.</sys:String>
+  <sys:String x:Key="Text.WindowsDidNotConfirmThatTheRecycleBin" xml:space="preserve">Windows did not confirm that the Recycle Bin was emptied successfully.</sys:String>
+  <sys:String x:Key="Text.TheCallCompletedSuccessfullyButTheSubsequentRecycle" xml:space="preserve">The call completed successfully, but the subsequent Recycle Bin state could not be checked.</sys:String>
+  <sys:String x:Key="Text.SpaceFreed" xml:space="preserve"> · Space freed: </sys:String>
+  <sys:String x:Key="Text.ThisActionMayInterruptTheCurrentRemoteConnection" xml:space="preserve">This action may interrupt the current remote connection.</sys:String>
+  <sys:String x:Key="Text.TheSessionCouldNotBeCheckedForRemote" xml:space="preserve">The session could not be checked for remote access. This action may interrupt a remote connection.</sys:String>
+  <sys:String x:Key="Text.TheStepCouldNotBeExecuted" xml:space="preserve">The step could not be executed: </sys:String>
+  <sys:String x:Key="Text.FullRepairCompleted" xml:space="preserve">Full repair completed. </sys:String>
+  <sys:String x:Key="Text.TheSequenceCouldNotBeStarted" xml:space="preserve">The sequence could not be started.</sys:String>
+  <sys:String x:Key="Text.WindowsMustBeRestartedItNeverRestartsAutomatically" xml:space="preserve">
+Windows must be restarted; it never restarts automatically.</sys:String>
+  <sys:String x:Key="Text.TheConfirmedIpv4ConfigurationChangedOrItsRisk" xml:space="preserve">The confirmed IPv4 configuration changed or its risk was not acknowledged. TCP/IP will not run; review the configuration and confirm again.</sys:String>
+  <sys:String x:Key="Text.TheTcpIpConfirmationHasAlreadyBeenUsed" xml:space="preserve">The TCP/IP confirmation has already been used.</sys:String>
+  <sys:String x:Key="Text.CleanThumbnailCache" xml:space="preserve">Clean thumbnail cache</sys:String>
+  <sys:String x:Key="Text.OnlyFilesInTheExplorerFolderFilesIn" xml:space="preserve">Only files in the Explorer folder; files in use or protected files are skipped</sys:String>
+  <sys:String x:Key="Text.DeletesOnlyEligibleThumbnailCacheFilesThatAre" xml:space="preserve">Deletes only eligible thumbnail cache files that are not in use.</sys:String>
+  <sys:String x:Key="Text.OnlyThumbcacheDbFilesInThisFolderAre" xml:space="preserve">
+Only thumbcache_*.db files in this folder are considered, without entering subfolders or deleting folders. </sys:String>
+  <sys:String x:Key="Text.IconCachesAndOtherFilesAreNotDeleted" xml:space="preserve">Icon caches and other files are not deleted. Files in use or protected files will be skipped. </sys:String>
+  <sys:String x:Key="Text.LockedInUseOrInaccessibleFilesAreSkipped" xml:space="preserve">Locked, in-use or inaccessible files are skipped; reparse points are not followed and permissions are not changed. </sys:String>
+  <sys:String x:Key="Text.ExplorerExeIsNotClosedOrRestartedAnd" xml:space="preserve">explorer.exe is not closed or restarted and processes are not terminated. Windows recreates thumbnails automatically as needed. </sys:String>
+  <sys:String x:Key="Text.OnlyThisCategoryIsReanalyzedAfterwardsWithoutUac" xml:space="preserve">Only this category is reanalyzed afterwards, without UAC.
+</sys:String>
+  <sys:String x:Key="Text.LastAnalysis" xml:space="preserve">Last analysis: </sys:String>
+  <sys:String x:Key="Text.PartialResult501" xml:space="preserve"> · Partial result</sys:String>
+  <sys:String x:Key="Text.DetectedSizePotentiallyCleanableSizeAndFileCount" xml:space="preserve">Detected size, potentially cleanable size and file count: unavailable; no valid analysis yet.</sys:String>
+  <sys:String x:Key="Text.ReanalyzingThumbnailCache" xml:space="preserve">Reanalyzing thumbnail cache... </sys:String>
+  <sys:String x:Key="Text.ThumbnailReanalysisCouldNotBeCompleted" xml:space="preserve">Thumbnail reanalysis could not be completed.</sys:String>
+  <sys:String x:Key="Text.CleanupDuration" xml:space="preserve"> · Cleanup duration: </sys:String>
+  <sys:String x:Key="Text.SReanalysis" xml:space="preserve"> s · Reanalysis: </sys:String>
+  <sys:String x:Key="Text.TempIsNotDefined" xml:space="preserve">TEMP is not defined.</sys:String>
+  <sys:String x:Key="Text.ElevatedAnalysisInThisSessionReadOnly" xml:space="preserve"> · Elevated analysis in this session (read-only).</sys:String>
+  <sys:String x:Key="Text.InvalidElevatedAnalysisResult" xml:space="preserve">Invalid elevated analysis result.</sys:String>
+  <sys:String x:Key="Text.ElevationCancelledByTheUserNoAnalysisWas" xml:space="preserve">Elevation cancelled by the user; no analysis was performed.</sys:String>
+  <sys:String x:Key="Text.ElevatedAnalysisOfWindowsTemporaryFilesCouldNot" xml:space="preserve">Elevated analysis of Windows temporary files could not be completed.</sys:String>
+  <sys:String x:Key="Text.InvalidCleanupState" xml:space="preserve">Invalid cleanup state.</sys:String>
+  <sys:String x:Key="Text.InvalidCleanupDates" xml:space="preserve">Invalid cleanup dates.</sys:String>
+  <sys:String x:Key="Text.ReanalysisUnavailable" xml:space="preserve">Reanalysis unavailable</sys:String>
+  <sys:String x:Key="Text.ElevationCancelledWindowsTemporaryFilesWereNotCleaned" xml:space="preserve">Elevation cancelled; Windows temporary files were not cleaned.</sys:String>
+  <sys:String x:Key="Text.TheWindowsTemporaryFileCleanupResultCouldNot" xml:space="preserve">The Windows temporary file cleanup result could not be confirmed. View the log.</sys:String>
+  <sys:String x:Key="Text.WindowsTemporaryFiles517" xml:space="preserve">Windows temporary files · </sys:String>
+  <sys:String x:Key="Text.Reanalysis" xml:space="preserve"> · Reanalysis: </sys:String>
+  <sys:String x:Key="Text.WindowsHasNotBeenRestarted" xml:space="preserve"> · Windows has not been restarted.</sys:String>
+  <sys:String x:Key="Text.LastElevatedAnalysisInThisSession" xml:space="preserve">
+Last elevated analysis in this session: </sys:String>
+  <sys:String x:Key="Text.EstimatedPotentiallyRecoverableSpace" xml:space="preserve">
+Estimated potentially recoverable space: </sys:String>
+  <sys:String x:Key="Text.UnavailablePotentiallyRecoverableSpaceNotEstimated" xml:space="preserve">unavailable. Potentially recoverable space: not estimated.</sys:String>
+  <sys:String x:Key="Text.ReanalyzingWindowsTemporaryFilesWithinTheSameWorker" xml:space="preserve">Reanalyzing Windows temporary files within the same worker... </sys:String>
+  <sys:String x:Key="Text.TheSubsequentReanalysisCouldNotBeCompleted" xml:space="preserve">The subsequent reanalysis could not be completed.</sys:String>
+  <sys:String x:Key="Text.InvalidIpcLength" xml:space="preserve">Invalid IPC length.</sys:String>
+  <sys:String x:Key="Text.TheWorkerDidNotCompleteTheIpcHandshake" xml:space="preserve">The worker did not complete the IPC handshake.</sys:String>
+  <sys:String x:Key="Text.LocationIsNotWritable" xml:space="preserve">Location is not writable</sys:String>
+  <sys:String x:Key="Text.ConfigJsonCouldNotBeReadTheLight" xml:space="preserve">config.json could not be read. The light theme will be used.
+</sys:String>
+  <sys:String x:Key="Text.ThePortableApplicationCouldNotBeStarted" xml:space="preserve">The portable application could not be started.
+</sys:String>
+  <sys:String x:Key="Text.Analyzing0000" xml:space="preserve">Analyzing... · 00:00</sys:String>
+  <sys:String x:Key="Text.DiagnosticsCompletedIn" xml:space="preserve">Diagnostics completed in </sys:String>
+  <sys:String x:Key="Text.DiagnosticsCancelled" xml:space="preserve">Diagnostics cancelled</sys:String>
+  <sys:String x:Key="Text.DiagnosticsCouldNotBeCompletedResultsObtainedSo" xml:space="preserve">Diagnostics could not be completed. Results obtained so far have been kept.</sys:String>
+  <sys:String x:Key="Text.Attention534" xml:space="preserve"> Attention · </sys:String>
+  <sys:String x:Key="Text.NotChecked535" xml:space="preserve"> Not checked</sys:String>
+  <sys:String x:Key="Text.CheckingWindowsIntegrity" xml:space="preserve">Checking Windows integrity...</sys:String>
+  <sys:String x:Key="Text.Module" xml:space="preserve"> module</sys:String>
+  <sys:String x:Key="Text.Modules" xml:space="preserve"> modules</sys:String>
+  <sys:String x:Key="Text.NoActiveTask" xml:space="preserve">No active task</sys:String>
+  <sys:String x:Key="Text.DiagnosticsCancelled540" xml:space="preserve">Diagnostics cancelled.</sys:String>
+  <sys:String x:Key="Text.DiagnosticsCompleted" xml:space="preserve">Diagnostics completed.</sys:String>
+  <sys:String x:Key="Text.RunningSimulation542" xml:space="preserve">Running... (simulation)</sys:String>
+  <sys:String x:Key="Text.CancellingSimulation" xml:space="preserve">Cancelling simulation...</sys:String>
+  <sys:String x:Key="Text.NoTaskIsRunning" xml:space="preserve">No task is running.</sys:String>
+  <sys:String x:Key="Text.Home" xml:space="preserve">Home</sys:String>
+  <sys:String x:Key="Text.DismCheckhealthQuickCheckOfTheRecordedState" xml:space="preserve">DISM CheckHealth · Quick check of the recorded state</sys:String>
+  <sys:String x:Key="Text.ChkdskReadOnly" xml:space="preserve">CHKDSK · Read-only</sys:String>
+  <sys:String x:Key="Text.SequenceConditionalRestorehealthOneUacRequest" xml:space="preserve">Sequence · Conditional RestoreHealth · One UAC request</sys:String>
+  <sys:String x:Key="Text.SelectedCleanupCouldNotBeCompletedViewThe" xml:space="preserve">Selected cleanup could not be completed. View the log.</sys:String>
+  <sys:String x:Key="Text.TheRecycleBinCouldNotBeCheckedIt" xml:space="preserve">The Recycle Bin could not be checked. It will not be emptied.</sys:String>
+  <sys:String x:Key="Text.WindowsTemporaryFileCleanupCouldNotBeCompleted" xml:space="preserve">Windows temporary file cleanup could not be completed. View the log.</sys:String>
+  <sys:String x:Key="Text.TemporaryFileCleanupCouldNotBeCompletedView" xml:space="preserve">Temporary file cleanup could not be completed. View the log.</sys:String>
+  <sys:String x:Key="Text.CheckIpv4Configuration" xml:space="preserve">Check IPv4 configuration</sys:String>
+  <sys:String x:Key="Text.TcpIpResetCouldNotBeCompletedView" xml:space="preserve">TCP/IP reset could not be completed. View the log.</sys:String>
+  <sys:String x:Key="Text.WinsockResetCouldNotBeCompletedViewThe" xml:space="preserve">Winsock reset could not be completed. View the log.</sys:String>
+  <sys:String x:Key="Text.CheckingConnectedPhysicalAdapters" xml:space="preserve">Checking connected physical adapters...</sys:String>
+  <sys:String x:Key="Text.NoEligibleActivePhysicalEthernetOrWiFi" xml:space="preserve">No eligible active physical Ethernet or Wi-Fi adapters to restart.</sys:String>
+  <sys:String x:Key="Text.AnActivePhysicalAdapterCouldNotBeReliably" xml:space="preserve">An active physical adapter could not be reliably verified.</sys:String>
+  <sys:String x:Key="Text.ConfirmationCancelledNoUacWasRequestedAndThe" xml:space="preserve">Confirmation cancelled; no UAC was requested and the adapter was not restarted.</sys:String>
+  <sys:String x:Key="Text.RestartConfirmationCancelled" xml:space="preserve">Restart confirmation cancelled.</sys:String>
+  <sys:String x:Key="Text.RestartingCouldNotBeStartedCompletedViewThe" xml:space="preserve">Restarting could not be started/completed. View the log.</sys:String>
+  <sys:String x:Key="Text.CheckingActivePhysicalInterfacesWithDhcp" xml:space="preserve">Checking active physical interfaces with DHCP...</sys:String>
+  <sys:String x:Key="Text.NoActivePhysicalEthernetWiFiInterfaceHas" xml:space="preserve">No active physical Ethernet/Wi-Fi interface has an IPv4 address configured through DHCP. No commands ran.</sys:String>
+  <sys:String x:Key="Text.DhcpInterfacesCouldNotBeReliablyVerifiedNo" xml:space="preserve">DHCP interfaces could not be reliably verified. No commands ran.</sys:String>
+  <sys:String x:Key="Text.AnotherOperationIsActiveTrySelectingDhcpInterfaces" xml:space="preserve">Another operation is active; try selecting DHCP interfaces again.</sys:String>
+  <sys:String x:Key="Text.ConfirmationCancelledNoDhcpCommandsRan" xml:space="preserve">Confirmation cancelled; no DHCP commands ran.</sys:String>
+  <sys:String x:Key="Text.DhcpRenewalCouldNotBeCompletedViewThe" xml:space="preserve">DHCP renewal could not be completed. View the log.</sys:String>
+  <sys:String x:Key="Text.TheDnsCacheCouldNotBeFlushedView" xml:space="preserve">The DNS cache could not be flushed. View the log.</sys:String>
+  <sys:String x:Key="Text.TheToolCouldNotBeStartedViewThe" xml:space="preserve">The tool could not be started. View the log for more information.</sys:String>
+  <sys:String x:Key="Text.A12SecondSimulationToReviewTheInterface" xml:space="preserve">A 12-second simulation to review the interface and application closing.</sys:String>
+  <sys:String x:Key="Text.OnlyWaitsAndPublishesSampleTextDoesNot" xml:space="preserve">Only waits and publishes sample text. Does not start processes, diagnose Windows or change its configuration. The fictitious result demonstrates that ExitCode 0 can coexist with RepairRequired.</sys:String>
+  <sys:String x:Key="Text.TheSimulationCouldNotBeCompleted" xml:space="preserve">The simulation could not be completed: </sys:String>
+  <sys:String x:Key="Text.TheLogsFolderCouldNotBeOpened" xml:space="preserve">The logs folder could not be opened.
+</sys:String>
+  <sys:String x:Key="Text.CouldNotOpen" xml:space="preserve">Could not open </sys:String>
+  <sys:String x:Key="Text.PhysicalDisk" xml:space="preserve">Physical disk </sys:String>
+  <sys:String x:Key="Text.NormalBasicHealth" xml:space="preserve">normal basic health</sys:String>
+  <sys:String x:Key="Text.DegradedHealthReportedByTheProvider" xml:space="preserve">degraded health reported by the provider</sys:String>
+  <sys:String x:Key="Text.WindowsReportsDegradedHealthOnAPhysicalDisk" xml:space="preserve">Windows reports degraded health on a physical disk.</sys:String>
+  <sys:String x:Key="Text.WindowsReportsAHealthWarning" xml:space="preserve">Windows reports a health warning.</sys:String>
+  <sys:String x:Key="Text.TheProviderDoesNotExposeACompleteReliable" xml:space="preserve">The provider does not expose a complete, reliable health status.</sys:String>
+  <sys:String x:Key="Text.WindowsReportsNormalBasicHealthOnTheExposed" xml:space="preserve">Windows reports normal basic health on the exposed disks.</sys:String>
+  <sys:String x:Key="Text.ThisIsInformationFromTheStorageProviderNot" xml:space="preserve">
+This is information from the storage provider, not a full SMART analysis. Volume letters have not been mapped to physical disks.</sys:String>
+  <sys:String x:Key="Text.ThisCheckCannotRuleOutIssuesThatAre" xml:space="preserve">This check cannot rule out issues that are not exposed by the driver.</sys:String>
+  <sys:String x:Key="Text.AnEssentialServiceIsStopped" xml:space="preserve">An essential service is stopped.</sys:String>
+  <sys:String x:Key="Text.TheExpectedStateOfAllServicesCouldNot" xml:space="preserve">The expected state of all services could not be confirmed.</sys:String>
+  <sys:String x:Key="Text.AllThreeEssentialServicesAreRunning" xml:space="preserve">All three essential services are running.</sys:String>
+  <sys:String x:Key="Text.ReviewWhyTheServiceStoppedTheApplicationDoes" xml:space="preserve">Review why the service stopped; the application does not start or modify services.</sys:String>
+  <sys:String x:Key="Text.OnlyRpcDcomAndEventLogAreQueried" xml:space="preserve">Only RPC, DCOM and Event Log are queried; not services started on demand.</sys:String>
+  <sys:String x:Key="Text.CheckCancelledByTheUser" xml:space="preserve">Check cancelled by the user.</sys:String>
+  <sys:String x:Key="Text.ChkdskReportsInconsistenciesThatRequireFurtherVerificationThey" xml:space="preserve">CHKDSK reports inconsistencies that require further verification. They may be temporary on an active partition; no repairs were performed.</sys:String>
+  <sys:String x:Key="Text.TheCheckCouldNotBeCompletedOrConfirmed" xml:space="preserve">The check could not be completed or confirmed. View the original output; this does not establish disk damage.</sys:String>
+  <sys:String x:Key="Text.TheChkdskResultCouldNotBeInterpretedAutomatically" xml:space="preserve">The CHKDSK result could not be interpreted automatically. View the original output.</sys:String>
+  <sys:String x:Key="Text.ChkdskOutputRecommendsChkdskScanForAFollow" xml:space="preserve"> CHKDSK output recommends chkdsk /scan for a follow-up check. This is information only; WinSereno has not run or scheduled that action.</sys:String>
+  <sys:String x:Key="Text.InvalidWorkerStartup" xml:space="preserve">Invalid worker startup.</sys:String>
+  <sys:String x:Key="Text.OperationCancelledByTheUserComponentCleanupDid" xml:space="preserve">Operation cancelled by the user; component cleanup did not start.</sys:String>
+  <sys:String x:Key="Text.DismConfirmedThatComponentStoreCleanupCompletedSuccessfully" xml:space="preserve">DISM confirmed that component store cleanup completed successfully.</sys:String>
+  <sys:String x:Key="Text.ComponentStoreCleanupCouldNotBeCompletedView" xml:space="preserve">Component store cleanup could not be completed. View the original output.</sys:String>
+  <sys:String x:Key="Text.TheComponentCleanupResultCouldNotBeInterpreted" xml:space="preserve">The component cleanup result could not be interpreted automatically. View the original output.</sys:String>
+  <sys:String x:Key="Text.WindowsMustBeRestartedToCompleteTheOperation" xml:space="preserve"> Windows must be restarted to complete the operation; the application does not restart automatically.</sys:String>
+  <sys:String x:Key="Text.TheDnsCacheCouldNotBeFlushedView600" xml:space="preserve">The DNS cache could not be flushed. View the details.</sys:String>
+  <sys:String x:Key="Text.WindowsCouldNotFlushTheDnsCacheView" xml:space="preserve">Windows could not flush the DNS cache. View the output for the reason.</sys:String>
+  <sys:String x:Key="Text.WindowsConfirmedThatTheDnsCacheWasFlushed" xml:space="preserve">Windows confirmed that the DNS cache was flushed. This does not verify Internet connectivity.</sys:String>
+  <sys:String x:Key="Text.TheCommandFinishedWithExitcode0ButFlushing" xml:space="preserve">The command finished with ExitCode 0, but flushing the DNS cache could not be confirmed automatically. View the original output.</sys:String>
+  <sys:String x:Key="Text.AValidApplicationFolderCouldNotBeDetermined" xml:space="preserve">A valid application folder could not be determined. No other location will be opened.</sys:String>
+  <sys:String x:Key="Text.TheLogsFolderDoesNotMatchTheExpected" xml:space="preserve">The logs folder does not match the expected portable location.</sys:String>
+  <sys:String x:Key="Text.TheLogsFolderIsALinkOrReparse" xml:space="preserve">The logs folder is a link or reparse point. A redirected location will not be opened.</sys:String>
+  <sys:String x:Key="Text.UnexpectedRestartStart" xml:space="preserve">Unexpected restart start.</sys:String>
+  <sys:String x:Key="Text.TheApplicationFolderMustBeAValidAbsolute" xml:space="preserve">The application folder must be a valid absolute local path.</sys:String>
+  <sys:String x:Key="Text.AnExistingLocalApplicationFolderCouldNotBe" xml:space="preserve">An existing local application folder could not be resolved.</sys:String>
+  <sys:String x:Key="Text.TheManagedLocationIsALinkReparsePoint" xml:space="preserve">The managed location is a link, reparse point or unexpected file type.</sys:String>
+  <sys:String x:Key="Text.WindowsMustBeRestartedTheApplicationDoesNot" xml:space="preserve"> Windows must be restarted; the application does not restart it.</sys:String>
+  <sys:String x:Key="Text.WindowsDidNotFindDamagedProtectedFiles" xml:space="preserve">Windows did not find damaged protected files.</sys:String>
+  <sys:String x:Key="Text.NoComponentStoreCorruptionWasDetected" xml:space="preserve">No component store corruption was detected.</sys:String>
+  <sys:String x:Key="Text.WindowsFoundDamagedFilesAndRepairedThem" xml:space="preserve">Windows found damaged files and repaired them.</sys:String>
+  <sys:String x:Key="Text.TheWindowsImageRepairOperationCompletedSuccessfully" xml:space="preserve">The Windows image repair operation completed successfully.</sys:String>
+  <sys:String x:Key="Text.RepairableComponentStoreCorruptionWasDetectedDismRestorehealth" xml:space="preserve">Repairable component store corruption was detected. DISM RestoreHealth is recommended.</sys:String>
+  <sys:String x:Key="Text.DismCouldNotObtainTheFilesNeededTo" xml:space="preserve">DISM could not obtain the files needed to complete repair.</sys:String>
+  <sys:String x:Key="Text.WindowsFoundDamagedFilesItCouldNotFully" xml:space="preserve">Windows found damaged files it could not fully repair. Windows stores additional information in </sys:String>
+  <sys:String x:Key="Text.DismCouldNotCompleteTheRepairOperationView" xml:space="preserve">DISM could not complete the repair operation. View the original output.</sys:String>
+  <sys:String x:Key="Text.WindowsResourceProtectionCouldNotPerformTheRequested" xml:space="preserve">Windows Resource Protection could not perform the requested operation. This does not establish corruption.</sys:String>
+  <sys:String x:Key="Text.TheOperationCouldNotBeCompletedViewThe" xml:space="preserve">The operation could not be completed. View the output for context.</sys:String>
+  <sys:String x:Key="Text.VerificationNotStartedPermissionRequestCancelled" xml:space="preserve">Verification not started: permission request cancelled.</sys:String>
+  <sys:String x:Key="Text.WindowsDidNotFindIntegrityViolationsInProtected" xml:space="preserve">Windows did not find integrity violations in protected files.</sys:String>
+  <sys:String x:Key="Text.WindowsDetectedIntegrityViolationsInProtectedFilesNo" xml:space="preserve">Windows detected integrity violations in protected files. No repairs were performed.</sys:String>
+  <sys:String x:Key="Text.VerificationOfProtectedFilesCouldNotBeConfirmed" xml:space="preserve">Verification of protected files could not be confirmed. View the original output.</sys:String>
+  <sys:String x:Key="Text.LocalVolumesReady" xml:space="preserve"> local volumes ready</sys:String>
+  <sys:String x:Key="Text.ElevationCancelledByTheUserTcpIpWas" xml:space="preserve">Elevation cancelled by the user; TCP/IP was not reset.</sys:String>
+  <sys:String x:Key="Text.NoFinalTcpIpCommandResultWasReceived" xml:space="preserve">No final TCP/IP command result was received. View the original output; changes may have been applied.</sys:String>
+  <sys:String x:Key="Text.WindowsPartiallyResetTcpIpButOneOr" xml:space="preserve">Windows partially reset TCP/IP, but one or more entries could not be changed.</sys:String>
+  <sys:String x:Key="Text.WindowsConfirmedChangesToTcpIpButNot" xml:space="preserve">Windows confirmed changes to TCP/IP, but not all output could be interpreted or a complete reset confirmed.</sys:String>
+  <sys:String x:Key="Text.Confirmed" xml:space="preserve"> Confirmed </sys:String>
+  <sys:String x:Key="Text.WindowsCouldNotCompleteTheTcpIpReset" xml:space="preserve">Windows could not complete the TCP/IP reset. View the original output. Changes may have been applied.</sys:String>
+  <sys:String x:Key="Text.TheTcpIpResetStepsReportedByWindows" xml:space="preserve">The TCP/IP reset steps reported by Windows completed successfully. This does not verify or guarantee connectivity.</sys:String>
+  <sys:String x:Key="Text.TheCommandFinishedWithExitcode0ButIts" xml:space="preserve">The command finished with ExitCode 0, but its output does not allow the TCP/IP reset to be confirmed automatically. View the details.</sys:String>
+  <sys:String x:Key="Text.WindowsSaysYouMustRestartToCompleteThe" xml:space="preserve"> Windows says you must restart to complete the change; the application never restarts automatically.</sys:String>
+  <sys:String x:Key="Text.RestartingWindowsIsUsuallyRecommendedToCompleteThe" xml:space="preserve"> Restarting Windows is usually recommended to complete the reset; the output did not confirm an explicit requirement. It never restarts automatically.</sys:String>
+  <sys:String x:Key="Text.TheTempLocationIsNotASafeLocal" xml:space="preserve">The TEMP location is not a safe local folder.</sys:String>
+  <sys:String x:Key="Text.TheRootFolderIsRetained" xml:space="preserve">
+The root folder is retained. </sys:String>
+  <sys:String x:Key="Text.DatesAndAttributesAreCheckedAgainDuringExecution" xml:space="preserve">Dates and attributes are checked again during execution. Links, junctions and reparse points are not followed. </sys:String>
+  <sys:String x:Key="Text.FilesInUseLockedOrProtectedFilesAre" xml:space="preserve">Files in use, locked or protected files are skipped without changing permissions. Only eligible empty folders are deleted.
+</sys:String>
+  <sys:String x:Key="Text.EstimateFromTheLastAnalysis" xml:space="preserve">Estimate from the last analysis: </sys:String>
+  <sys:String x:Key="Text.InvalidCleanupRoot" xml:space="preserve">Invalid cleanup root.</sys:String>
+  <sys:String x:Key="Text.TempChangedAfterConfirmation" xml:space="preserve">TEMP changed after confirmation.</sys:String>
+  <sys:String x:Key="Text.FolderReplacedOrReparsePoint" xml:space="preserve">Folder replaced or reparse point.</sys:String>
+  <sys:String x:Key="Text.ElevationCancelledByTheUserWinsockWasNot" xml:space="preserve">Elevation cancelled by the user; Winsock was not reset.</sys:String>
+  <sys:String x:Key="Text.TheWinsockResetCouldNotBeCompletedOr" xml:space="preserve">The Winsock reset could not be completed or confirmed. View the details.</sys:String>
+  <sys:String x:Key="Text.WindowsCouldNotCompleteTheWinsockResetView" xml:space="preserve">Windows could not complete the Winsock reset. View the original output.</sys:String>
+  <sys:String x:Key="Text.WindowsConfirmedThatTheWinsockCatalogWasReset" xml:space="preserve">Windows confirmed that the Winsock catalog was reset. This does not confirm Internet connectivity.</sys:String>
+  <sys:String x:Key="Text.TheCommandFinishedWithExitcode0ButThe" xml:space="preserve">The command finished with ExitCode 0, but the Winsock reset could not be interpreted automatically. View the original output.</sys:String>
+  <sys:String x:Key="Text.WindowsSaysYouMustRestartToCompleteThe650" xml:space="preserve"> Windows says you must restart to complete the change; it never restarts automatically.</sys:String>
+  <sys:String x:Key="Text.WindowsMayNeedToBeRestartedToComplete" xml:space="preserve"> Windows may need to be restarted to complete the change; it never restarts automatically.</sys:String>
+  <sys:String x:Key="Text.ViewDetails" xml:space="preserve">View details</sys:String>
+  <sys:String x:Key="Text.Close" xml:space="preserve">Close</sys:String>
+  <sys:String x:Key="Text.Winsereno" xml:space="preserve">WinSereno</sys:String>
+  <sys:String x:Key="Text.Separator" xml:space="preserve"> · </sys:String>
+  <sys:String x:Key="Text.ComingSoon" xml:space="preserve">COMING SOON</sys:String>
+  <sys:String x:Key="Text.Github" xml:space="preserve">GitHub ↗</sys:String>
+  <sys:String x:Key="Text.Refresh" xml:space="preserve">Refresh</sys:String>
+  <sys:String x:Key="Text.ExternalDrives" xml:space="preserve">External drives</sys:String>
+  <sys:String x:Key="Text.IndividualTools" xml:space="preserve">Individual tools</sys:String>
+  <sys:String x:Key="Text.ResetWinsock" xml:space="preserve">Reset Winsock</sys:String>
+  <sys:String x:Key="Text.EmptyRecycleBin" xml:space="preserve">Empty Recycle Bin</sys:String>
+  <sys:String x:Key="Text.Clean" xml:space="preserve">Clean</sys:String>
+  <sys:String x:Key="Text.Appearance" xml:space="preserve">Appearance</sys:String>
+  <sys:String x:Key="Text.Theme" xml:space="preserve">Theme</sys:String>
+  <sys:String x:Key="Text.DataAndLogs" xml:space="preserve">Data and logs</sys:String>
+  <sys:String x:Key="Text.OpenLogsFolder" xml:space="preserve">Open logs folder</sys:String>
+  <sys:String x:Key="Text.OpenWinserenoFolder" xml:space="preserve">Open WinSereno folder</sys:String>
+  <sys:String x:Key="Text.Preferences" xml:space="preserve">Preferences</sys:String>
+  <sys:String x:Key="Text.ResetPreferences" xml:space="preserve">Reset preferences</sys:String>
+  <sys:String x:Key="Text.About" xml:space="preserve">About</sys:String>
+  <sys:String x:Key="Text.Releases" xml:space="preserve">Releases ↗</sys:String>
+  <sys:String x:Key="Text.Updates" xml:space="preserve">Updates</sys:String>
+  <sys:String x:Key="Text.CheckForUpdates" xml:space="preserve">Check for updates</sys:String>
+  <sys:String x:Key="Text.WinserenoMark" xml:space="preserve">WinSereno mark</sys:String>
+  <sys:String x:Key="Text.ConfirmTask" xml:space="preserve">Confirm task</sys:String>
+  <sys:String x:Key="Text.ExactCommand" xml:space="preserve">Exact command</sys:String>
+  <sys:String x:Key="Text.Arguments" xml:space="preserve">Arguments</sys:String>
+  <sys:String x:Key="Text.X" xml:space="preserve">X</sys:String>
+  <sys:String x:Key="Text.HideResult" xml:space="preserve">Hide result</sys:String>
+  <sys:String x:Key="Text.HideCompletedResult" xml:space="preserve">Hide completed result</sys:String>
+  <sys:String x:Key="Text.FullOutputTask" xml:space="preserve">Full output · Task</sys:String>
+  <sys:String x:Key="Text.StdoutFullOutput" xml:space="preserve">STDOUT · full output</sys:String>
+  <sys:String x:Key="Text.StderrFullOutput" xml:space="preserve">STDERR · full output</sys:String>
+  <sys:String x:Key="Text.Separator685" xml:space="preserve">⚠</sys:String>
+  <sys:String x:Key="Text.Ipv4" xml:space="preserve">IPv4</sys:String>
+  <sys:String x:Key="Text.Cleanup" xml:space="preserve">Cleanup</sys:String>
+  <sys:String x:Key="Text.Activity" xml:space="preserve">Activity</sys:String>
+  <sys:String x:Key="Text.Settings" xml:space="preserve">Settings</sys:String>
+  <sys:String x:Key="Text.Light" xml:space="preserve">Light</sys:String>
+  <sys:String x:Key="Text.Dark" xml:space="preserve">Dark</sys:String>
+  <sys:String x:Key="Text.System" xml:space="preserve">System</sys:String>
+  <sys:String x:Key="Text.Maintenance" xml:space="preserve">Maintenance</sys:String>
+  <sys:String x:Key="Text.ActionHistory" xml:space="preserve">Action history</sys:String>
+  <sys:String x:Key="Text.InstalledRam" xml:space="preserve">Installed RAM</sys:String>
+  <sys:String x:Key="Text.Uptime" xml:space="preserve">Uptime</sys:String>
+  <sys:String x:Key="Text.DedicatedGpu" xml:space="preserve">Dedicated GPU</sys:String>
+  <sys:String x:Key="Text.Analyzed" xml:space="preserve">Analyzed</sys:String>
+  <sys:String x:Key="Text.Repaired" xml:space="preserve">Repaired</sys:String>
+  <sys:String x:Key="Text.Partial" xml:space="preserve">Partial</sys:String>
+  <sys:String x:Key="Text.Failed701" xml:space="preserve">Failed</sys:String>
+  <sys:String x:Key="Text.RestartRequired" xml:space="preserve">Restart required</sys:String>
+  <sys:String x:Key="Text.TaskStarted" xml:space="preserve">Task started</sys:String>
+  <sys:String x:Key="Text.Cancelling" xml:space="preserve">Cancelling...</sys:String>
+  <sys:String x:Key="Text.Running" xml:space="preserve">Running...</sys:String>
+  <sys:String x:Key="Text.Uptime706" xml:space="preserve">Uptime</sys:String>
+  <sys:String x:Key="Text.Language" xml:space="preserve">Language</sys:String>
+  <sys:String x:Key="Text.InterfaceLanguage" xml:space="preserve">Interface language</sys:String>
+  <sys:String x:Key="Text.TheLanguageCouldNotBeSaved" xml:space="preserve">The language could not be saved.
+</sys:String>
+  <sys:String x:Key="Text.UpdatesTheInterfaceImmediately" xml:space="preserve">Updates the interface immediately.</sys:String>
+  <sys:String x:Key="Text.Found711" xml:space="preserve"> found</sys:String>
+  <sys:String x:Key="Text.PotentiallyCleanable" xml:space="preserve"> potentially cleanable</sys:String>
+  <sys:String x:Key="Text.EstimatedRecoverable" xml:space="preserve"> estimated recoverable</sys:String>
+  <sys:String x:Key="Text.InTheRecycleBin" xml:space="preserve"> in the Recycle Bin</sys:String>
+  <sys:String x:Key="Text.AccessibleFiles" xml:space="preserve"> accessible files</sys:String>
+  <sys:String x:Key="Text.Items" xml:space="preserve"> items</sys:String>
+  <sys:String x:Key="Text.InaccessibleItemsQueries" xml:space="preserve"> inaccessible items/queries (</sys:String>
+  <sys:String x:Key="Text.PermissionDenials" xml:space="preserve"> permission denials, </sys:String>
+  <sys:String x:Key="Text.Locked" xml:space="preserve"> locked, </sys:String>
+  <sys:String x:Key="Text.OtherErrors" xml:space="preserve"> other errors)</sys:String>
+  <sys:String x:Key="Text.Threads" xml:space="preserve"> threads</sys:String>
+  <sys:String x:Key="Text.FreeOf" xml:space="preserve"> free of </sys:String>
+  <sys:String x:Key="Text.Free" xml:space="preserve"> % free</sys:String>
+  <sys:String x:Key="Text.Driver" xml:space="preserve">Driver </sys:String>
+  <sys:String x:Key="Text.LastChecked" xml:space="preserve">Last checked: </sys:String>
+  <sys:String x:Key="Text.SomeDrivesCouldNotBeChecked726" xml:space="preserve">Some drives could not be checked</sys:String>
+  <sys:String x:Key="Text.IncompleteQuery" xml:space="preserve">Incomplete query</sys:String>
+  <sys:String x:Key="Text.NameUnavailable" xml:space="preserve">Name unavailable</sys:String>
+  <sys:String x:Key="Text.ModelUnavailable" xml:space="preserve">Model unavailable</sys:String>
+  <sys:String x:Key="Text.PrimaryIpv4NotDetermined" xml:space="preserve">Primary IPv4 not determined</sys:String>
+  <sys:String x:Key="Text.DateUnavailable" xml:space="preserve">Date unavailable</sys:String>
+  <sys:String x:Key="Text.SettingsCouldNotBeSaved" xml:space="preserve">Settings could not be saved.</sys:String>
+  <sys:String x:Key="Text.PreferencesHaveBeenAppliedButCouldNotBe" xml:space="preserve">Preferences have been applied, but could not be saved.
+</sys:String>
+  <sys:String x:Key="Text.CouldNotOpen734" xml:space="preserve">Could not open</sys:String>
+  <sys:String x:Key="Text.NoRepairsHaveBeenPerformed" xml:space="preserve">No repairs have been performed.</sys:String>
+  <sys:String x:Key="Text.NoResultsAvailable" xml:space="preserve">No results available.</sys:String>
+  <sys:String x:Key="Text.Analyzing737" xml:space="preserve">Analyzing · </sys:String>
+  <sys:String x:Key="Text.NoResults" xml:space="preserve">No results</sys:String>
+  <sys:String x:Key="Text.Disconnected739" xml:space="preserve">Disconnected</sys:String>
+  <sys:String x:Key="Text.Connected" xml:space="preserve">Connected</sys:String>
+  <sys:String x:Key="Text.Disconnected741" xml:space="preserve">Disconnected</sys:String>
+  <sys:String x:Key="Text.Undetermined" xml:space="preserve">Undetermined</sys:String>
+  <sys:String x:Key="Text.Unconfirmed" xml:space="preserve">Unconfirmed</sys:String>
+  <sys:String x:Key="Text.Cancelled744" xml:space="preserve">Cancelled</sys:String>
+  <sys:String x:Key="Text.CancellationRequested" xml:space="preserve">Cancellation requested</sys:String>
+  <sys:String x:Key="Text.Protected" xml:space="preserve">Protected</sys:String>
+  <sys:String x:Key="Text.Skipped" xml:space="preserve">Skipped</sys:String>
+  <sys:String x:Key="Text.Skipped748" xml:space="preserve">Skipped: </sys:String>
+  <sys:String x:Key="Text.TheLogsFolder" xml:space="preserve"> the Logs folder</sys:String>
+  <sys:String x:Key="Text.TheLogsFolder750" xml:space="preserve">the Logs folder</sys:String>
+  <sys:String x:Key="Text.StepsAppliedByWindows" xml:space="preserve"> steps applied by Windows.</sys:String>
+  <sys:String x:Key="Text.SystemComponents" xml:space="preserve"> (system components)</sys:String>
+  <sys:String x:Key="Text.Unavailable753" xml:space="preserve">unavailable</sys:String>
+  <sys:String x:Key="Text.CurrentUserSRecycleBin" xml:space="preserve">Current user's Recycle Bin.</sys:String>
+  <sys:String x:Key="Text.RequestingAdministratorPrivileges" xml:space="preserve">Requesting administrator privileges...</sys:String>
+  <sys:String x:Key="Text.TheWinserenoFolder" xml:space="preserve">the WinSereno folder</sys:String>
+  <sys:String x:Key="Text.PreliminaryRecycleBinQueryReadOnly" xml:space="preserve">Preliminary Recycle Bin query (read-only)</sys:String>
+  <sys:String x:Key="Text.RecycleBinCannotBeQueriedEmptyingIsNot" xml:space="preserve">Recycle Bin cannot be queried; emptying is not offered.</sys:String>
+  <sys:String x:Key="Text.SelectAdapterToRestart" xml:space="preserve">Select adapter to restart</sys:String>
+  <sys:String x:Key="Text.SelectDhcpInterfaces" xml:space="preserve">Select DHCP interfaces</sys:String>
+  <sys:String x:Key="Text.CancellableSampleTask" xml:space="preserve">Cancellable sample task</sys:String>
+  <sys:String x:Key="Text.NonCancellableSampleTask" xml:space="preserve">Non-cancellable sample task</sys:String>
+  <sys:String x:Key="Text.NoSystemArguments" xml:space="preserve">(no system arguments)</sys:String>
+  <sys:String x:Key="Text.InternetAvailable" xml:space="preserve">Internet available</sys:String>
+  <sys:String x:Key="Text.NetworkQueryCancelled" xml:space="preserve">Network query cancelled.</sys:String>
+  <sys:String x:Key="Text.CheckDisk" xml:space="preserve">Check disk</sys:String>
+  <sys:String x:Key="Text.CleanUpComponents" xml:space="preserve">Clean up components</sys:String>
+  <sys:String x:Key="Text.CheckAndRepair" xml:space="preserve">Check and repair</sys:String>
+  <sys:String x:Key="Text.LastResult" xml:space="preserve">Last result: </sys:String>
+  <sys:String x:Key="Text.RestartRequired770" xml:space="preserve"> · Restart required</sys:String>
+  <sys:String x:Key="Text.ItemsDeleted" xml:space="preserve"> · Items deleted: </sys:String>
+  <sys:String x:Key="Text.CurrentLink" xml:space="preserve">Current link: </sys:String>
+  <sys:String x:Key="Text.NothingToClean" xml:space="preserve">Nothing to clean</sys:String>
+  <sys:String x:Key="Text.FilesDeleted" xml:space="preserve"> files deleted · </sys:String>
+  <sys:String x:Key="Text.LinksSkipped" xml:space="preserve"> links skipped · </sys:String>
+  <sys:String x:Key="Text.SelectedAdapter" xml:space="preserve">Selected adapter: </sys:String>
+  <sys:String x:Key="Text.RemoteProcedureCallRpc" xml:space="preserve">Remote Procedure Call (RPC)</sys:String>
+  <sys:String x:Key="Text.DcomServerProcessLauncher" xml:space="preserve">DCOM Server Process Launcher</sys:String>
+  <sys:String x:Key="Text.ADriveHasLittleFreeSpace" xml:space="preserve">A drive has little free space.</sys:String>
+  <sys:String x:Key="Text.AllQueriedDrivesHaveAtLeast" xml:space="preserve">All queried drives have at least </sys:String>
+  <sys:String x:Key="Text.FreeSpace" xml:space="preserve"> % free space.</sys:String>
+  <sys:String x:Key="Text.ProviderWarning" xml:space="preserve">provider warning</sys:String>
+  <sys:String x:Key="Text.UnknownStatus" xml:space="preserve">unknown status</sys:String>
+  <sys:String x:Key="Text.KeepACopyOfYourDataAndReview" xml:space="preserve">Keep a copy of your data and review the indicated device.</sys:String>
+  <sys:String x:Key="Text.CouldNotBeChecked" xml:space="preserve">: could not be checked</sys:String>
+  <sys:String x:Key="Text.ChkdskFoundNoFileSystemProblemsOnThe" xml:space="preserve">CHKDSK found no file system problems on the checked drive.</sys:String>
+  <sys:String x:Key="Text.UserTemporaryFiles" xml:space="preserve">User temporary files</sys:String>
+  <sys:String x:Key="Text.RecycleBin" xml:space="preserve">Recycle Bin</sys:String>
+  <sys:String x:Key="Text.QueryCancelledOnlyFilesAlreadyQueriedAreShown" xml:space="preserve">Query cancelled; only files already queried are shown.</sys:String>
+  <sys:String x:Key="Text.NotCalculated" xml:space="preserve">not calculated</sys:String>
+  <sys:String x:Key="Text.CurrentUserSRecycleBinAllDrivesShqueryrecyclebinw" xml:space="preserve">Current user's Recycle Bin · all drives (SHQueryRecycleBinW)</sys:String>
+  <sys:String x:Key="Text.CleanSelectedItems" xml:space="preserve">Clean selected items</sys:String>
+  <sys:String x:Key="Text.RequestingPermissionBeforeStartingCleanup" xml:space="preserve">Requesting permission before starting cleanup...</sys:String>
+  <sys:String x:Key="Text.RefreshingResults" xml:space="preserve">Refreshing results · </sys:String>
+  <sys:String x:Key="Text.TheFinalResultCouldNotBeRefreshed" xml:space="preserve">: the final result could not be refreshed.</sys:String>
+  <sys:String x:Key="Text.CleanupCompleted" xml:space="preserve">Cleanup completed.</sys:String>
+  <sys:String x:Key="Text.DisconnectedInactive" xml:space="preserve">disconnected/inactive</sys:String>
+  <sys:String x:Key="Text.NameOrTypeExcludedForSafety" xml:space="preserve">name or type excluded for safety</sys:String>
+  <sys:String x:Key="Text.UnsafeInterfaceName" xml:space="preserve">Unsafe interface name.</sys:String>
+  <sys:String x:Key="Text.ProtectedFiles" xml:space="preserve">Protected files</sys:String>
+  <sys:String x:Key="Text.ProtectedFilesHaveNoIntegrityViolations" xml:space="preserve">protected files have no integrity violations</sys:String>
+  <sys:String x:Key="Text.IntegrityViolationsWereDetectedInProtectedFiles" xml:space="preserve">integrity violations were detected in protected files</sys:String>
+  <sys:String x:Key="Text.ProtectedFilesCouldNotBeFullyChecked" xml:space="preserve">protected files could not be fully checked</sys:String>
+  <sys:String x:Key="Text.ChecksWhetherDrivesHaveEnoughFreeSpace" xml:space="preserve">Checks whether drives have enough free space.</sys:String>
+  <sys:String x:Key="Text.ChecksWhetherTheComputerHasAnActiveNetwork" xml:space="preserve">Checks whether the computer has an active network and working Internet access.</sys:String>
+  <sys:String x:Key="Text.Check" xml:space="preserve">Check </sys:String>
+  <sys:String x:Key="Text.FixedReadOnlySequenceNoExternalArguments" xml:space="preserve">Fixed read-only sequence; no external arguments.</sys:String>
+  <sys:String x:Key="Text.VerifyProtectedFiles" xml:space="preserve">Verify protected files</sys:String>
+  <sys:String x:Key="Text.ChecksTheFileSystemOf" xml:space="preserve">Checks the file system of </sys:String>
+  <sys:String x:Key="Text.FixedInternalSequenceNoExternalArgumentsAccepted" xml:space="preserve">Fixed internal sequence; no external arguments accepted.</sys:String>
+  <sys:String x:Key="Text.CheckSystemFiles" xml:space="preserve">Check system files</sys:String>
+  <sys:String x:Key="Text.SystemExecutableNotAllowed" xml:space="preserve">System executable not allowed.</sys:String>
+  <sys:String x:Key="Text.AtLeast" xml:space="preserve">at least </sys:String>
+  <sys:String x:Key="Text.UserTemporaryFileCleanup" xml:space="preserve">User temporary file cleanup</sys:String>
+  <sys:String x:Key="Text.CheckingTemporaryFiles" xml:space="preserve">Checking temporary files...</sys:String>
+  <sys:String x:Key="Text.CleanupPartiallyCompleted" xml:space="preserve">Cleanup partially completed</sys:String>
+  <sys:String x:Key="Text.CleanupCompleted817" xml:space="preserve">Cleanup completed</sys:String>
+  <sys:String x:Key="Text.CheckingThumbcacheDbFiles" xml:space="preserve">Checking thumbcache_*.db files...</sys:String>
+  <sys:String x:Key="Text.PreparingCleanup" xml:space="preserve">Preparing cleanup...</sys:String>
+  <sys:String x:Key="Text.RunningWithNormalPrivileges" xml:space="preserve">Running with normal privileges...</sys:String>
+  <sys:String x:Key="Text.SsidCannotBeRepresentedAsUtf8Text" xml:space="preserve">SSID cannot be represented as UTF-8 text</sys:String>
+  <sys:String x:Key="Text.ConnectedAdapter" xml:space="preserve">Connected adapter: </sys:String>
+  <sys:String x:Key="Text.Undetermined823" xml:space="preserve">undetermined</sys:String>
+  <sys:String x:Key="Text.Undetermined824" xml:space="preserve">undetermined</sys:String>
+  <sys:String x:Key="Text.Unavailable825" xml:space="preserve">unavailable</sys:String>
+  <sys:String x:Key="Text.NegotiatedSpeed" xml:space="preserve">Negotiated speed: </sys:String>
+  <sys:String x:Key="Text.UnavailableNotInferredFromTheProductName" xml:space="preserve">unavailable; not inferred from the product name</sys:String>
+  <sys:String x:Key="Text.WorkingInternetConnectivityConfirmedThroughHttps" xml:space="preserve">Working Internet connectivity confirmed through HTTPS.</sys:String>
+  <sys:String x:Key="Text.InternetAvailableEthernetLinkAt100MbpsWith" xml:space="preserve">Internet available; Ethernet link at 100 Mbps with higher capacity confirmed.</sys:String>
+  <sys:String x:Key="Text.DestinationUndetermined" xml:space="preserve">destination undetermined</sys:String>
+  <sys:String x:Key="Text.IcmpNotChecked" xml:space="preserve">ICMP not checked</sys:String>
+  <sys:String x:Key="Text.NoAddressesNotChecked" xml:space="preserve">no addresses; not checked</sys:String>
+  <sys:String x:Key="Text.HostnameCouldNotBeResolvedInconclusiveResult" xml:space="preserve">hostname could not be resolved; inconclusive result</sys:String>
+  <sys:String x:Key="Text.NotConfirmed" xml:space="preserve">not confirmed (</sys:String>
+  <sys:String x:Key="Text.HttpsResponseReceivedFromMicrosoftHttp" xml:space="preserve">HTTPS response received from Microsoft · HTTP </sys:String>
+  <sys:String x:Key="Text.ResponseFromADifferentEndpointHttpsNotConfirmed" xml:space="preserve">response from a different endpoint; HTTPS not confirmed</sys:String>
+  <sys:String x:Key="Text.MultipleActiveAdaptersPrimaryAdapterUndetermined" xml:space="preserve">Multiple active adapters; primary adapter undetermined</sys:String>
+  <sys:String x:Key="Text.CurrentItems" xml:space="preserve">Current items: </sys:String>
+  <sys:String x:Key="Text.ShemptyrecyclebinwCurrentUserSRecycleBinAllDrives" xml:space="preserve">SHEmptyRecycleBinW (current user's Recycle Bin, all drives)</sys:String>
+  <sys:String x:Key="Text.CurrentUserSRecycleBinAllDrives" xml:space="preserve">Current user's Recycle Bin · all drives</sys:String>
+  <sys:String x:Key="Text.EmptyingTheCurrentUserSEntireRecycleBin" xml:space="preserve">Emptying the current user's entire Recycle Bin...</sys:String>
+  <sys:String x:Key="Text.RecycleBinEmptied" xml:space="preserve">Recycle Bin emptied.</sys:String>
+  <sys:String x:Key="Text.PartiallyEmptiedItemsRemainInTheRecycleBin" xml:space="preserve">Partially emptied: items remain in the Recycle Bin.</sys:String>
+  <sys:String x:Key="Text.RemainingItems" xml:space="preserve"> · Remaining items: </sys:String>
+  <sys:String x:Key="Text.NotApplicable" xml:space="preserve">not applicable</sys:String>
+  <sys:String x:Key="Text.ScanhealthHealthyRestorehealthIsNotNeeded" xml:space="preserve">ScanHealth = Healthy: RestoreHealth is not needed.</sys:String>
+  <sys:String x:Key="Text.StoppedAt" xml:space="preserve">Stopped at </sys:String>
+  <sys:String x:Key="Text.SequenceCancelledByTheUserBeforeAnySteps" xml:space="preserve">Sequence cancelled by the user before any steps started.</sys:String>
+  <sys:String x:Key="Text.SequenceStoppedAt" xml:space="preserve">Sequence stopped at </sys:String>
+  <sys:String x:Key="Text.AdditionalActionsMayBeNeeded" xml:space="preserve">. Additional actions may be needed.</sys:String>
+  <sys:String x:Key="Text.StepsViewTheOriginalOutputAndExitcodeFor" xml:space="preserve"> steps. View the original output and ExitCode for errors or uninterpreted data. This does not guarantee connectivity.</sys:String>
+  <sys:String x:Key="Text.InternalNetCleanupOfThumbcacheDb" xml:space="preserve">Internal .NET cleanup of thumbcache_*.db</sys:String>
+  <sys:String x:Key="Text.PotentiallyCleanable853" xml:space="preserve">
+Potentially cleanable: </sys:String>
+  <sys:String x:Key="Text.CleanUserTemporaryFiles" xml:space="preserve">Clean user temporary files</sys:String>
+  <sys:String x:Key="Text.InternalNetCleanupNoExternalProcesses" xml:space="preserve">Internal .NET cleanup (no external processes)</sys:String>
+  <sys:String x:Key="Text.DoesNotGuaranteeSpaceRecovered" xml:space="preserve"> (does not guarantee space recovered).</sys:String>
+  <sys:String x:Key="Text.ExcessiveFolderDepthSkippedForSafety" xml:space="preserve">Excessive folder depth; skipped for safety.</sys:String>
+  <sys:String x:Key="Text.ItemTypeChanged" xml:space="preserve">Item type changed.</sys:String>
+  <sys:String x:Key="Text.PartialResult859" xml:space="preserve">partial result</sys:String>
+  <sys:String x:Key="Text.SelectAdapter" xml:space="preserve">Select adapter</sys:String>
+  <sys:String x:Key="Text.Continue" xml:space="preserve">Continue</sys:String>
+  <sys:String x:Key="Text.Reset" xml:space="preserve">Reset</sys:String>
+  <sys:String x:Key="Text.Internet" xml:space="preserve">Internet</sys:String>
+  <sys:String x:Key="Text.IcmpResponseReceived" xml:space="preserve">ICMP response received</sys:String>
+  <sys:String x:Key="Text.Resolved" xml:space="preserve"> resolved</sys:String>
+  <sys:String x:Key="Text.HttpsNotChecked" xml:space="preserve">HTTPS not checked</sys:String>
+  <sys:String x:Key="Text.Back" xml:space="preserve">Back</sys:String>
+  <sys:String x:Key="Text.AdministratorPrivileges" xml:space="preserve">Administrator privileges</sys:String>
+  <sys:String x:Key="Text.WindowsRestart" xml:space="preserve">Windows restart</sys:String>
+  <sys:String x:Key="Text.Cancellation" xml:space="preserve">Cancellation</sys:String>
+  <sys:String x:Key="Text.FreeSpace871" xml:space="preserve"> % free space</sys:String>
+  <sys:String x:Key="Text.Pending" xml:space="preserve">Pending</sys:String>
+  <sys:String x:Key="Text.S" xml:space="preserve">s</sys:String>
+  <sys:String x:Key="Text.ElapsedTime" xml:space="preserve">Elapsed time: </sys:String>
+  <sys:String x:Key="Text.ActualProgress" xml:space="preserve">Actual progress: </sys:String>
+  <sys:String x:Key="Text.ImpactLevel" xml:space="preserve">Impact level: </sys:String>
+  <sys:String x:Key="Text.AdministratorPrivilegesRequired" xml:space="preserve">Administrator privileges required: </sys:String>
+  <sys:String x:Key="Text.MayRequireRestart" xml:space="preserve">May require restart: </sys:String>
+  <sys:String x:Key="Text.CanBeCancelled" xml:space="preserve">Can be cancelled: </sys:String>
+  <sys:String x:Key="Text.Healthy880" xml:space="preserve"> Healthy</sys:String>
+  <sys:String x:Key="Text.Errors" xml:space="preserve"> Errors</sys:String>
+  <sys:String x:Key="Text.Running882" xml:space="preserve">Running </sys:String>
+  <sys:String x:Key="Text.Healthy883" xml:space="preserve"> Healthy</sys:String>
+  <sys:String x:Key="Text.Attention884" xml:space="preserve"> Attention</sys:String>
+  <sys:String x:Key="Text.WindowsHasNotBeenRestarted885" xml:space="preserve">Windows has not been restarted.</sys:String>
+  <sys:String x:Key="Text.NoChangesHaveBeenApplied" xml:space="preserve">No changes have been applied.</sys:String>
+  <sys:String x:Key="Text.HealthyPlural887" xml:space="preserve">Healthy</sys:String>
+  <sys:String x:Key="Text.ErrorsPlural888" xml:space="preserve">Errors</sys:String>
+  <sys:String x:Key="Text.HealthyPlural889" xml:space="preserve">Healthy · </sys:String>
+  <sys:String x:Key="Text.ErrorsPlural890" xml:space="preserve">Errors · </sys:String>
+  <sys:String x:Key="Text.TheDhcpCommandCouldNotBeStartedOrConfirmed" xml:space="preserve">The DHCP command could not be started or confirmed.</sys:String>
+  <sys:String x:Key="Text.TheCommand" xml:space="preserve">The command </sys:String>
+  <sys:String x:Key="Text.FailedReviewItsOriginalOutput" xml:space="preserve"> failed; review its original output.</sys:String>
+  <sys:String x:Key="Text.WindowsReportedAFailureIn" xml:space="preserve">Windows reported a failure in </sys:String>
+  <sys:String x:Key="Text.EvenThoughItReturnedExitcode0ReviewItsOutput" xml:space="preserve"> even though it returned ExitCode 0. Review its output.</sys:String>
+  <sys:String x:Key="Text.Ipv4ReleaseWasConfirmedOnThisInterface" xml:space="preserve">IPv4 release was confirmed on this interface.</sys:String>
+  <sys:String x:Key="Text.WindowsHasAValidDhcpIpv4AddressOnThis" xml:space="preserve">Windows has a valid DHCP IPv4 address on this interface; this does not check Internet connectivity.</sys:String>
+  <sys:String x:Key="Text.Ipv4Release" xml:space="preserve">IPv4 release.</sys:String>
+  <sys:String x:Key="Text.AValidDhcpIpv4Address" xml:space="preserve">a valid DHCP IPv4 address.</sys:String>
+  <sys:String x:Key="Text.IpcCommunicationWasInterruptedNoFurtherInterfacesWillBe" xml:space="preserve">IPC communication was interrupted; no further interfaces will be changed.</sys:String>
+  <sys:String x:Key="Text.RenewWasNotRunBecauseReleaseFailedOrIts" xml:space="preserve">Renew was not run because release failed or its result could not be confirmed.</sys:String>
+  <sys:String x:Key="Text.ElevationWasCancelledDhcpRenewalWasNotCompletedReview" xml:space="preserve">Elevation was cancelled; DHCP renewal was not completed. Review the executed and skipped steps.</sys:String>
+  <sys:String x:Key="Text.DhcpRenewalCompletedOnTheConfirmedInterfacesConnectivityIs" xml:space="preserve">DHCP renewal completed on the confirmed interfaces. Connectivity is checked separately.</sys:String>
+  <sys:String x:Key="Text.DhcpRenewalDidNotCompleteOnEveryInterfaceReview" xml:space="preserve">DHCP renewal did not complete on every interface. Review the failed command and skipped steps.</sys:String>
+  <sys:String x:Key="Text.TheCommandsFinishedButDhcpRenewalCouldNotBe" xml:space="preserve">The commands finished, but DHCP renewal could not be fully confirmed.</sys:String>
+  <sys:String x:Key="Text.EnableRecoveryRetry" xml:space="preserve">Enable recovery retry </sys:String>
+  <sys:String x:Key="Text.RetryWaitFailedRecoveryContinues" xml:space="preserve">Retry wait failed; recovery continues: </sys:String>
+  <sys:String x:Key="Text.FailedContext" xml:space="preserve"> failed: </sys:String>
+  <sys:String x:Key="Text.CheckAction" xml:space="preserve">Check</sys:String>
+  <sys:String x:Key="Text.RepairAction" xml:space="preserve">Repair</sys:String>
+  <sys:String x:Key="Text.FailedResult" xml:space="preserve">Failed</sys:String>
+  <sys:String x:Key="Text.UnknownResult" xml:space="preserve">Unknown</sys:String>
+  <sys:String x:Key="Text.CancellingAction" xml:space="preserve">Cancelling</sys:String>
+</ResourceDictionary>

@@ -14,7 +14,7 @@ namespace WinSereno.Views
         private bool waitingForCancellation;
         public MainWindow(MainViewModel viewModel, IDialogService dialogs)
         {
-            InitializeComponent();
+            WinSereno.Localization.LocalizationPresentation.Initialize(); InitializeComponent();
             TaskExecutionHost.Content = new TaskExecutionPanel();
             this.viewModel = viewModel; this.dialogs = dialogs;
             DataContext = viewModel;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using WinSereno.Infrastructure;
 using WinSereno.Models;
@@ -48,7 +49,7 @@ namespace WinSereno.ViewModels
         public RelayCommand DismissTaskPanelCommand { get; }
         public ObservableCollection<ToolPlaceholder> RepairTools { get; } = new ObservableCollection<ToolPlaceholder>();
         public ObservableCollection<ToolPlaceholder> NetworkTools { get; } = new ObservableCollection<ToolPlaceholder>();
-        public string[] ThemeChoices { get; } = { "Claro", "Oscuro", "Sistema" };
+        public string[] ThemeChoices { get; } = { WinSereno.Localization.LocalizationService.Source("Text.Light"), WinSereno.Localization.LocalizationService.Source("Text.Dark"), WinSereno.Localization.LocalizationService.Source("Text.System") };
         public RelayCommand NavigateCommand { get; }
         public RelayCommand StartMockCommand { get; }
         public RelayCommand RunRepairCommand { get; }
@@ -102,7 +103,7 @@ namespace WinSereno.ViewModels
         public string CurrentSectionCode => CurrentSection.ToString();
         public NavigationSection DiagnosisNavigationTarget => NavigationSection.Diagnosis;
         public NavigationSection RepairNavigationTarget => NavigationSection.Repair;
-        public string PageTitle => CurrentSection == NavigationSection.Activity ? "Registro de acciones" : SelectedNavigation.Label;
+        public string PageTitle => CurrentSection == NavigationSection.Activity ? WinSereno.Localization.LocalizationService.Source("Text.ActionHistory") : SelectedNavigation.Label;
         public string ProductVersion => ProductInformation.DisplayVersion;
         public bool HasPageNotice => !string.IsNullOrWhiteSpace(PageNotice);
         public string PageNotice => "";
@@ -112,13 +113,13 @@ namespace WinSereno.ViewModels
             {
                 switch (CurrentSection)
                 {
-                    case NavigationSection.Activity: return "Consulta las acciones realizadas durante esta sesión; los logs TXT conservan el registro persistente.";
-                    case NavigationSection.Diagnosis: return "Analiza el estado general del PC sin realizar reparaciones. La integridad de Windows requiere permisos de administrador.";
-                    case NavigationSection.Repair: return "Comprueba y repara componentes de Windows mediante acciones explícitas; las herramientas administrativas solicitan confirmación y permisos de administrador antes de ejecutarse.";
-                    case NavigationSection.Network: return "Consulta y actualiza el estado de la red; las herramientas solicitan confirmación y permisos de administrador cuando corresponde.";
-                    case NavigationSection.Cleanup: return "Analiza el espacio que puede recuperarse y elige qué categorías quieres limpiar.";
-                    case NavigationSection.Settings: return "Personaliza la apariencia y consulta la configuración de WinSereno.";
-                    default: return "Información del equipo obtenida directamente desde Windows.";
+                    case NavigationSection.Activity: return WinSereno.Localization.LocalizationService.Source("Text.ViewActionsPerformedDuringThisSessionTxtLogs");
+                    case NavigationSection.Diagnosis: return WinSereno.Localization.LocalizationService.Source("Text.AnalyzesTheGeneralConditionOfYourPcWithout");
+                    case NavigationSection.Repair: return WinSereno.Localization.LocalizationService.Source("Text.ChecksAndRepairsWindowsComponentsThroughExplicitActions");
+                    case NavigationSection.Network: return WinSereno.Localization.LocalizationService.Source("Text.ViewAndRefreshNetworkStatusToolsRequestConfirmation");
+                    case NavigationSection.Cleanup: return WinSereno.Localization.LocalizationService.Source("Text.AnalyzeRecoverableSpaceAndChooseWhichCategoriesTo");
+                    case NavigationSection.Settings: return WinSereno.Localization.LocalizationService.Source("Text.CustomizeTheAppearanceAndViewWinserenoSettings");
+                    default: return WinSereno.Localization.LocalizationService.Source("Text.SystemInformationRetrievedDirectlyFromWindows");
                 }
             }
         }
@@ -127,18 +128,32 @@ namespace WinSereno.ViewModels
             foreach (var item in Navigation) if (item.Section == section) { SelectedNavigation = item; if (section == NavigationSection.Repair) RepairNavigationRequested?.Invoke(this, EventArgs.Empty); return; }
         }
         public event EventHandler RepairNavigationRequested;
-        public string SelectedTheme
+        public System.Collections.Generic.IReadOnlyList<WinSereno.Localization.LanguageChoice> LanguageChoices => WinSereno.Localization.LocalizationService.Languages;
+        public WinSereno.Localization.LanguageChoice SelectedLanguage
         {
-            get => settings.Theme == "System" ? "Sistema" : settings.Theme == "Dark" ? "Oscuro" : "Claro";
+            get => LanguageChoices.First(l => l.Code == WinSereno.Localization.LocalizationService.Normalize(settings.Language));
             set
             {
-                var theme = value == "Sistema" ? "System" : value == "Oscuro" ? "Dark" : "Light";
+                if (value == null || value.Code == settings.Language) return;
+                settings.Language = WinSereno.Localization.LocalizationService.Normalize(value.Code);
+                WinSereno.Localization.LocalizationService.Current.Apply(settings.Language);
+                Raise(nameof(SelectedLanguage));
+                try { storage.SaveSettings(settings); }
+                catch (Exception ex) { dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheLanguageCouldNotBeSaved") + ex.Message); }
+            }
+        }
+        public string SelectedTheme
+        {
+            get => settings.Theme == "System" ? WinSereno.Localization.LocalizationService.Source("Text.System") : settings.Theme == "Dark" ? WinSereno.Localization.LocalizationService.Source("Text.Dark") : WinSereno.Localization.LocalizationService.Source("Text.Light");
+            set
+            {
+                var theme = value == WinSereno.Localization.LocalizationService.Source("Text.System") ? "System" : value == WinSereno.Localization.LocalizationService.Source("Text.Dark") ? "Dark" : "Light";
                 if (settings.Theme == theme) { if (theme == "System") themes.Apply(theme); return; }
                 settings.Theme = theme;
                 themes.Apply(theme);
                 Raise();
                 try { storage.SaveSettings(settings); }
-                catch (Exception ex) { dialogs.ShowMessage("El tema se ha aplicado, pero no se pudo guardar en la carpeta de la aplicación.\n" + ex.Message); }
+                catch (Exception ex) { dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheThemeHasBeenAppliedButCouldNot") + ex.Message); }
             }
         }
         private TaskProgress progress = new TaskProgress { State = RunnerState.Idle };
@@ -153,20 +168,20 @@ namespace WinSereno.ViewModels
         public bool ShowDiagnosticToastCounts => !IsActive && !Diagnosis.IsRunning && !Cleanup.IsRunning && Progress.State == RunnerState.Completed && Progress.Result != null && Progress.CurrentTask?.Id == "diagnosis.general";
         public string ToastLastRelevantLine => Diagnosis.IsRunning ? Diagnosis.LiveProgress?.LastRelevantLine : Cleanup.IsRunning ? null : Progress.LastRelevantLine;
         public string ElapsedText => (Diagnosis.IsRunning || Cleanup.IsRunning ? analysisToastWatch.Elapsed : Progress.Elapsed).ToString(@"hh\:mm\:ss");
-        public string TaskName => Diagnosis.IsRunning ? "Diagnóstico" : Cleanup.IsRunning ? "Análisis de Limpieza" : Progress.CurrentTask?.Name ?? "Sin tarea activa";
+        public string TaskName => Diagnosis.IsRunning ? WinSereno.Localization.LocalizationService.Source("Text.Diagnostics") : Cleanup.IsRunning ? WinSereno.Localization.LocalizationService.Source("Text.CleanupAnalysis") : Progress.CurrentTask?.Name ?? WinSereno.Localization.LocalizationService.Source("Text.NoActiveTask");
         public string StatusText
         {
             get
             {
                 if (Diagnosis.IsRunning) return Diagnosis.LiveProgress?.StepLabel ?? Diagnosis.Summary;
                 if (Cleanup.IsRunning) return Cleanup.Summary;
-                if (ShowDiagnosticToastCounts) return Progress.Result.ExecutionStatus == ExecutionStatus.Cancelled ? "Diagnóstico cancelado." :
-                    Progress.Result.ExecutionStatus == ExecutionStatus.Failed ? "No se pudo completar el diagnóstico. Los resultados obtenidos se conservan." : "Diagnóstico finalizado.";
-                if (Progress.State == RunnerState.Running) return Progress.StepLabel ?? (Progress.CurrentTask?.IsMock == true ? "Ejecutando... (simulación)" : "Ejecutando " + TaskName + "...");
-                if (Progress.State == RunnerState.Cancelling) return "Cancelando simulación...";
+                if (ShowDiagnosticToastCounts) return Progress.Result.ExecutionStatus == ExecutionStatus.Cancelled ? WinSereno.Localization.LocalizationService.Source("Text.DiagnosticsCancelled540") :
+                    Progress.Result.ExecutionStatus == ExecutionStatus.Failed ? WinSereno.Localization.LocalizationService.Source("Text.DiagnosticsCouldNotBeCompletedResultsObtainedSo") : WinSereno.Localization.LocalizationService.Source("Text.DiagnosticsCompleted");
+                if (Progress.State == RunnerState.Running) return Progress.StepLabel ?? (Progress.CurrentTask?.IsMock == true ? WinSereno.Localization.LocalizationService.Source("Text.RunningSimulation542") : WinSereno.Localization.LocalizationService.Source("Text.Running882") + TaskName + "...");
+                if (Progress.State == RunnerState.Cancelling) return WinSereno.Localization.LocalizationService.Source("Text.CancellingSimulation");
                 if (Progress.Result != null)
                     return Progress.Result.UserSummary;
-                return "No hay ninguna tarea en ejecución.";
+                return WinSereno.Localization.LocalizationService.Source("Text.NoTaskIsRunning");
             }
         }
 
@@ -181,10 +196,10 @@ namespace WinSereno.ViewModels
             Cleanup = cleanup ?? new CleanupViewModel(new CleanupAnalysisService(logger), operations, logger,
                 cleanupRunner == null ? (Func<OperationLease, Action<TaskProgress>, Task<MaintenanceTaskResult>>)null : cleanupRunner.RunCleanupAnalysisAsync);
             this.storage = storage; this.settings = settings; this.themes = themes; this.dialogs = dialogs; Runner = runner; Home = home; Diagnosis = diagnosis; Operations = operations;
-            AddNavigation(NavigationSection.Home, "Inicio"); AddNavigation(NavigationSection.Diagnosis, "Diagnóstico");
-            AddNavigation(NavigationSection.Repair, "Reparación"); AddNavigation(NavigationSection.Network, "Red");
-            AddNavigation(NavigationSection.Cleanup, "Limpieza"); AddNavigation(NavigationSection.Activity, "Actividad");
-            AddNavigation(NavigationSection.Settings, "Ajustes");
+            AddNavigation(NavigationSection.Home, WinSereno.Localization.LocalizationService.Source("Text.Home")); AddNavigation(NavigationSection.Diagnosis, WinSereno.Localization.LocalizationService.Source("Text.Diagnostics"));
+            AddNavigation(NavigationSection.Repair, WinSereno.Localization.LocalizationService.Source("Text.Repair")); AddNavigation(NavigationSection.Network, WinSereno.Localization.LocalizationService.Source("Text.Network"));
+            AddNavigation(NavigationSection.Cleanup, WinSereno.Localization.LocalizationService.Source("Text.Cleanup")); AddNavigation(NavigationSection.Activity, WinSereno.Localization.LocalizationService.Source("Text.Activity"));
+            AddNavigation(NavigationSection.Settings, WinSereno.Localization.LocalizationService.Source("Text.Settings"));
             selectedNavigation = Navigation[0];
             NavigateCommand = new RelayCommand(p => { if (p is NavigationSection destination) Navigate(destination); });
             StartMockCommand = new RelayCommand(async p => await StartMockAsync(p as string != "NonCancelable"), p => !Operations.IsActive);
@@ -199,13 +214,13 @@ namespace WinSereno.ViewModels
             RestartAdapterCommand = new RelayCommand(async p => await RestartAdapterAsync(), p => !Operations.IsActive);
             RenewDhcpCommand = new RelayCommand(async p => await RenewDhcpAsync(), p => !Operations.IsActive);
             FlushDnsCommand = new RelayCommand(async p => await FlushDnsAsync(), p => !Operations.IsActive);
-            RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.CheckHealthId, "DISM CheckHealth · Comprobación rápida del estado registrado", integrity));
+            RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.CheckHealthId, WinSereno.Localization.LocalizationService.Source("Text.DismCheckhealthQuickCheckOfTheRecordedState"), integrity));
             RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.ScanHealthId, "DISM ScanHealth", integrity));
             RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.RestoreHealthId, "DISM RestoreHealth", integrity));
-            RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.SfcId, "SFC /scannow", integrity));
+            RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.SfcId, WinSereno.Localization.LocalizationService.Source("Text.SfcScannow"), integrity));
             RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.ComponentCleanupId, "DISM StartComponentCleanup · Mantenimiento", integrity));
-            RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.ChkdskId, "CHKDSK · Solo lectura", integrity));
-            RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.CompleteId, "Secuencia · RestoreHealth condicional · Un único UAC", integrity));
+            RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.ChkdskId, WinSereno.Localization.LocalizationService.Source("Text.ChkdskReadOnly"), integrity));
+            RealRepairTasks.Add(new RepairTaskViewModel(ElevatedTaskCatalog.CompleteId, WinSereno.Localization.LocalizationService.Source("Text.SequenceConditionalRestorehealthOneUacRequest"), integrity));
             CancelTaskCommand = new RelayCommand(p => { if (Diagnosis.IsRunning) Diagnosis.CancelCommand.Execute(null); else if (Cleanup.IsRunning) Operations.RequestCancellation(); else Runner.RequestCancellation(); },
                 p => Diagnosis.IsRunning ? Diagnosis.CancelCommand.CanExecute(null) : Cleanup.IsRunning ? Operations.CanBeCancelled : Runner.IsActive && Runner.Current.CurrentTask.CanBeCancelled);
             DetailsCommand = new RelayCommand(p => dialogs.ShowOutput(CreateToastDetails()), p => HasTask);
@@ -213,7 +228,7 @@ namespace WinSereno.ViewModels
             DismissTaskPanelCommand = new RelayCommand(p => { panel.Dismiss(Progress, Operations.IsActive); RefreshTaskPanel(); }, p => CanDismissTaskPanel);
             CheckUpdatesCommand = new RelayCommand(p => { }, p => false);
             OpenLogsCommand = new RelayCommand(p => OpenLogs());
-            OpenApplicationFolderCommand = new RelayCommand(p => OpenShell(this.shell.OpenApplicationFolder, "la carpeta de WinSereno"));
+            OpenApplicationFolderCommand = new RelayCommand(p => OpenShell(this.shell.OpenApplicationFolder, WinSereno.Localization.LocalizationService.Source("Text.TheWinserenoFolder")));
             OpenGitHubCommand = new RelayCommand(p => OpenShell(this.shell.OpenGitHub, "GitHub"));
             OpenReleasesCommand = new RelayCommand(p => OpenShell(this.shell.OpenReleases, "Releases"));
             ResetPreferencesCommand = new RelayCommand(p => ResetPreferences());
@@ -233,7 +248,7 @@ namespace WinSereno.ViewModels
             try
             {
                 if (selection.HasFlag(CleanupSelection.RecycleBin)) {
-                    using (Operations.Begin("Consulta previa de Papelera (solo lectura)", false)) Cleanup.SetRecycleBinAnalysis(await recycleBin.QueryAsync());
+                    using (Operations.Begin(WinSereno.Localization.LocalizationService.Source("Text.PreliminaryRecycleBinQueryReadOnly"), false)) Cleanup.SetRecycleBinAnalysis(await recycleBin.QueryAsync());
                 }
                 var estimates = new System.Collections.Generic.List<CleanupCategoryResult>(); foreach (var row in Cleanup.Categories) estimates.Add(row.Result);
                 var task = CleanupBatchExecutor.Prepare(selection, estimates);
@@ -245,7 +260,7 @@ namespace WinSereno.ViewModels
                     else Cleanup.SetCategoryAnalysis(step.Analysis);
                 }
             }
-            catch (Exception ex) { logger.Write("Error limpieza seleccionada: " + ex); dialogs.ShowMessage("No se pudo completar la limpieza seleccionada. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error limpieza seleccionada: " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.SelectedCleanupCouldNotBeCompletedViewThe")); }
         }
         private async Task EmptyRecycleBinAsync()
         {
@@ -253,9 +268,9 @@ namespace WinSereno.ViewModels
             try
             {
                 CleanupCategoryResult current;
-                using (Operations.Begin("Consulta previa de Papelera (solo lectura)", false)) current = await recycleBin.QueryAsync();
+                using (Operations.Begin(WinSereno.Localization.LocalizationService.Source("Text.PreliminaryRecycleBinQueryReadOnly"), false)) current = await recycleBin.QueryAsync();
                 Cleanup.SetRecycleBinAnalysis(current);
-                if (!current.IsAvailable) { logger.Write("Papelera no consultable; no se ofrece vaciado."); dialogs.ShowMessage("No se pudo consultar la Papelera. No se vaciará."); return; }
+                if (!current.IsAvailable) { logger.Write(WinSereno.Localization.LocalizationService.Source("Text.RecycleBinCannotBeQueriedEmptyingIsNot")); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheRecycleBinCouldNotBeCheckedIt")); return; }
                 var task = RecycleBinCleanupService.Prepare(current);
                 logger.Write("Solicitud Vaciar Papelera | Elementos=" + current.FileCount + " | Bytes=" + current.TotalBytes);
                 if (!dialogs.ConfirmTask(task)) { logger.Write("Confirmación Vaciar Papelera cancelada por el usuario; sin vaciado ni UAC."); return; }
@@ -263,7 +278,7 @@ namespace WinSereno.ViewModels
                 var result = await Runner.RunAsync(task);
                 if (result.RecycleBinAnalysis != null) Cleanup.SetRecycleBinAnalysis(result.RecycleBinAnalysis);
             }
-            catch (Exception ex) { logger.Write("Error Vaciar Papelera: " + ex); dialogs.ShowMessage("No se pudo completar el vaciado de Papelera. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error Vaciar Papelera: " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheRecycleBinCouldNotBeEmptiedView")); }
         }
         private async Task CleanThumbnailsAsync()
         {
@@ -277,7 +292,7 @@ namespace WinSereno.ViewModels
                 var result = await Runner.RunAsync(task);
                 if (result.ThumbnailAnalysis != null) Cleanup.SetThumbnailAnalysis(result.ThumbnailAnalysis);
             }
-            catch (Exception ex) { logger.Write("Error limpieza miniaturas: " + ex); dialogs.ShowMessage("No se pudo completar la limpieza de miniaturas. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error limpieza miniaturas: " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.ThumbnailCleanupCouldNotBeCompletedViewThe")); }
         }
         private async Task CleanWindowsTempAsync()
         {
@@ -287,7 +302,7 @@ namespace WinSereno.ViewModels
             if (!dialogs.ConfirmTask(task)) { logger.Write("Confirmación limpieza Windows cancelada; sin UAC ni borrado."); return; }
             if (Operations.IsActive) return;
             try { var result = await Runner.RunAsync(task); if (result.WindowsTempAnalysis != null) Cleanup.SetWindowsTempAnalysis(result.WindowsTempAnalysis); }
-            catch (Exception ex) { logger.Write("Error limpieza temporales Windows: " + ex); dialogs.ShowMessage("No se pudo completar la limpieza de temporales de Windows. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error limpieza temporales Windows: " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.WindowsTemporaryFileCleanupCouldNotBeCompleted")); }
         }
         private async Task CleanUserTempAsync()
         {
@@ -301,7 +316,7 @@ namespace WinSereno.ViewModels
                 await Runner.RunAsync(task);
                 await Cleanup.AnalyzeAsync(false);
             }
-            catch (Exception ex) { logger.Write("Error limpieza TEMP: " + ex); dialogs.ShowMessage("No se pudo completar la limpieza de temporales. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error limpieza TEMP: " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TemporaryFileCleanupCouldNotBeCompletedView")); }
         }
         private async Task ResetTcpIpAsync()
         {
@@ -309,7 +324,7 @@ namespace WinSereno.ViewModels
             try
             {
                 TcpIpResetSnapshot snapshot;
-                using (var operation = Operations.Begin("Comprobar configuración IPv4", true))
+                using (var operation = Operations.Begin(WinSereno.Localization.LocalizationService.Source("Text.CheckIpv4Configuration"), true))
                 {
                     logger.Write("Preflight TCP/IP iniciado; solo lectura, sin comandos ni elevación.");
                     snapshot = await Task.Run(() => tcpIpPreflight.Read());
@@ -338,7 +353,7 @@ namespace WinSereno.ViewModels
                 logger.Write("Confirmaciones TCP/IP completadas; se permite solicitar UAC y revalidar en el worker.");
                 var result = await Runner.RunAsync(task); Network.SetTcpIpResult(result);
             }
-            catch (Exception ex) { logger.Write("Error Restablecer TCP/IP: " + ex); dialogs.ShowMessage("No se pudo completar el restablecimiento TCP/IP. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error Restablecer TCP/IP: " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TcpIpResetCouldNotBeCompletedView")); }
         }
         private async Task ResetWinsockAsync()
         {
@@ -353,7 +368,7 @@ namespace WinSereno.ViewModels
                 var result = await Runner.RunAsync(task); Network.SetWinsockResult(result);
                 if (result.ExecutionStatus != ExecutionStatus.Cancelled) await Network.RefreshAsync();
             }
-            catch (Exception ex) { logger.Write("Error Restablecer Winsock: " + ex); dialogs.ShowMessage("No se pudo completar el restablecimiento Winsock. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error Restablecer Winsock: " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.WinsockResetCouldNotBeCompletedViewThe")); }
         }
         private async Task RestartAdapterAsync()
         {
@@ -361,8 +376,8 @@ namespace WinSereno.ViewModels
             try
             {
                 AdapterRestartSelection selection;
-                Network.SetRestartStatus("Comprobando adaptadores físicos conectados...");
-                using (var operation = Operations.Begin("Seleccionar adaptador para reinicio", true))
+                Network.SetRestartStatus(WinSereno.Localization.LocalizationService.Source("Text.CheckingConnectedPhysicalAdapters"));
+                using (var operation = Operations.Begin(WinSereno.Localization.LocalizationService.Source("Text.SelectAdapterToRestart"), true))
                 {
                     logger.Write("Solicitud reinicio de adaptador; selección de solo lectura, aún sin comandos.");
                     selection = await Task.Run(() => new AdapterRestartService(logger).ReadSelection());
@@ -370,20 +385,20 @@ namespace WinSereno.ViewModels
                 }
                 if (!selection.ReadSucceeded || selection.Adapters.Count == 0)
                 {
-                    string message = selection.ReadSucceeded ? "No hay adaptadores físicos Ethernet o Wi-Fi activos elegibles para reiniciar." : "No se pudo verificar de forma fiable un adaptador físico activo.";
+                    string message = selection.ReadSucceeded ? WinSereno.Localization.LocalizationService.Source("Text.NoEligibleActivePhysicalEthernetOrWiFi") : WinSereno.Localization.LocalizationService.Source("Text.AnActivePhysicalAdapterCouldNotBeReliably");
                     Network.SetRestartStatus(message); logger.Write(message); dialogs.ShowMessage(message); return;
                 }
                 var adapter = AdapterRestartPolicy.Select(selection.Adapters, dialogs.SelectRestartAdapter);
                 if (adapter == null) { Network.SetRestartStatus("Selección cancelada; no se ejecutaron comandos."); return; }
                 var task = AdapterRestartService.PrepareTask(adapter);
                 if (Operations.IsActive) return;
-                if (!dialogs.ConfirmTask(task)) { Network.SetRestartStatus("Confirmación cancelada; no se solicitó UAC ni se reinició el adaptador."); logger.Write("Confirmación reinicio cancelada."); return; }
+                if (!dialogs.ConfirmTask(task)) { Network.SetRestartStatus(WinSereno.Localization.LocalizationService.Source("Text.ConfirmationCancelledNoUacWasRequestedAndThe")); logger.Write(WinSereno.Localization.LocalizationService.Source("Text.RestartConfirmationCancelled")); return; }
                 if (Operations.IsActive) return;
                 var result = await Runner.RunAsync(task);
                 Network.SetRestartResult(result); await Network.RefreshAsync();
                 if (result.ExecutionStatus == ExecutionStatus.Failed) dialogs.ShowMessage(result.UserSummary);
             }
-            catch (Exception ex) { logger.Write("Error reinicio adaptador: " + ex); Network.SetRestartStatus("No se pudo iniciar/completar el reinicio. Consulta el log."); dialogs.ShowMessage("No se pudo iniciar/completar el reinicio. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error reinicio adaptador: " + ex); Network.SetRestartStatus(WinSereno.Localization.LocalizationService.Source("Text.RestartingCouldNotBeStartedCompletedViewThe")); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.RestartingCouldNotBeStartedCompletedViewThe")); }
         }
         private async Task RenewDhcpAsync()
         {
@@ -391,8 +406,8 @@ namespace WinSereno.ViewModels
             try
             {
                 DhcpRenewalPlan plan;
-                Network.SetDhcpStatus("Comprobando interfaces físicas activas con DHCP...");
-                using (var operation = Operations.Begin("Seleccionar interfaces DHCP", true))
+                Network.SetDhcpStatus(WinSereno.Localization.LocalizationService.Source("Text.CheckingActivePhysicalInterfacesWithDhcp"));
+                using (var operation = Operations.Begin(WinSereno.Localization.LocalizationService.Source("Text.SelectDhcpInterfaces"), true))
                 {
                     logger.Write("Solicitud Renovar dirección DHCP; detección de interfaces, aún sin comandos.");
                     plan = await Task.Run(() => new DhcpRenewalService(logger).ReadPlan());
@@ -400,20 +415,20 @@ namespace WinSereno.ViewModels
                 }
                 if (!plan.ReadSucceeded || plan.Adapters.Count == 0)
                 {
-                    string message = plan.ReadSucceeded ? "No hay ninguna interfaz física Ethernet/Wi-Fi activa con IPv4 configurado mediante DHCP. No se ejecutó ningún comando." :
-                        "No se pudieron verificar de forma fiable las interfaces DHCP. No se ejecutó ningún comando.";
+                    string message = plan.ReadSucceeded ? WinSereno.Localization.LocalizationService.Source("Text.NoActivePhysicalEthernetWiFiInterfaceHas") :
+                        WinSereno.Localization.LocalizationService.Source("Text.DhcpInterfacesCouldNotBeReliablyVerifiedNo");
                     Network.SetDhcpStatus(message); logger.Write(message + "\n" + string.Join("\n", plan.Exclusions));
                     dialogs.ShowMessage(message); return;
                 }
                 var task = DhcpRenewalService.PrepareTask(plan);
-                if (Operations.IsActive) { Network.SetDhcpStatus("Otra operación está activa; vuelve a intentar la selección DHCP."); return; }
-                if (!dialogs.ConfirmTask(task)) { Network.SetDhcpStatus("Confirmación cancelada; no se ejecutó ningún comando DHCP."); logger.Write("Confirmación DHCP cancelada; no se ejecutaron comandos."); return; }
+                if (Operations.IsActive) { Network.SetDhcpStatus(WinSereno.Localization.LocalizationService.Source("Text.AnotherOperationIsActiveTrySelectingDhcpInterfaces")); return; }
+                if (!dialogs.ConfirmTask(task)) { Network.SetDhcpStatus(WinSereno.Localization.LocalizationService.Source("Text.ConfirmationCancelledNoDhcpCommandsRan")); logger.Write("Confirmación DHCP cancelada; no se ejecutaron comandos."); return; }
                 if (Operations.IsActive) return;
                 var result = await Runner.RunAsync(task);
                 Network.SetDhcpResult(result);
                 await Network.RefreshAsync();
             }
-            catch (Exception ex) { logger.Write("No se pudo iniciar renovación DHCP: " + ex); Network.SetDhcpStatus("No se pudo completar la renovación DHCP. Consulta el log."); dialogs.ShowMessage("No se pudo completar la renovación DHCP. Consulta el log."); }
+            catch (Exception ex) { logger.Write("No se pudo iniciar renovación DHCP: " + ex); Network.SetDhcpStatus(WinSereno.Localization.LocalizationService.Source("Text.DhcpRenewalCouldNotBeCompletedViewThe")); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.DhcpRenewalCouldNotBeCompletedViewThe")); }
         }
         private async Task FlushDnsAsync()
         {
@@ -428,14 +443,14 @@ namespace WinSereno.ViewModels
                 Network.SetFlushDnsResult(result);
                 if (result.FindingStatus == FindingStatus.Completed) await Network.RefreshAsync();
             }
-            catch (Exception ex) { logger.Write("Error vaciar caché DNS: " + ex); dialogs.ShowMessage("No se pudo completar el vaciado de caché DNS. Consulta el log."); }
+            catch (Exception ex) { logger.Write("Error vaciar caché DNS: " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheDnsCacheCouldNotBeFlushedView")); }
         }
         private async Task RunRepairAsync(string taskId)
         {
             if (Operations.IsActive) return;
             MaintenanceTask task;
             try { task = ElevatedTaskCatalog.Get(taskId); }
-            catch (Exception ex) when (taskId == ElevatedTaskCatalog.ChkdskId) { logger.Write("CHKDSK: resolución del volumen falló | " + ex); dialogs.ShowMessage("No se pudo determinar con seguridad la unidad de Windows. CHKDSK no se ejecutará."); return; }
+            catch (Exception ex) when (taskId == ElevatedTaskCatalog.ChkdskId) { logger.Write("CHKDSK: resolución del volumen falló | " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheWindowsDriveCouldNotBeSafelyDetermined")); return; }
             logger.Write("Solicitud administrativa | TaskId=" + task.Id);
             if (!dialogs.ConfirmTask(task)) { logger.Write("Confirmación cancelada; no se solicita elevación. TaskId=" + task.Id); return; }
             if (Operations.IsActive) return;
@@ -447,7 +462,7 @@ namespace WinSereno.ViewModels
                 foreach (var step in result.SequenceSteps)
                     if (!step.WasSkipped && step.Result.ExecutionStatus != ExecutionStatus.Cancelled) integrity.Update(step.TaskId, step.Result);
             }
-            catch (Exception ex) { logger.Write("Error en solicitud " + task.Id + ": " + ex); dialogs.ShowMessage("No se pudo iniciar la herramienta. Consulta el log para obtener más información."); }
+            catch (Exception ex) { logger.Write("Error en solicitud " + task.Id + ": " + ex); dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheToolCouldNotBeStartedViewThe")); }
         }
         private void OnProgressChanged(object sender, TaskProgress value)
         {
@@ -459,7 +474,7 @@ namespace WinSereno.ViewModels
                 DiagnosticToastCounts.Clear();
                 AddDiagnosticToastCount("Healthy", Diagnosis.HealthyCount);
                 AddDiagnosticToastCount("Attention", Diagnosis.AttentionCount);
-                AddDiagnosticToastCount("Error", Diagnosis.ErrorCount);
+                AddDiagnosticToastCount(WinSereno.Localization.LocalizationService.Source("Text.Error"), Diagnosis.ErrorCount);
                 AddDiagnosticToastCount("NotChecked", Diagnosis.NotCheckedCount);
             }
             Raise(nameof(HasTask)); Raise(nameof(IsActive)); Raise(nameof(HasPercentage)); Raise(nameof(ElapsedText));
@@ -516,15 +531,15 @@ namespace WinSereno.ViewModels
         {
             if (Operations.IsActive) return;
             var task = new MaintenanceTask { Id = cancelable ? "mock.cancelable" : "mock.non-cancelable",
-                Name = cancelable ? "Tarea de ejemplo cancelable" : "Tarea de ejemplo no cancelable",
-                ShortDescription = "Simulación de 12 segundos para revisar la interfaz y el cierre de la aplicación.",
-                DetailedDescription = "Solo espera y publica texto de ejemplo. No inicia procesos, no diagnostica Windows y no modifica su configuración. El resultado ficticio demuestra que ExitCode 0 puede coexistir con RepairRequired.",
+                Name = cancelable ? WinSereno.Localization.LocalizationService.Source("Text.CancellableSampleTask") : WinSereno.Localization.LocalizationService.Source("Text.NonCancellableSampleTask"),
+                ShortDescription = WinSereno.Localization.LocalizationService.Source("Text.A12SecondSimulationToReviewTheInterface"),
+                DetailedDescription = WinSereno.Localization.LocalizationService.Source("Text.OnlyWaitsAndPublishesSampleTextDoesNot"),
                 Category = TaskCategory.Diagnosis, ImpactLevel = ImpactLevel.Information, TaskType = TaskType.Internal,
-                Command = "(simulación interna)", Arguments = "(sin argumentos de sistema)", RequiresElevation = false,
+                Command = WinSereno.Localization.LocalizationService.Source("Text.InternalSimulation"), Arguments = WinSereno.Localization.LocalizationService.Source("Text.NoSystemArguments"), RequiresElevation = false,
                 CanBeCancelled = cancelable, MayRequireRestart = false, IsMock = true };
             if (!dialogs.ConfirmTask(task)) return;
             try { await Runner.RunAsync(task); }
-            catch (Exception ex) { dialogs.ShowMessage("No se pudo completar la simulación: " + ex.Message); }
+            catch (Exception ex) { dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheSimulationCouldNotBeCompleted") + ex.Message); }
         }
         private void OpenLogs()
         {
@@ -532,17 +547,19 @@ namespace WinSereno.ViewModels
             {
                 shell.OpenLogs();
             }
-            catch (Exception ex) { dialogs.ShowMessage("No se pudo abrir la carpeta de logs.\n" + ex.Message); }
+            catch (Exception ex) { dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.TheLogsFolderCouldNotBeOpened") + ex.Message); }
         }
         private void OpenShell(Action action, string name)
-        { try { action(); } catch (Exception ex) { dialogs.ShowMessage("No se pudo abrir " + name + ".\n" + ex.Message); } }
+        { try { action(); } catch (Exception ex) { dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.CouldNotOpen") + name + ".\n" + ex.Message); } }
         private void ResetPreferences()
         {
             if ((dialogs as IPreferencesDialogs)?.ConfirmResetPreferences() != true) return;
             settings.Theme = new AppSettings().Theme;
+            settings.Language = new AppSettings().Language;
+            WinSereno.Localization.LocalizationService.Current.Apply(settings.Language); Raise(nameof(SelectedLanguage));
             themes.Apply(settings.Theme); Raise(nameof(SelectedTheme));
             try { storage.SaveSettings(settings); }
-            catch (Exception ex) { dialogs.ShowMessage("Las preferencias se han aplicado, pero no se pudieron guardar.\n" + ex.Message); }
+            catch (Exception ex) { dialogs.ShowMessage(WinSereno.Localization.LocalizationService.Source("Text.PreferencesHaveBeenAppliedButCouldNotBe") + ex.Message); }
         }
         private void AddNavigation(NavigationSection section, string label)
         {

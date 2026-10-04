@@ -19,8 +19,9 @@ namespace WinSereno
                 Shutdown(await ElevatedWorker.RunAsync(e.Args));
                 return;
             }
+            WinSereno.Localization.LocalizationPresentation.Initialize();
             var storage = new PortableStorage(System.IO.Path.GetDirectoryName(typeof(App).Assembly.Location));
-            if (!storage.CheckWritable(out var error)) { MessageBox.Show(error, "Ubicación no escribible"); Shutdown(); return; }
+            if (!storage.CheckWritable(out var error)) { WinSereno.Localization.LocalizedMessageBox.Show(error, "Ubicación no escribible"); Shutdown(); return; }
             try
             {
                 logger = new SessionLogger(storage);
@@ -31,9 +32,10 @@ namespace WinSereno
                 catch (Exception ex)
                 {
                     logger.Write("Configuración no válida: " + ex.Message);
-                    MessageBox.Show("No se pudo leer config.json. Se usará el tema claro.\n" + ex.Message, "Configuración");
+                    WinSereno.Localization.LocalizedMessageBox.Show("No se pudo leer config.json. Se usará el tema claro.\n" + ex.Message, "Configuración");
                     settings = new AppSettings();
                 }
+                WinSereno.Localization.LocalizationService.Current.Apply(settings.Language);
                 var themes = new ThemeService();
                 themes.Apply(settings.Theme);
                 if (!System.IO.File.Exists(storage.ConfigPath)) storage.SaveSettings(settings);
@@ -50,7 +52,7 @@ namespace WinSereno
             }
             catch (Exception ex)
             {
-                MessageBox.Show("No se pudo iniciar la aplicación portable.\n" + ex.Message, "WinSereno");
+                WinSereno.Localization.LocalizedMessageBox.Show("No se pudo iniciar la aplicación portable.\n" + ex.Message, "WinSereno");
                 Shutdown(1);
             }
         }

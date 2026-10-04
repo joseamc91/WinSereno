@@ -1,8 +1,9 @@
 ﻿$ErrorActionPreference='Stop'
 $project=Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot 'LocalizationSource.ps1')
 $count=0
 function Check([bool]$ok,[string]$label){if(-not $ok){throw $label};$script:count++}
-function Source([string]$path){[IO.File]::ReadAllText((Join-Path $project $path))}
+function Source([string]$path){(Read-LocalizedSource $path)}
 [xml]$xml=Source 'Views/MainWindow.xaml'
 $ns=[Xml.XmlNamespaceManager]::new($xml.NameTable)
 $ns.AddNamespace('p','http://schemas.microsoft.com/winfx/2006/xaml/presentation')
