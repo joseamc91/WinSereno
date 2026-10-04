@@ -70,9 +70,9 @@ No hay fallback a otra ubicación ni elevación automática para escribir config
 
 ## Evidencia y alcance de verificación
 
-Las suites actualmente incluidas se enumeran en [README.md](README.md#pruebas) y residen en [Tests/](Tests/). Cubren componentes concretos con muestras y proveedores controlados; no son una prueba completa de todas las operaciones privilegiadas.
+Las suites actualmente incluidas residen en [Tests/](Tests/) y se descubren automáticamente en el [workflow de CI](.github/workflows/ci.yml). Cubren componentes concretos con muestras y proveedores controlados; no son una prueba completa de todas las operaciones privilegiadas.
 
-La existencia de una suite o una compilación correcta no implica una ejecución superada. App Control bloqueó recientemente la carga del binario en la regresión CHKDSK y en la repetición de las suites de integridad y SFC. Esas ejecuciones permanecen sin validar. No se alteraron políticas para completarlas.
+La existencia de una suite o una compilación correcta no implica una ejecución superada. Durante validaciones locales anteriores, App Control bloqueó la carga del binario en la regresión CHKDSK y en las suites de integridad y SFC; esas ejecuciones locales no se contaron como superadas ni se alteraron políticas para completarlas. Las suites automatizadas actuales también se ejecutan en CI; su resultado debe comprobarse para el commit concreto que se quiera validar.
 
 Las validaciones manuales anteriores tampoco constituyen una certificación del binario actual. Esta documentación no reproduce logs, identificadores de políticas ni detalles del equipo de desarrollo.
 

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Cleaned up project resources and internal structure without functional changes.
+
 - Fixed a startup crash when English was saved as the interface language.
 
 - Added Spanish/English interface support with a persistent selector in Settings and centralized resources ready for additional languages.

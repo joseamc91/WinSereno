@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Limpieza de recursos y estructura interna del proyecto sin cambios funcionales.
+
 - Corregido un fallo de arranque cuando English estaba guardado como idioma de la interfaz.
 
 - Añadido soporte de interfaz Español/English con selector persistente en Ajustes y recursos centralizados preparados para más idiomas.

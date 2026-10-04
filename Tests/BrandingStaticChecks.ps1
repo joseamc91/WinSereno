@@ -52,7 +52,11 @@ Check ($vectors['WinSerenoMarkPrimaryGeometry'].GetArea() -gt 90000 -and $vector
 foreach ($point in @([Windows.Point]::new(1415,390), [Windows.Point]::new(1688,390), [Windows.Point]::new(2021,413))) {
     Check (!$vectors['WinSerenoSerenoGeometry'].FillContains($point)) "Letter counter remains open at $point"
 }
-foreach ($file in @('WinSereno-Mark-Color.png','WinSereno-Logo-Horizontal-Dark.png','WinSereno-Logo-Horizontal-Light.png')) {
-    Check (Test-Path -LiteralPath (Join-Path $project "Assets/Brand/$file")) "Historical PNG retained: $file"
+foreach ($file in @('WinSereno-Mark-Color.svg','WinSereno-Logo-Horizontal-Color.svg','WinSereno-Logo-Horizontal-Dark.svg')) {
+    $path = Join-Path $project "Assets/Brand/Source/$file"
+    Check (Test-Path -LiteralPath $path -PathType Leaf) "Vector source retained: $file"
+    [xml]$source = [IO.File]::ReadAllText($path)
+    Check ($source.DocumentElement.LocalName -eq 'svg' -and $source.SelectNodes('//*[local-name()="path"]').Count -gt 0) "Source contains native vector paths: $file"
+    Check ($source.SelectNodes('//*[local-name()="image"]').Count -eq 0) "Source has no embedded raster image: $file"
 }
 Write-Output "$count comprobaciones estaticas de branding correctas; geometria nativa, sin ejecutar acciones reales."
